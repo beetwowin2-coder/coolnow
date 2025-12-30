@@ -3,198 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Cool Now</title>
+    <title>Cool Now Store - Fresh & Cool Anywhere</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; }
-        .active-push:active { transform: scale(0.98); }
-        #uploadZone.drag-over { border-color: #ec4899; background-color: #fdf2f8; }
-        .qr-container { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+        body { font-family: 'Kanit', sans-serif; overflow-x: hidden; }
+        #cartDrawer { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .drawer-open { transform: translateX(0); }
+        .drawer-closed { transform: translateX(100%); }
+        .modal-active { overflow: hidden; }
+        .spinner { border: 2px solid rgba(236, 72, 153, 0.1); border-radius: 50%; border-top: 2px solid #ec4899; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .active-push:active { transform: scale(0.95); }
+        .hero-bg { background: radial-gradient(circle at top right, #fff5f8, #ffffff); }
+        #cartItemsList::-webkit-scrollbar { width: 4px; }
+        #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-[#FBFBFD] text-gray-800 pb-20">
+<body class="bg-[#FBFBFD] text-gray-800">
 
-    <nav class="p-6">
-        <a href="index.html" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 transition">
-            <span>←</span> กลับไปหน้าหลัก
-        </a>
+    <nav class="bg-white/80 backdrop-blur-md py-3 md:py-4 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
+        <div class="flex items-center gap-4 md:gap-8">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="font-bold text-xl tracking-tighter text-gray-800 uppercase">COOL<span class="text-pink-500">NOW</span></div>
+            </a>
+            <div class="relative hidden md:block">
+                <input type="text" id="indexSearchInput" placeholder="ค้นหากลิ่นที่ชอบ..." 
+                       class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 focus:bg-white transition-all">
+                <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3 md:gap-6 text-gray-600 text-sm">
+            <a href="products.html" class="hover:text-pink-500 font-medium transition">สินค้าทั้งหมด</a>
+            <div id="authSection" class="flex items-center gap-2">
+                <div class="spinner"></div>
+            </div>
+            <div class="flex items-center gap-3 md:gap-4 border-l pl-4 md:pl-6">
+                <div class="relative cursor-pointer hover:text-pink-500 transition-transform active-push" onclick="toggleCart(true)">
+                    <span class="text-xl md:text-2xl">🛒</span>
+                    <span id="cart-count" class="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-pink-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shadow-md">0</span>
+                </div>
+            </div>
+        </div>
     </nav>
 
-    <main class="container mx-auto max-w-2xl px-4">
-        <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
-
-        <div id="checkoutItems" class="space-y-4 mb-8"></div>
-
-        <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
-            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📍 ที่อยู่จัดส่ง</h2>
-            <textarea id="address" placeholder="ชื่อ-นามสกุล, เบอร์โทรศัพท์ และที่อยู่ผู้รับ..." 
-                      class="w-full h-32 bg-gray-50 rounded-2xl p-4 focus:outline-none border border-transparent focus:border-pink-200 transition-all"></textarea>
-        </section>
-
-        <section class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 mb-8">
-            <h2 class="text-lg font-bold mb-6">💰 ชำระเงินผ่าน พร้อมเพย์ / บัญชีธนาคาร</h2>
-            
-            <div class="flex flex-col items-center mb-8">
-                <div class="bg-white p-6 rounded-3xl border-2 border-blue-500 qr-container text-center max-w-[280px]">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" class="h-6 mx-auto mb-4" alt="PromptPay">
-                    <img id="promptpayQR" src="https://promptpay.io/1869900269561.png" class="w-48 h-48 mx-auto rounded-lg" alt="QR Code">
-                    <p class="mt-4 font-bold text-blue-900 text-lg">ณัฐฑิชา สัจจะวัฒนะ</p>
-                    <p class="text-gray-500 text-sm">186-990-026-9561</p>
+    <section class="hero-bg container mx-auto mt-4 md:mt-8 px-4">
+        <div class="flex flex-col md:flex-row items-center bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100">
+            <div class="w-full md:w-1/2 p-8 md:p-12 lg:p-16 text-center md:text-left order-2 md:order-1">
+                <span class="bg-pink-100 text-pink-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Natural Cooling Mist</span>
+                <h1 class="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 mt-4 leading-[1.1]">
+                    สดชื่น เย็นสบาย... <br> <span class="text-pink-500">จากธรรมชาติ</span>
+                </h1>
+                
+                <div class="mt-6 inline-flex items-center gap-3 bg-pink-50 border border-pink-100 p-3 rounded-2xl">
+                    <span class="text-xl">🚚</span>
+                    <p class="text-xs md:text-sm text-pink-700 font-bold">โปรโมชั่น: ซื้อ 2 ชิ้นขึ้นไป ส่งฟรี! (ปกติ 40฿)</p>
                 </div>
 
-                <div class="mt-6 w-full bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-4">
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <img src="https://www.bbl.co.th/images/logo.png" class="w-6 h-6 object-contain">
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">ธนาคารกรุงเทพ (BBL)</p>
-                        <p class="text-blue-900 font-bold leading-none">930-0-272847</p>
-                    </div>
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <button onclick="scrollToProducts()" class="bg-pink-500 text-white px-10 py-4 rounded-2xl hover:bg-pink-600 transition shadow-lg shadow-pink-100 font-bold active-push">
+                        เริ่มช้อปเลย 🛍️
+                    </button>
+                    <a href="products.html" class="bg-gray-50 text-gray-600 px-10 py-4 rounded-2xl font-bold hover:bg-gray-100 transition active-push flex items-center justify-center border border-gray-100">
+                        ดูสินค้าทั้งหมด
+                    </a>
                 </div>
             </div>
-            
-            <div class="space-y-4">
-                <p class="text-sm font-bold text-gray-700 ml-1">แนบหลักฐานการโอนเงิน</p>
-                <div id="uploadZone" 
-                     onclick="document.getElementById('slipInput').click()"
-                     class="relative group cursor-pointer border-2 border-dashed border-pink-200 bg-pink-50/30 rounded-[2rem] p-8 transition-all hover:border-pink-400 hover:bg-pink-50 flex flex-col items-center justify-center min-h-[200px]">
-                    
-                    <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="previewSlip(this)">
-                    
-                    <div id="uploadPrompt" class="text-center">
-                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">📸</div>
-                        <p class="font-bold text-pink-600 uppercase">คลิกเพื่ออัพโหลดสลิป</p>
-                        <p class="text-xs text-pink-400 mt-1">หรือลากไฟล์รูปภาพมาวางที่นี่</p>
-                    </div>
+            <div class="w-full md:w-1/2 h-[350px] md:h-[550px] order-1 md:order-2 bg-pink-50/30 flex items-center justify-center p-8 relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/20 backdrop-blur-3xl animate-pulse"></div>
+                <img src="images/Banner.png" alt="Banner" class="relative max-w-full max-h-full object-contain drop-shadow-2xl hover:scale-105 transition duration-700 z-10">
+            </div>
+        </div>
+    </section>
 
-                    <div id="previewContainer" class="hidden w-full flex flex-col items-center">
-                        <img id="slipPreview" src="#" class="max-h-64 rounded-xl shadow-md border-2 border-white mb-3">
-                        <button type="button" class="text-xs font-bold text-pink-500 hover:underline">เปลี่ยนรูปภาพ</button>
-                    </div>
+    <section id="product-list" class="container mx-auto mt-16 md:mt-24 px-4 mb-24">
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-8 bg-pink-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-gray-800">สินค้าแนะนำ</h2>
+            </div>
+            <a href="products.html" class="text-sm text-pink-500 hover:underline font-bold transition">ดูทั้งหมด →</a>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Bubble Gum', 100, 'images/bubble-gum.png')">
+                <div class="relative bg-pink-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
+                    <img src="images/bubble-gum.png" class="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-500">
+                    <div class="absolute top-3 right-3 bg-white/80 backdrop-blur shadow-sm px-2 py-1 rounded-lg text-[10px] font-bold text-pink-500 uppercase tracking-tighter">HOT</div>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1 uppercase tracking-tight">Bubble Gum</h3>
+                <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
+                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold hover:bg-pink-600 transition-all active-push shadow-sm">เพิ่มลงตะกร้า +</button>
+            </div>
+            
+            <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Lemon Mint', 100, 'images/lemon-mint.png')">
+                <div class="relative bg-green-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
+                    <img src="images/lemon-mint.png" class="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-500">
+                    <div class="absolute top-3 right-3 bg-white/80 backdrop-blur shadow-sm px-2 py-1 rounded-lg text-[10px] font-bold text-green-500 uppercase tracking-tighter">NEW</div>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1 uppercase tracking-tight">Lemon Mint</h3>
+                <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
+                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold hover:bg-pink-600 transition-all active-push shadow-sm">เพิ่มลงตะกร้า +</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="qtyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">ระบุจำนวน</h3>
+                <button onclick="toggleModal('qtyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
+            </div>
+            <div class="flex items-center gap-5 mb-8 bg-gray-50 p-4 rounded-2xl">
+                <img id="modalImg" src="" class="w-20 h-20 object-contain bg-white rounded-xl shadow-sm">
+                <div>
+                    <p id="modalName" class="font-bold text-gray-800 text-sm leading-tight uppercase"></p>
+                    <p id="modalPrice" class="text-pink-500 font-bold text-lg mt-1"></p>
                 </div>
             </div>
-        </section>
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-2xl mb-8">
+                <button onclick="changeModalQty(-1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold hover:bg-gray-100 active-push text-xl">-</button>
+                <span id="quantity" class="text-2xl font-bold text-gray-800">1</span>
+                <button onclick="changeModalQty(1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold hover:bg-gray-100 active-push text-xl">+</button>
+            </div>
+            <button onclick="addToCart()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ยืนยันการเพิ่ม 🛍️</button>
+        </div>
+    </div>
 
-        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-pink-100/30 border border-pink-50">
-            <div class="space-y-3 mb-6" id="summaryArea"></div>
-            <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
-                ยืนยันการสั่งซื้อ 🚀
+    <div id="cartDrawerOverlay" class="fixed inset-0 bg-black/40 z-[70] hidden backdrop-blur-sm transition-opacity" onclick="toggleCart(false)"></div>
+    <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-[80] shadow-2xl flex flex-col drawer-closed">
+        <div class="p-6 flex justify-between items-center border-b border-gray-50">
+            <h2 class="text-xl font-bold flex items-center gap-2">🛒 ตะกร้าสินค้า</h2>
+            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 hover:text-gray-500 transition active-push">&times;</button>
+        </div>
+        <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30">
+            </div>
+        <div class="p-8 border-t bg-white">
+            <div id="cartSummary" class="mb-6 space-y-3">
+                </div>
+            <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
+                ไปหน้าชำระเงิน <span>→</span>
             </button>
         </div>
-    </main>
+    </div>
+
+    <footer class="bg-white py-12 border-t border-gray-50">
+        <div class="container mx-auto px-4 text-center">
+            <div class="font-bold text-xl tracking-tighter text-gray-800 uppercase mb-4">COOL<span class="text-pink-500">NOW</span></div>
+            <p class="text-gray-400 text-xs tracking-widest uppercase">&copy; 2025 Cool Now Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
+            authDomain: "coolnow-1d8f4.firebaseapp.com",
+            projectId: "coolnow-1d8f4",
+            storageBucket: "coolnow-1d8f4.firebasestorage.app",
+            messagingSenderId: "857055916856",
+            appId: "1:857055916856:web:c32673482de318e04a07cd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        window.currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            window.currentUser = user;
+            const authSection = document.getElementById('authSection');
+            if(user) {
+                const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
+                authSection.innerHTML = `
+                    <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-1">My Account</p>
+                        </div>
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-100 group-hover:border-pink-300 shadow-sm transition-all">
+                            ${photo}
+                        </div>
+                    </div>`;
+            } else {
+                authSection.innerHTML = `
+                    <a href="auth.html" class="bg-gray-800 text-white px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all active-push">Login</a>`;
+            }
+        });
+
+        window.proceedToCheckout = () => {
+            const currentCart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
+            if(currentCart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
+            
+            if(!window.currentUser) {
+                alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
+                window.location.href = 'auth.html';
+            } else {
+                window.location.href = 'checkout.html';
+            }
+        };
+    </script>
 
     <script>
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-        let finalTotal = 0; // ตัวแปรเก็บยอดรวมสุทธิ
+        let tempItem = {};
 
-        function renderCheckout() {
-            const itemsContainer = document.getElementById('checkoutItems');
-            const summaryArea = document.getElementById('summaryArea');
-            const qrImg = document.getElementById('promptpayQR');
-            
-            if (cart.length === 0) {
-                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400 border border-dashed border-gray-200">ไม่มีสินค้าในตะกร้า</div>`;
-                summaryArea.innerHTML = `<p class="text-center text-gray-400 font-bold">ยอดเป็น 0 บาท</p>`;
-                return;
+        function toggleModal(id, show) {
+            const modal = document.getElementById(id);
+            if (show) { modal.classList.remove('hidden'); document.body.classList.add('modal-active'); }
+            else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
+        }
+
+        function scrollToProducts() { 
+            document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); 
+        }
+        
+        function openQtyModal(name, price, img) {
+            tempItem = { name, price, img, qty: 1 };
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalPrice').innerText = price + ' ฿';
+            document.getElementById('modalImg').src = img;
+            document.getElementById('quantity').innerText = '1';
+            toggleModal('qtyModal', true);
+        }
+
+        function changeModalQty(amt) { 
+            tempItem.qty = Math.max(1, tempItem.qty + amt); 
+            document.getElementById('quantity').innerText = tempItem.qty; 
+        }
+
+        function addToCart() {
+            const existing = cart.find(item => item.name === tempItem.name);
+            if (existing) { existing.qty += tempItem.qty; } else { cart.push({...tempItem}); }
+            saveAndRefresh();
+            toggleModal('qtyModal', false);
+            toggleCart(true);
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('coolNowCart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function toggleCart(isOpen) {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('cartDrawerOverlay');
+            if (isOpen) { 
+                drawer.classList.replace('drawer-closed', 'drawer-open'); 
+                overlay.classList.remove('hidden'); 
+                updateCartUI(); 
             }
+            else { 
+                drawer.classList.replace('drawer-open', 'drawer-closed'); 
+                overlay.classList.add('hidden'); 
+            }
+        }
 
-            let subtotal = 0;
-            let totalItems = 0;
-            itemsContainer.innerHTML = '';
+        function updateCartUI() {
+            const list = document.getElementById('cartItemsList');
+            const countBadge = document.getElementById('cart-count');
+            const summaryDisplay = document.getElementById('cartSummary');
+            let subtotal = 0, totalItems = 0;
+            
+            list.innerHTML = cart.length === 0 ? `
+                <div class="flex flex-col items-center justify-center py-20 text-gray-300">
+                    <span class="text-6xl mb-4 opacity-50">🛒</span>
+                    <p class="text-xs font-bold uppercase tracking-widest">ตะกร้าของคุณว่างเปล่า</p>
+                </div>` : '';
 
             cart.forEach((item, index) => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
-                
-                itemsContainer.innerHTML += `
-                    <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
-                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-2xl">
-                        <div class="flex-1">
-                            <h3 class="font-bold text-sm leading-tight text-gray-800">${item.name}</h3>
-                            <p class="text-pink-500 font-bold mt-1">${item.price.toLocaleString()} ฿</p>
+                list.innerHTML += `
+                    <div class="flex gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm group">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-2xl group-hover:scale-105 transition">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-xs text-gray-800 leading-tight truncate uppercase tracking-tight">${item.name}</p>
+                            <p class="text-pink-500 font-bold text-sm mt-1">${item.price} ฿</p>
+                            <div class="flex items-center gap-3 mt-2">
+                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-[10px] hover:bg-pink-50 hover:text-pink-500 transition">-</button>
+                                <span class="text-[10px] font-bold w-4 text-center">${item.qty}</span>
+                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-[10px] hover:bg-pink-50 hover:text-pink-500 transition">+</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                            <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">-</button>
-                            <span class="font-bold min-w-[20px] text-center text-sm">${item.qty}</span>
-                            <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">+</button>
-                        </div>
-                    </div>
-                `;
+                        <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-400 transition self-start pt-1">🗑️</button>
+                    </div>`;
             });
 
-            const shippingFee = (totalItems >= 2) ? 0 : 40;
-            finalTotal = subtotal + shippingFee; // เก็บค่าลงตัวแปร Global
+            const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
+            const finalTotal = subtotal + shippingFee;
+            countBadge.innerText = totalItems;
 
-            qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
+            let promoTxt = "";
+            if(totalItems === 1) promoTxt = `<p class="text-[10px] text-orange-500 font-bold bg-orange-50 p-2 rounded-lg text-center mb-2 uppercase tracking-tighter">🔥 เพิ่มอีก 1 ชิ้นเพื่อส่งฟรี!</p>`;
+            else if(totalItems >= 2) promoTxt = `<p class="text-[10px] text-green-500 font-bold bg-green-50 p-2 rounded-lg text-center mb-2 uppercase tracking-tighter">✨ รับสิทธิ์ส่งฟรีเรียบร้อย!</p>`;
 
-            summaryArea.innerHTML = `
-                <div class="flex justify-between text-gray-400 font-medium">
-                    <span>ราคาสินค้ารวม (${totalItems} ชิ้น)</span>
+            summaryDisplay.innerHTML = `
+                ${promoTxt}
+                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
+                    <span>ราคาสินค้า</span>
                     <span>${subtotal.toLocaleString()} ฿</span>
                 </div>
-                <div class="flex justify-between text-gray-400 font-medium">
+                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
                     <span>ค่าจัดส่ง</span>
-                    <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">
-                        ${shippingFee === 0 ? 'ฟรีค่าจัดส่ง' : '40 ฿'}
+                    <span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">
+                        ${totalItems === 0 ? '0 ฿' : (shippingFee === 0 ? 'ฟรี' : '40 ฿')}
                     </span>
                 </div>
-                <div class="flex justify-between items-end pt-4 border-t border-dashed border-gray-200 mt-2">
-                    <span class="text-xl font-bold text-gray-800">ยอดสุทธิที่ต้องชำระ</span>
-                    <span class="text-3xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
+                <div class="flex justify-between items-end pt-3 border-t border-dashed border-gray-100 mt-3">
+                    <span class="text-xs font-bold text-gray-800 uppercase tracking-widest">ยอดรวมสุทธิ</span>
+                    <span class="text-2xl font-bold text-pink-500 tracking-tighter">${finalTotal.toLocaleString()} ฿</span>
                 </div>
             `;
         }
 
-        function updateQty(index, amount) {
-            cart[index].qty += amount;
-            if (cart[index].qty <= 0) {
-                if(confirm('ต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?')) {
-                    cart.splice(index, 1);
-                } else {
-                    cart[index].qty = 1;
+        function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
+        function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
+
+        function setupSearch(id) {
+            const input = document.getElementById(id);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && input.value.trim()) {
+                    window.location.href = `products.html?search=${encodeURIComponent(input.value.trim())}`;
                 }
-            }
-            localStorage.setItem('coolNowCart', JSON.stringify(cart));
-            renderCheckout();
+            });
         }
+        setupSearch('indexSearchInput');
 
-        function previewSlip(input) {
-            const prompt = document.getElementById('uploadPrompt');
-            const container = document.getElementById('previewContainer');
-            const preview = document.getElementById('slipPreview');
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    prompt.classList.add('hidden');
-                    container.classList.remove('hidden');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function confirmOrder() {
-            const address = document.getElementById('address').value;
-            const slip = document.getElementById('slipInput').files[0];
-
-            if (cart.length === 0) return alert('ไม่มีสินค้าในตะกร้า');
-            if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
-            if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
-
-            // บันทึกข้อมูลเพื่อส่งไปยังหน้า Success
-            const orderSummary = {
-                customerName: address.split('\n')[0].split(',')[0].trim() || 'คุณลูกค้า',
-                totalAmount: finalTotal.toLocaleString() + ' ฿'
-            };
-            sessionStorage.setItem('lastOrder', JSON.stringify(orderSummary));
-
-            alert('ยืนยันการสั่งซื้อสำเร็จ! ระบบได้รับข้อมูลของคุณแล้ว');
-            localStorage.removeItem('coolNowCart');
-            window.location.href = 'order-success.html'; 
-        }
-
-        window.onload = renderCheckout;
+        window.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
 </html>
