@@ -11,7 +11,7 @@
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Smooth Drawer */
+        /* Smooth Drawer & Modals */
         #cartDrawer { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .drawer-open { transform: translateX(0); }
         .drawer-closed { transform: translateX(100%); }
@@ -37,9 +37,8 @@
         
         .active-push:active { transform: scale(0.95); }
         
-        #cartItemsList::-webkit-scrollbar { width: 4px; }
-        #cartItemsList::-webkit-scrollbar-track { background: #f9fafb; }
-        #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+        #cartItemsList::-webkit-scrollbar, #historyList::-webkit-scrollbar { width: 4px; }
+        #cartItemsList::-webkit-scrollbar-thumb, #historyList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -123,7 +122,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8" id="productGrid">
-                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="fruity" data-name="Cool Body Spray - Bubble Gum">
+                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="fruity" data-name="Body Spray - Bubble Gum">
                     <div class="relative bg-pink-50 rounded-[2rem] aspect-square flex items-center justify-center p-12 overflow-hidden">
                         <span class="absolute top-5 left-5 bg-purple-500 text-white text-[10px] px-3 py-1.5 rounded-full z-10 shadow-md font-bold uppercase tracking-wider">Best Seller</span>
                         <img src="images/bubble-gum.png" alt="Bubble Gum" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-700">
@@ -145,7 +144,7 @@
                     </div>
                 </div>
 
-                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="mint" data-name="Cool Body Spray - Lemon Mint">
+                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="mint" data-name="Body Spray - Lemon Mint">
                     <div class="relative bg-green-50 rounded-[2rem] aspect-square flex items-center justify-center p-12 overflow-hidden">
                         <span class="absolute top-5 left-5 bg-green-500 text-white text-[10px] px-3 py-1.5 rounded-full z-10 shadow-md font-bold uppercase tracking-wider">New</span>
                         <img src="images/lemon-mint.png" alt="Lemon Mint" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-700">
@@ -184,15 +183,28 @@
             </div>
             <button onclick="toggleCart(false)" class="text-3xl text-gray-300 transition hover:text-gray-600 active-push">&times;</button>
         </div>
-        
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50"></div>
-
         <div class="p-8 border-t bg-white shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
             <div id="cartSummary" class="mb-6 space-y-2"></div>
             <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 active-push transition hover:bg-pink-600 flex items-center justify-center gap-2">
                 <span>สั่งซื้อสินค้า</span>
                 <span class="text-xl">→</span>
             </button>
+        </div>
+    </div>
+
+    <div id="historyModalOverlay" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity" onclick="toggleHistoryModal(false)"></div>
+    <div id="historyModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg bg-white z-[100] rounded-[2.5rem] shadow-2xl hidden overflow-hidden border border-gray-100">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">📜 ประวัติการสั่งซื้อ</h2>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Order History</p>
+            </div>
+            <button onclick="toggleHistoryModal(false)" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white transition active-push text-2xl text-gray-400">&times;</button>
+        </div>
+        <div id="historyList" class="p-6 max-h-[60vh] overflow-y-auto space-y-4"></div>
+        <div class="p-6 bg-gray-50/50 text-center">
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Cool Now Official Store</p>
         </div>
     </div>
 
@@ -219,25 +231,26 @@
             if(user) {
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
                 authSection.innerHTML = `
-                    <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase">Account</p>
-                        </div>
-                        <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition">
-                            ${photo}
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleHistoryModal(true)" class="hover:text-pink-500 transition text-lg active-push" title="ประวัติการสั่งซื้อ">📜</button>
+                        <div class="flex items-center gap-3 group cursor-pointer border-l pl-3" onclick="location.href='auth.html'">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
+                                <p class="text-[9px] text-gray-400 font-bold uppercase">Account</p>
+                            </div>
+                            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition">
+                                ${photo}
+                            </div>
                         </div>
                     </div>`;
             } else {
-                authSection.innerHTML = `
-                    <a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition active-push">Login</a>`;
+                authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition active-push">Login</a>`;
             }
         });
 
         window.proceedToCheckout = () => {
             const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
             if(cart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
-            
             if(!window.currentUser) {
                 alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
                 window.location.href = 'auth.html';
@@ -250,6 +263,7 @@
     <script>
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
 
+        // --- Cart Logic ---
         function changeQty(btn, change) {
             const input = btn.parentElement.querySelector('input');
             input.value = Math.max(1, parseInt(input.value) + change);
@@ -262,8 +276,7 @@
                 drawer.classList.replace('drawer-closed', 'drawer-open'); 
                 overlay.classList.remove('hidden'); 
                 updateCartUI();
-            }
-            else { 
+            } else { 
                 drawer.classList.replace('drawer-open', 'drawer-closed'); 
                 overlay.classList.add('hidden'); 
             }
@@ -274,10 +287,8 @@
             const qty = parseInt(card.querySelector('input').value);
             const img = card.querySelector('.product-img').src;
             const existing = cart.find(item => item.name === name);
-            
             if (existing) existing.qty += qty;
             else cart.push({ name, price, img, qty });
-            
             card.querySelector('input').value = 1;
             saveAndRefresh();
             toggleCart(true);
@@ -297,7 +308,6 @@
             if (cart.length === 0) {
                 list.innerHTML = '<div class="flex flex-col items-center py-20 text-gray-300"><span class="text-5xl mb-4">🛒</span><p class="text-sm font-medium">ตะกร้าของคุณยังว่างเปล่า</p></div>';
             } else {
-                // Optimized Rendering: Build HTML string first
                 let itemsHTML = '';
                 cart.forEach((item, index) => {
                     subtotal += item.price * item.qty;
@@ -311,9 +321,9 @@
                                 <p class="font-bold text-xs text-gray-800 leading-tight truncate">${item.name}</p>
                                 <p class="text-pink-500 font-bold text-sm mt-1">${item.price.toLocaleString()} ฿</p>
                                 <div class="flex items-center gap-3 mt-2">
-                                    <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs hover:bg-pink-50 hover:text-pink-500 transition active-push">-</button>
+                                    <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs hover:bg-pink-50 hover:text-pink-500 transition">-</button>
                                     <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                                    <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs hover:bg-pink-50 hover:text-pink-500 transition active-push">+</button>
+                                    <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs hover:bg-pink-50 hover:text-pink-500 transition">+</button>
                                 </div>
                             </div>
                             <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition text-sm">🗑️</button>
@@ -322,93 +332,83 @@
                 list.innerHTML = itemsHTML;
             }
 
-            // Promotion Logic
             const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
-            const finalTotal = subtotal + shippingFee;
-            
             countBadges.forEach(badge => { if(badge) badge.innerText = totalItems });
             
-            let promoMsg = "";
-            if(totalItems === 1) {
-                promoMsg = `<div class="bg-orange-50 text-orange-600 p-2 rounded-lg text-[10px] font-bold mb-3 text-center">🔥 เพิ่มอีก 1 ชิ้นเพื่อส่งฟรี!</div>`;
-            } else if(totalItems >= 2) {
-                promoMsg = `<div class="bg-green-50 text-green-600 p-2 rounded-lg text-[10px] font-bold mb-3 text-center">✨ คุณได้รับสิทธิ์ส่งฟรีแล้ว!</div>`;
-            }
-
             summaryDisplay.innerHTML = `
-                ${promoMsg}
-                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
-                    <span>ราคาสินค้า</span>
-                    <span>${subtotal.toLocaleString()} ฿</span>
-                </div>
-                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
-                    <span>ค่าจัดส่ง</span>
-                    <span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500 font-bold' : ''}">
-                        ${totalItems === 0 ? '0 ฿' : (shippingFee === 0 ? 'ฟรี' : '40 ฿')}
-                    </span>
-                </div>
-                <div class="flex justify-between items-end pt-3 border-t border-dashed mt-2">
-                    <span class="text-gray-800 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
-                    <span class="text-2xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
-                </div>
-            `;
+                ${totalItems === 1 ? '<div class="bg-orange-50 text-orange-600 p-2 rounded-lg text-[10px] font-bold mb-3 text-center">🔥 เพิ่มอีก 1 ชิ้นเพื่อส่งฟรี!</div>' : (totalItems >= 2 ? '<div class="bg-green-50 text-green-600 p-2 rounded-lg text-[10px] font-bold mb-3 text-center">✨ คุณได้รับสิทธิ์ส่งฟรีแล้ว!</div>' : '')}
+                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest"><span>ราคาสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
+                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest"><span>ค่าจัดส่ง</span><span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500 font-bold' : ''}">${totalItems === 0 ? '0 ฿' : (shippingFee === 0 ? 'ฟรี' : '40 ฿')}</span></div>
+                <div class="flex justify-between items-end pt-3 border-t border-dashed mt-2"><span class="text-gray-800 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>`;
         }
 
-        function updateCartQty(index, amt) { 
-            cart[index].qty = Math.max(1, cart[index].qty + amt); 
-            saveAndRefresh(); 
-        }
+        function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
+        function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
 
-        function removeFromCart(index) { 
-            cart.splice(index, 1); 
-            saveAndRefresh(); 
-        }
-
-        // --- Filter & Search Logic ---
-        const searchInput = document.getElementById('searchInput');
-        const checkboxes = document.querySelectorAll('.filter-checkbox');
-        const cards = document.querySelectorAll('.product-card');
-
+        // --- Filter Logic ---
         function filterProducts() {
-            const term = searchInput.value.toLowerCase();
-            const activeFilters = Array.from(checkboxes).filter(i => i.checked).map(i => i.value);
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const activeFilters = Array.from(document.querySelectorAll('.filter-checkbox')).filter(i => i.checked).map(i => i.value);
             let visibleCount = 0;
-
-            cards.forEach(card => {
+            document.querySelectorAll('.product-card').forEach(card => {
                 const name = card.dataset.name.toLowerCase();
                 const scent = card.dataset.scent;
-                const matchesSearch = name.includes(term);
-                const matchesFilter = activeFilters.includes('all') || activeFilters.includes(scent);
-                
-                if (matchesSearch && matchesFilter) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
+                const matches = name.includes(term) && (activeFilters.includes('all') || activeFilters.includes(scent));
+                card.style.display = matches ? 'block' : 'none';
+                if (matches) visibleCount++;
             });
-
             document.getElementById('resultCount').innerText = `พบสินค้า ${visibleCount} รายการ`;
             document.getElementById('emptySearch').classList.toggle('hidden', visibleCount > 0);
         }
 
-        checkboxes.forEach(cb => {
+        document.querySelectorAll('.filter-checkbox').forEach(cb => {
             cb.addEventListener('change', (e) => {
-                if (e.target.value === 'all' && e.target.checked) {
-                    checkboxes.forEach(c => { if(c.value !== 'all') c.checked = false; });
-                } else if (e.target.checked) {
-                    checkboxes[0].checked = false;
-                }
-                if (Array.from(checkboxes).every(c => !c.checked)) checkboxes[0].checked = true;
+                if (e.target.value === 'all' && e.target.checked) document.querySelectorAll('.filter-checkbox').forEach(c => { if(c.value !== 'all') c.checked = false; });
+                else if (e.target.checked) document.querySelectorAll('.filter-checkbox')[0].checked = false;
+                if (Array.from(document.querySelectorAll('.filter-checkbox')).every(c => !c.checked)) document.querySelectorAll('.filter-checkbox')[0].checked = true;
                 filterProducts();
             });
         });
 
-        searchInput.addEventListener('input', filterProducts);
-        
+        document.getElementById('searchInput').addEventListener('input', filterProducts);
+
+        // --- History Logic ---
+        function toggleHistoryModal(isOpen) {
+            const modal = document.getElementById('historyModal');
+            const overlay = document.getElementById('historyModalOverlay');
+            if (isOpen) { renderHistory(); modal.classList.remove('hidden'); overlay.classList.remove('hidden'); }
+            else { modal.classList.add('hidden'); overlay.classList.add('hidden'); }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            if (!window.currentUser) {
+                container.innerHTML = '<p class="text-center py-10 text-gray-400 text-sm">กรุณาเข้าสู่ระบบเพื่อดูประวัติการสั่งซื้อ</p>';
+                return;
+            }
+            const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+            const userOrders = allHistory[window.currentUser.email] || [];
+            if (userOrders.length === 0) {
+                container.innerHTML = '<div class="text-center py-10"><span class="text-4xl block mb-2">📦</span><p class="text-gray-400 text-sm font-bold italic">คุณยังไม่มีรายการสั่งซื้อ</p></div>';
+            } else {
+                container.innerHTML = userOrders.map(order => `
+                    <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden hover:border-pink-200 transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <div><span class="text-[10px] bg-pink-100 text-pink-500 px-2 py-0.5 rounded-full font-bold mb-1 inline-block">Order ID: ${order.orderId}</span><p class="text-[11px] text-gray-400 font-bold tracking-tight">${order.date}</p></div>
+                            <span class="text-[10px] font-bold text-green-500 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> ชำระเงินแล้ว</span>
+                        </div>
+                        <div class="space-y-1 mb-4 border-y border-dashed border-gray-100 py-3">
+                            ${order.items.map(item => `<div class="flex justify-between text-xs"><span class="text-gray-600 font-medium">${item.name}</span><span class="font-bold text-gray-800">x${item.qty}</span></div>`).join('')}
+                        </div>
+                        <div class="flex justify-between items-center"><span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">ยอดสุทธิ</span><span class="text-lg font-bold text-pink-500">${order.total} ฿</span></div>
+                    </div>`).join('');
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             filterProducts();
             updateCartUI();
+            if (new URLSearchParams(window.location.search).get('openHistory') === 'true') setTimeout(() => toggleHistoryModal(true), 1500);
         });
     </script>
 </body>
