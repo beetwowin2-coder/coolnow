@@ -148,7 +148,8 @@
                 <h3 class="text-xl font-bold flex items-center gap-2">📜 ประวัติการสั่งซื้อ</h3>
                 <button onclick="toggleModal('historyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
             </div>
-            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2"></div>
+            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
+                </div>
         </div>
     </div>
 
@@ -249,20 +250,57 @@
             toggleModal('addressModal', false);
         }
 
-        // --- ระบบประวัติการสั่งซื้อ ---
+        // --- ระบบประวัติการสั่งซื้อ (เชื่อมต่อ Google Login) ---
         function openHistoryModal() {
-            const history = JSON.parse(localStorage.getItem('coolNow_History')) || [];
             const container = document.getElementById('historyList');
-            if (history.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400"><p class="text-4xl mb-2">🏜️</p><p class="text-sm">คุณยังไม่มีประวัติการสั่งซื้อ</p></div>`;
+            
+            // 1. ตรวจสอบสถานะการเข้าสู่ระบบ
+            if (!window.currentUser) {
+                container.innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="text-4xl mb-3">🔒</div>
+                        <p class="text-gray-800 font-bold">เฉพาะสมาชิกเท่านั้น</p>
+                        <p class="text-gray-400 text-xs mt-1 mb-6">กรุณาล็อคอินเพื่อดูประวัติการสั่งซื้อ</p>
+                        <a href="auth.html" class="bg-pink-500 text-white px-6 py-2 rounded-full text-xs font-bold active-push inline-block">ไปหน้าล็อคอิน</a>
+                    </div>`;
+                toggleModal('historyModal', true);
+                return;
+            }
+
+            // 2. ดึงข้อมูลประวัติ (จาก Key 'orderHistory' ที่บันทึกมาจากหน้า Success)
+            const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+            const userOrders = allHistory[window.currentUser.email] || [];
+
+            if (userOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-gray-400">
+                        <p class="text-4xl mb-2">🏜️</p>
+                        <p class="text-sm">คุณยังไม่มีประวัติการสั่งซื้อค่ะ</p>
+                    </div>`;
             } else {
-                container.innerHTML = history.map(order => `
+                container.innerHTML = userOrders.map(order => `
                     <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500">
                         <div class="flex justify-between items-start">
-                            <p class="font-bold text-gray-800 text-sm">#${order.orderId}</p>
-                            <span class="text-[10px] text-gray-400 font-bold">${order.date}</span>
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">#${order.orderId}</p>
+                                <p class="text-[10px] text-gray-400 font-bold">${order.date}</p>
+                            </div>
+                            <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">สำเร็จ</span>
                         </div>
-                        <p class="text-pink-500 font-bold mt-1">${order.total} ฿</p>
+                        
+                        <div class="my-3 space-y-1 border-y border-gray-100 py-2">
+                            ${order.items ? order.items.map(item => `
+                                <div class="flex justify-between text-[11px] text-gray-600">
+                                    <span>• ${item.name}</span>
+                                    <span class="font-bold">x${item.qty}</span>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-[10px] text-gray-400 uppercase font-bold">ยอดรวม</span>
+                            <p class="text-pink-500 font-bold text-base">${order.total} ฿</p>
+                        </div>
                     </div>`).join('');
             }
             toggleModal('historyModal', true);
