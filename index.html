@@ -16,6 +16,9 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .active-push:active { transform: scale(0.95); }
         .hero-bg { background: radial-gradient(circle at top right, #fff5f8, #ffffff); }
+        /* Custom Scrollbar */
+        #cartItemsList::-webkit-scrollbar { width: 4px; }
+        #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800">
@@ -69,7 +72,7 @@
                 </div>
             </div>
             <div class="w-full md:w-1/2 h-[350px] md:h-[550px] order-1 md:order-2 bg-pink-50/50 flex items-center justify-center p-8">
-                 <img src="images/Banner.png" alt="Banner" class="max-w-full max-h-full object-contain drop-shadow-2xl">
+                 <img src="images/Banner.png" alt="Banner" class="max-w-full max-h-full object-contain drop-shadow-2xl hover:scale-105 transition duration-700">
             </div>
         </div>
     </section>
@@ -97,6 +100,7 @@
             <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Lemon Mint', 100, 'images/lemon-mint.png')">
                 <div class="relative bg-green-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
                     <img src="images/lemon-mint.png" class="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-500">
+                    <div class="absolute top-3 right-3 bg-white/80 backdrop-blur shadow-sm px-2 py-1 rounded-lg text-[10px] font-bold text-green-500">NEW</div>
                 </div>
                 <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1">Lemon Mint</h3>
                 <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
@@ -109,7 +113,7 @@
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold">ระบุจำนวน</h3>
-                <button onclick="toggleModal('qtyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition">&times;</button>
+                <button onclick="toggleModal('qtyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
             </div>
             <div class="flex items-center gap-5 mb-8 bg-gray-50 p-4 rounded-2xl">
                 <img id="modalImg" src="" class="w-20 h-20 object-contain bg-white rounded-xl shadow-sm">
@@ -123,20 +127,24 @@
                 <span id="quantity" class="text-2xl font-bold text-gray-800">1</span>
                 <button onclick="changeModalQty(1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold hover:bg-gray-100 active-push text-xl">+</button>
             </div>
-            <button onclick="addToCart()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ยืนยัน 🛍️</button>
+            <button onclick="addToCart()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ยืนยันการเพิ่ม 🛍️</button>
         </div>
     </div>
 
-    <div id="cartDrawerOverlay" class="fixed inset-0 bg-black/40 z-[70] hidden backdrop-blur-sm" onclick="toggleCart(false)"></div>
+    <div id="cartDrawerOverlay" class="fixed inset-0 bg-black/40 z-[70] hidden backdrop-blur-sm transition-opacity" onclick="toggleCart(false)"></div>
     <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-[80] shadow-2xl flex flex-col drawer-closed">
         <div class="p-6 flex justify-between items-center border-b border-gray-50">
             <h2 class="text-xl font-bold flex items-center gap-2">🛒 ตะกร้าสินค้า</h2>
-            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 hover:text-gray-500 transition">&times;</button>
+            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 hover:text-gray-500 transition active-push">&times;</button>
         </div>
-        <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-8 border-t bg-gray-50">
-            <div id="cartSummary" class="mb-6 space-y-3"></div>
-            <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ไปหน้าชำระเงิน</button>
+        <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30">
+            </div>
+        <div class="p-8 border-t bg-white">
+            <div id="cartSummary" class="mb-6 space-y-3">
+                </div>
+            <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
+                ไปหน้าชำระเงิน <span>→</span>
+            </button>
         </div>
     </div>
 
@@ -155,7 +163,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        window.currentUser = null; // ย้ายไปที่ window เพื่อให้ script อื่นเรียกใช้ได้
+        window.currentUser = null;
 
         onAuthStateChanged(auth, (user) => {
             window.currentUser = user;
@@ -166,7 +174,7 @@
                     <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
                         <div class="text-right hidden sm:block">
                             <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
-                            <p class="text-[9px] text-gray-400">บัญชีของฉัน</p>
+                            <p class="text-[9px] text-gray-400 font-bold">Account</p>
                         </div>
                         <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition-all">
                             ${photo}
@@ -174,13 +182,11 @@
                     </div>`;
             } else {
                 authSection.innerHTML = `
-                    <a href="auth.html" class="bg-gray-800 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">เข้าสู่ระบบ</a>`;
+                    <a href="auth.html" class="bg-gray-800 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">Login</a>`;
             }
         });
 
-        // ฟังก์ชันไปหน้า Checkout (ฉบับปรับปรุง)
         window.proceedToCheckout = () => {
-            // ดึงข้อมูลล่าสุดมาเช็ค
             const currentCart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
             if(currentCart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
             
@@ -194,7 +200,6 @@
     </script>
 
     <script>
-        // รวมศูนย์ข้อมูลตะกร้าที่นี่
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let tempItem = {};
 
@@ -204,7 +209,9 @@
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
 
-        function scrollToProducts() { document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); }
+        function scrollToProducts() { 
+            document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); 
+        }
         
         function openQtyModal(name, price, img) {
             tempItem = { name, price, img, qty: 1 };
@@ -251,28 +258,27 @@
             const list = document.getElementById('cartItemsList');
             const countBadge = document.getElementById('cart-count');
             const summaryDisplay = document.getElementById('cartSummary');
-            
             let subtotal = 0, totalItems = 0;
             
             list.innerHTML = cart.length === 0 ? `
                 <div class="flex flex-col items-center justify-center py-20 text-gray-300">
                     <span class="text-6xl mb-4">🛒</span>
-                    <p class="text-sm font-medium">ไม่มีสินค้าในตะกร้า</p>
+                    <p class="text-sm font-medium">ตะกร้าของคุณว่างเปล่า</p>
                 </div>` : '';
 
             cart.forEach((item, index) => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
                 list.innerHTML += `
-                    <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
-                        <div class="flex-1">
-                            <p class="font-bold text-xs text-gray-800 leading-tight">${item.name}</p>
+                    <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm group">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl group-hover:scale-105 transition">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-xs text-gray-800 leading-tight truncate">${item.name}</p>
                             <p class="text-pink-500 font-bold text-sm mt-1">${item.price} ฿</p>
                             <div class="flex items-center gap-3 mt-2">
-                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-gray-50">-</button>
+                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-pink-50 hover:text-pink-500 transition">-</button>
                                 <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-gray-50">+</button>
+                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-pink-50 hover:text-pink-500 transition">+</button>
                             </div>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition self-start pt-1">🗑️</button>
@@ -283,19 +289,25 @@
             const finalTotal = subtotal + shippingFee;
             countBadge.innerText = totalItems;
 
+            // Promotion Message in Cart
+            let promoTxt = "";
+            if(totalItems === 1) promoTxt = `<p class="text-[10px] text-orange-500 font-bold bg-orange-50 p-2 rounded-lg text-center mb-2">🔥 เพิ่มอีก 1 ชิ้นเพื่อส่งฟรี!</p>`;
+            else if(totalItems >= 2) promoTxt = `<p class="text-[10px] text-green-500 font-bold bg-green-50 p-2 rounded-lg text-center mb-2">✨ รับสิทธิ์ส่งฟรีเรียบร้อย!</p>`;
+
             summaryDisplay.innerHTML = `
+                ${promoTxt}
                 <div class="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
                     <span>ราคาสินค้า</span>
                     <span>${subtotal.toLocaleString()} ฿</span>
                 </div>
                 <div class="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
                     <span>ค่าจัดส่ง</span>
-                    <span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">
+                    <span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500 font-bold' : ''}">
                         ${totalItems === 0 ? '0 ฿' : (shippingFee === 0 ? 'ฟรี' : '40 ฿')}
                     </span>
                 </div>
                 <div class="flex justify-between items-end pt-3 border-t border-dashed mt-3">
-                    <span class="text-sm font-bold text-gray-800 uppercase">ยอดสุทธิ</span>
+                    <span class="text-sm font-bold text-gray-800 uppercase tracking-wider">ยอดรวมสุทธิ</span>
                     <span class="text-2xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
                 </div>
             `;
@@ -314,7 +326,6 @@
         }
         setupSearch('indexSearchInput');
 
-        // โหลดข้อมูลตะกร้าครั้งแรกเมื่อเปิดหน้า
         window.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
