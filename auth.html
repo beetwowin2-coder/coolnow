@@ -8,61 +8,73 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kanit', sans-serif; }
+        .loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; align-items: center; justify-content: center; z-index: 100;
+        }
         .spinner { 
-            border: 2px solid rgba(255,255,255,0.3); 
-            border-radius: 50%; 
-            border-top: 2px solid #fff; 
-            width: 20px; 
-            height: 20px; 
-            animation: spin 1s linear infinite; 
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid #ec4899; border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-[#FBFBFD] flex flex-col min-h-screen text-gray-800">
 
-    <nav class="bg-white py-4 px-6 flex items-center justify-between shadow-sm">
-        <a href="index.html">
-            <img src="images/logo.png" alt="Logo" class="h-8">
+    <div id="loader" class="loading-screen">
+        <div class="spinner"></div>
+    </div>
+
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 py-4 px-6 flex items-center justify-between shadow-sm z-50">
+        <a href="index.html" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center text-white font-bold">C</div>
+            <span class="font-bold text-lg tracking-tight">COOL NOW</span>
         </a>
         <div class="flex gap-4">
-            <a href="products.html" class="text-sm text-gray-500 hover:text-pink-500 transition">Back to Shop</a>
-            <a href="index.html" class="text-sm text-gray-500 hover:text-pink-500 transition">Home</a>
+            <a href="index.html" class="text-sm font-medium text-gray-500 hover:text-pink-500 transition">หน้าหลัก</a>
         </div>
     </nav>
 
     <main class="flex-1 flex items-center justify-center p-4">
         
-        <div id="profileSection" class="hidden bg-white p-8 rounded-[2.5rem] shadow-xl max-w-md w-full text-center border border-gray-100">
-            <div id="userPhoto" class="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-inner">
-                <span class="text-4xl">👤</span>
+        <div id="profileSection" class="hidden bg-white p-10 rounded-[3rem] shadow-xl shadow-pink-100/20 max-w-md w-full text-center border border-gray-50">
+            <div id="userPhoto" class="w-28 h-28 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden border-4 border-white shadow-lg">
+                <span class="text-5xl">👤</span>
             </div>
             <h2 id="userName" class="text-2xl font-bold text-gray-800 mb-1">ยินดีต้อนรับ!</h2>
-            <p id="userEmail" class="text-gray-500 mb-8"></p>
+            <p id="userEmail" class="text-gray-400 text-sm mb-8 font-light"></p>
             
             <div class="space-y-3">
-                <button onclick="location.href='index.html'" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition">ไปช้อปปิ้งกันเลย 🛍️</button>
-                <button id="mainLogoutBtn" class="w-full border border-gray-200 text-gray-400 py-4 rounded-2xl font-bold hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition">ออกจากระบบ</button>
+                <button onclick="location.href='index.html'" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-pink-200 hover:bg-pink-600 transition active:scale-[0.98]">
+                    ไปช้อปปิ้งกันเลย 🛍️
+                </button>
+                <button id="mainLogoutBtn" class="w-full text-gray-400 py-3 rounded-2xl font-medium hover:text-red-500 transition text-sm">
+                    ออกจากระบบ
+                </button>
             </div>
         </div>
 
-        <div id="loginSection" class="hidden bg-white p-8 rounded-[2.5rem] shadow-xl max-w-md w-full border border-gray-100 text-center">
+        <div id="loginSection" class="hidden bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/30 max-w-md w-full border border-gray-50 text-center">
+            <div class="w-20 h-20 bg-pink-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl">
+                ✨
+            </div>
             <h2 class="text-2xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ</h2>
-            <p class="text-gray-400 text-sm mb-8">เพื่อเข้าถึงระบบการสั่งซื้อและโปรโมชั่น</p>
+            <p class="text-gray-400 text-sm mb-10 leading-relaxed">เข้าสู่ระบบเพื่อสะสมคะแนน<br>และจัดการที่อยู่จัดส่งของคุณ</p>
             
-            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-4 rounded-2xl font-bold hover:bg-gray-50 transition shadow-sm">
-                <img src="images/google.png" class="w-6" alt="Google">
-                <span>เข้าสู่ระบบด้วย Google</span>
+            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-4 rounded-2xl font-bold hover:bg-gray-50 transition shadow-sm active:scale-[0.98]">
+                <img src="images/google.png" class="w-5" alt="Google">
+                <span>เข้าใช้งานด้วย Google</span>
             </button>
 
-            <p class="text-center text-[10px] text-gray-300 mt-8 px-4 uppercase tracking-widest">
-                Cool Now Store Secure Login
+            <p class="text-[10px] text-gray-300 mt-10 uppercase tracking-[0.2em]">
+                Secure Cloud Authentication
             </p>
         </div>
     </main>
 
-    <footer class="py-6 text-center text-gray-400 text-xs">
-        &copy; 2024 Cool Now Store. All rights reserved.
+    <footer class="py-8 text-center text-gray-300 text-[10px] tracking-widest uppercase">
+        &copy; 2025 Cool Now Store
     </footer>
 
     <script type="module">
@@ -88,10 +100,13 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // 1. ตรวจสอบสถานะ User
+        const loader = document.getElementById('loader');
+        const profileSection = document.getElementById('profileSection');
+        const loginSection = document.getElementById('loginSection');
+
+        // ตรวจสอบสถานะ User
         onAuthStateChanged(auth, (user) => {
-            const profileSection = document.getElementById('profileSection');
-            const loginSection = document.getElementById('loginSection');
+            loader.style.display = 'none'; // ปิดตัวโหลดเมื่อรู้สถานะแล้ว
 
             if (user) {
                 profileSection.classList.remove('hidden');
@@ -107,20 +122,24 @@
             }
         });
 
-        // 2. ฟังก์ชัน Login ด้วย Google
+        // Login ด้วย Google
         document.getElementById('googleLoginBtn').onclick = async () => {
             try {
                 await signInWithPopup(auth, provider);
             } catch (err) {
                 console.error("Login Error:", err);
-                alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ: " + err.message);
+                if(err.code !== 'auth/popup-closed-by-user') {
+                    alert("เกิดข้อผิดพลาด: " + err.message);
+                }
             }
         };
 
-        // 3. ฟังก์ชัน Logout
+        // Logout
         document.getElementById('mainLogoutBtn').onclick = () => {
             if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-                signOut(auth);
+                signOut(auth).then(() => {
+                    window.location.reload();
+                });
             }
         };
     </script>
