@@ -9,6 +9,7 @@
     <style>
         body { font-family: 'Kanit', sans-serif; }
         .active-push:active { transform: scale(0.98); }
+        #uploadZone.drag-over { border-color: #ec4899; background-color: #fdf2f8; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800 pb-20">
@@ -20,48 +21,70 @@
     </nav>
 
     <main class="container mx-auto max-w-2xl px-4">
-        <h1 class="text-3xl font-bold mb-8">สรุปรายการสั่งซื้อ</h1>
+        <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
 
         <div id="checkoutItems" class="space-y-4 mb-8">
             </div>
 
         <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
-            <h2 class="text-lg font-bold mb-4">📍 ที่อยู่จัดส่ง</h2>
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📍 ที่อยู่จัดส่ง</h2>
             <textarea id="address" placeholder="ชื่อ-นามสกุล, เบอร์โทรศัพท์ และที่อยู่ผู้รับ..." 
                       class="w-full h-32 bg-gray-50 rounded-2xl p-4 focus:outline-none border border-transparent focus:border-pink-200 transition-all"></textarea>
         </section>
 
-        <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-8">
-            <h2 class="text-lg font-bold mb-4">💰 ช่องทางชำระเงิน</h2>
-            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4">
-                <div class="bg-white p-2 rounded-xl shadow-sm text-2xl">🏦</div>
+        <section class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 mb-8">
+            <h2 class="text-lg font-bold mb-6">💰 ช่องทางชำระเงิน</h2>
+            
+            <div class="bg-blue-50 border border-blue-100 rounded-[2rem] p-6 flex items-start gap-4 mb-8">
+                <div class="bg-white p-3 rounded-2xl shadow-sm">
+                    <img src="https://www.bbl.co.th/images/logo.png" class="w-8 h-8 object-contain" alt="ธนาคารกรุงเทพ">
+                </div>
                 <div>
-                    <p class="font-bold text-blue-900">ธนาคารกรุงเทพ (BBL)</p>
-                    <p class="text-blue-700 text-sm mt-1">ชื่อบัญชี: <span class="font-bold">ณัฐฑิชา สัจจะวัฒนะ</span></p>
-                    <p class="text-blue-800 font-bold mt-1 tracking-wider">XXX-X-XXXXX-X</p> 
-                    <p class="text-[10px] text-blue-400 mt-2">*กรุณาแนบสลิปหลังจากโอนเงิน</p>
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">ธนาคารกรุงเทพ (BBL)</p>
+                    <p class="text-blue-900 font-bold text-lg">ณัฐฑิชา สัจจะวัฒนะ</p>
+                    <p class="text-blue-700 font-bold text-xl tracking-tighter mt-1">930-0-272847</p>
                 </div>
             </div>
             
-            <div class="mt-6">
-                <p class="text-sm font-bold mb-3">แนบสลิปการโอนเงิน</p>
-                <input type="file" id="slip" accept="image/*" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer w-full">
+            <div class="space-y-4">
+                <p class="text-sm font-bold text-gray-700 ml-1">แนบหลักฐานการโอนเงิน</p>
+                
+                <div id="uploadZone" 
+                     onclick="document.getElementById('slipInput').click()"
+                     class="relative group cursor-pointer border-2 border-dashed border-pink-200 bg-pink-50/30 rounded-[2rem] p-8 transition-all hover:border-pink-400 hover:bg-pink-50 flex flex-col items-center justify-center min-h-[220px]">
+                    
+                    <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="previewSlip(this)">
+                    
+                    <div id="uploadPrompt" class="text-center">
+                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">
+                            📸
+                        </div>
+                        <p class="font-bold text-pink-600 uppercase tracking-tight">คลิกเพื่ออัพโหลดสลิป</p>
+                        <p class="text-xs text-pink-400 mt-1">หรือลากไฟล์รูปภาพมาวางที่นี่</p>
+                    </div>
+
+                    <div id="previewContainer" class="hidden w-full flex flex-col items-center">
+                        <img id="slipPreview" src="#" class="max-h-64 rounded-xl shadow-md border-2 border-white mb-3">
+                        <button type="button" class="text-xs font-bold text-pink-500 hover:underline">เปลี่ยนรูปภาพ</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-pink-50/50 border border-pink-50">
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-pink-100/30 border border-pink-50">
             <div class="space-y-3 mb-6" id="summaryArea">
                 </div>
-            <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
+            <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
                 ยืนยันการสั่งซื้อ 🚀
             </button>
-            <p class="text-center text-[10px] text-gray-400 mt-4">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
+            <p class="text-center text-[10px] text-gray-400 mt-4 tracking-tight">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
         </div>
     </main>
 
     <script>
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
 
+        // ฟังก์ชันวาดรายการสินค้าและคำนวณราคา
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
@@ -79,14 +102,14 @@
                 totalItems += item.qty;
                 itemsContainer.innerHTML += `
                     <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
-                        <img src="${item.img}" class="w-20 h-20 object-contain bg-gray-50 rounded-2xl">
+                        <img src="${item.img}" class="w-16 h-16 md:w-20 md:h-20 object-contain bg-gray-50 rounded-2xl">
                         <div class="flex-1">
-                            <h3 class="font-bold text-sm">${item.name}</h3>
-                            <p class="text-pink-500 font-bold">${item.price} ฿</p>
+                            <h3 class="font-bold text-sm md:text-base leading-tight text-gray-800">${item.name}</h3>
+                            <p class="text-pink-500 font-bold mt-1">${item.price} ฿</p>
                         </div>
-                        <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl">
+                        <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
                             <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">-</button>
-                            <span class="font-bold w-4 text-center">${item.qty}</span>
+                            <span class="font-bold w-4 text-center text-sm">${item.qty}</span>
                             <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">+</button>
                         </div>
                     </div>
@@ -103,15 +126,18 @@
                 </div>
                 <div class="flex justify-between text-gray-400 font-medium">
                     <span>ค่าจัดส่ง</span>
-                    <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span>
+                    <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">
+                        ${shippingFee === 0 ? 'ฟรี (โปรโมชั่น)' : '40 ฿'}
+                    </span>
                 </div>
-                <div class="flex justify-between items-end pt-4 border-t mt-2">
-                    <span class="text-xl font-bold">ยอดสุทธิ</span>
+                <div class="flex justify-between items-end pt-4 border-t border-dashed mt-2">
+                    <span class="text-xl font-bold text-gray-800 uppercase">ยอดสุทธิ</span>
                     <span class="text-3xl font-bold text-pink-500">${total.toLocaleString()} ฿</span>
                 </div>
             `;
         }
 
+        // ปรับจำนวนสินค้า
         function updateQty(index, amt) {
             cart[index].qty += amt;
             if (cart[index].qty <= 0) {
@@ -125,15 +151,52 @@
             renderCheckout();
         }
 
+        // แสดงตัวอย่างรูปสลิป
+        function previewSlip(input) {
+            const prompt = document.getElementById('uploadPrompt');
+            const container = document.getElementById('previewContainer');
+            const preview = document.getElementById('slipPreview');
+            const zone = document.getElementById('uploadZone');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    prompt.classList.add('hidden');
+                    container.classList.remove('hidden');
+                    zone.classList.remove('border-dashed');
+                    zone.classList.add('border-solid', 'border-pink-500', 'bg-white');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // ฟังก์ชันลากไฟล์มาวาง (Drag & Drop)
+        const zone = document.getElementById('uploadZone');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+            zone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
+        });
+        zone.addEventListener('dragover', () => zone.classList.add('drag-over'));
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', (e) => {
+            zone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if(files.length) {
+                document.getElementById('slipInput').files = files;
+                previewSlip(document.getElementById('slipInput'));
+            }
+        });
+
+        // ยืนยันคำสั่งซื้อ
         function confirmOrder() {
             const address = document.getElementById('address').value;
-            const slip = document.getElementById('slip').files[0];
+            const slip = document.getElementById('slipInput').files[0];
 
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
             if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
 
-            // ส่วนส่งข้อมูลไป Firebase หรือแจ้งเตือนความสำเร็จ
-            alert('ได้รับคำสั่งซื้อของคุณแล้ว! ขอบคุณที่ใช้บริการ Cool Now');
+            // ในที่นี้คือตัวอย่างการแจ้งเตือนสำเร็จ
+            alert('ได้รับคำสั่งซื้อของคุณแล้ว! ขอบคุณที่ช้อปกับ Cool Now');
             localStorage.removeItem('coolNowCart');
             window.location.href = 'order-success.html';
         }
