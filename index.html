@@ -91,7 +91,7 @@
                 </div>
                 <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1">Bubble Gum</h3>
                 <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
-                <button class="w-full mt-4 bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold group-hover:bg-pink-500 group-hover:text-white transition-all active-push">เพิ่มลงตะกร้า +</button>
+                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold hover:bg-pink-600 transition-all active-push shadow-sm">เพิ่มลงตะกร้า +</button>
             </div>
             
             <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Lemon Mint', 100, 'images/lemon-mint.png')">
@@ -100,7 +100,7 @@
                 </div>
                 <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1">Lemon Mint</h3>
                 <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
-                <button class="w-full mt-4 bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold group-hover:bg-pink-500 group-hover:text-white transition-all active-push">เพิ่มลงตะกร้า +</button>
+                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold hover:bg-pink-600 transition-all active-push shadow-sm">เพิ่มลงตะกร้า +</button>
             </div>
         </div>
     </section>
@@ -135,8 +135,7 @@
         </div>
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-8 border-t bg-gray-50">
-            <div id="cartSummary" class="mb-6 space-y-3">
-                </div>
+            <div id="cartSummary" class="mb-6 space-y-3"></div>
             <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ไปหน้าชำระเงิน</button>
         </div>
     </div>
@@ -156,17 +155,17 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        let currentUser = null;
+        window.currentUser = null; // ย้ายไปที่ window เพื่อให้ script อื่นเรียกใช้ได้
 
         onAuthStateChanged(auth, (user) => {
-            currentUser = user;
+            window.currentUser = user;
             const authSection = document.getElementById('authSection');
             if(user) {
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
                 authSection.innerHTML = `
                     <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
                         <div class="text-right hidden sm:block">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName.split(' ')[0]}</p>
+                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
                             <p class="text-[9px] text-gray-400">บัญชีของฉัน</p>
                         </div>
                         <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition-all">
@@ -179,10 +178,13 @@
             }
         });
 
+        // ฟังก์ชันไปหน้า Checkout (ฉบับปรับปรุง)
         window.proceedToCheckout = () => {
-            const cartData = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if(cartData.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
-            if(!currentUser) {
+            // ดึงข้อมูลล่าสุดมาเช็ค
+            const currentCart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
+            if(currentCart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
+            
+            if(!window.currentUser) {
                 alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
                 window.location.href = 'auth.html';
             } else {
@@ -192,6 +194,7 @@
     </script>
 
     <script>
+        // รวมศูนย์ข้อมูลตะกร้าที่นี่
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let tempItem = {};
 
@@ -233,9 +236,15 @@
         function toggleCart(isOpen) {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartDrawerOverlay');
-            if (isOpen) { drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); }
-            else { drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('hidden'); }
-            if(isOpen) updateCartUI();
+            if (isOpen) { 
+                drawer.classList.replace('drawer-closed', 'drawer-open'); 
+                overlay.classList.remove('hidden'); 
+                updateCartUI(); 
+            }
+            else { 
+                drawer.classList.replace('drawer-open', 'drawer-closed'); 
+                overlay.classList.add('hidden'); 
+            }
         }
 
         function updateCartUI() {
@@ -261,19 +270,17 @@
                             <p class="font-bold text-xs text-gray-800 leading-tight">${item.name}</p>
                             <p class="text-pink-500 font-bold text-sm mt-1">${item.price} ฿</p>
                             <div class="flex items-center gap-3 mt-2">
-                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs">-</button>
+                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-gray-50">-</button>
                                 <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs">+</button>
+                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-xs hover:bg-gray-50">+</button>
                             </div>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition self-start pt-1">🗑️</button>
                     </div>`;
             });
 
-            // Logic: 1 ชิ้น ค่าส่ง 40฿, 2 ชิ้นขึ้นไป ฟรี
             const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
             const finalTotal = subtotal + shippingFee;
-
             countBadge.innerText = totalItems;
 
             summaryDisplay.innerHTML = `
@@ -307,6 +314,7 @@
         }
         setupSearch('indexSearchInput');
 
+        // โหลดข้อมูลตะกร้าครั้งแรกเมื่อเปิดหน้า
         window.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
