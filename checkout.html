@@ -3,251 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Cool Now Store</title>
+    <title>Checkout - Cool Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kanit', sans-serif; }
-        .form-input:focus { border-color: #ec4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1); }
-        .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        button:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.6; }
+        .active-push:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="bg-[#FBFBFD] text-gray-800">
+<body class="bg-[#FBFBFD] text-gray-800 pb-20">
 
-    <div id="emailAlert" class="hidden bg-yellow-50 border-b border-yellow-100 p-4 sticky top-0 z-[60]">
-        <div class="container mx-auto flex items-center gap-3">
-            <span class="text-xl">📧</span>
-            <div>
-                <p class="text-sm font-bold text-yellow-800">กรุณายืนยันอีเมลของคุณ</p>
-                <p class="text-xs text-yellow-700">โปรดยืนยันอีเมลก่อนทำการสั่งซื้อ (ตรวจสอบใน Inbox หรือ Junk mail)</p>
-            </div>
-        </div>
-    </div>
-
-    <nav class="bg-white/80 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-gray-50">
-        <div class="container mx-auto flex items-center justify-between">
-            <a href="products.html" class="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition group">
-                <span class="group-hover:-translate-x-1 transition-transform">⬅️</span> 
-                <span class="text-sm font-medium">กลับไปเลือกสินค้า</span>
-            </a>
-            <div class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></div>
-            <div id="userBadge" class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-                <div id="userThumb" class="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-[10px]">👤</div>
-                <span id="userShortName" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account</span>
-            </div>
-        </div>
+    <nav class="p-6">
+        <a href="index.html" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 transition">
+            <span>←</span> ย้อนกลับ
+        </a>
     </nav>
 
-    <main class="container mx-auto px-4 max-w-6xl mb-20 mt-6">
-        <div class="flex flex-col lg:flex-row gap-8">
-            <div class="lg:w-[60%] space-y-6">
-                <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
-                    <h2 class="text-xl font-bold mb-8 flex items-center gap-3">
-                        <span class="bg-pink-50 p-2 rounded-xl text-lg">📍</span> ข้อมูลการจัดส่ง
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">ชื่อ-นามสกุล</label>
-                            <input type="text" id="custName" placeholder="ระบุชื่อผู้รับ" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 focus:outline-none transition form-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">เบอร์โทรศัพท์</label>
-                            <input type="tel" id="custPhone" maxlength="10" placeholder="08x-xxx-xxxx" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 focus:outline-none transition form-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">อีเมล</label>
-                            <input type="email" id="custEmail" readonly class="w-full bg-gray-100 border border-gray-100 rounded-2xl px-5 py-4 text-gray-500 cursor-not-allowed">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">ที่อยู่สำหรับการจัดส่ง</label>
-                            <textarea id="custAddress" rows="3" placeholder="บ้านเลขที่, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 focus:outline-none transition form-input"></textarea>
-                        </div>
-                    </div>
-                </div>
+    <main class="container mx-auto max-w-2xl px-4">
+        <h1 class="text-3xl font-bold mb-8">สรุปรายการสั่งซื้อ</h1>
 
-                <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
-                    <h2 class="text-xl font-bold mb-8 flex items-center gap-3">
-                        <span class="bg-blue-50 p-2 rounded-xl text-lg">💳</span> การชำระเงิน
-                    </h2>
-                    <div class="relative border-2 border-pink-500 bg-white p-6 rounded-[1.8rem] flex flex-col md:flex-row items-center gap-6 shadow-sm mb-6">
-                        <img id="paymentQR" src="" class="w-32 h-32 border rounded-xl" alt="QR">
-                        <div class="text-center md:text-left">
-                            <p class="font-bold text-gray-800 text-lg">Thai QR Payment</p>
-                            <p class="text-sm text-pink-500 font-bold">สแกนจ่ายยอดเงินขึ้นอัตโนมัติ</p>
-                            <p class="text-[10px] text-gray-400 mt-2 leading-relaxed">กรุณาตรวจสอบชื่อบัญชีและยอดเงินก่อนกดยืนยัน<br>ระบบจะตรวจสอบสลิปภายใน 24 ชม.</p>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <input type="file" id="slipUpload" accept="image/*" class="hidden">
-                        <div id="slipPreviewContainer" class="hidden mb-4"><img id="slipPreview" class="max-w-[200px] mx-auto rounded-xl shadow-md border-4 border-white"></div>
-                        <label for="slipUpload" id="uploadLabel" class="cursor-pointer bg-gray-100 px-8 py-4 rounded-2xl text-sm font-bold inline-block hover:bg-gray-200 transition">📸 แนบสลิปการโอน</label>
-                    </div>
-                </div>
+        <div id="checkoutItems" class="space-y-4 mb-8">
             </div>
 
-            <div class="lg:w-[40%]">
-                <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 sticky top-28">
-                    <h2 class="text-xl font-bold mb-6">สรุปรายการสั่งซื้อ</h2>
-                    <div id="checkout-items-list" class="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2"></div>
-                    <div class="space-y-3 pt-6 border-t border-gray-50">
-                        <div class="flex justify-between text-gray-400 text-sm font-medium">
-                            <span>ราคาสินค้า</span>
-                            <span id="subtotal">0 ฿</span>
-                        </div>
-                        <div class="flex justify-between text-gray-400 text-sm font-medium">
-                            <span>ค่าจัดส่ง</span>
-                            <span id="shippingFee" class="text-gray-800">0 ฿</span>
-                        </div>
-                        <div class="flex justify-between text-2xl font-bold pt-4 text-gray-800 border-t border-dashed mt-2">
-                            <span>ยอดสุทธิ</span>
-                            <span id="total" class="text-pink-500">0 ฿</span>
-                        </div>
-                    </div>
-                    <button id="submitBtn" onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg mt-8 shadow-lg shadow-pink-100 hover:bg-pink-600 transition-all active:scale-[0.98] flex items-center justify-center">
-                        ยืนยันการสั่งซื้อ 🚀
-                    </button>
-                    <p class="text-[10px] text-center text-gray-400 mt-4">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
+        <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
+            <h2 class="text-lg font-bold mb-4">📍 ที่อยู่จัดส่ง</h2>
+            <textarea id="address" placeholder="ชื่อ-นามสกุล, เบอร์โทรศัพท์ และที่อยู่ผู้รับ..." 
+                      class="w-full h-32 bg-gray-50 rounded-2xl p-4 focus:outline-none border border-transparent focus:border-pink-200 transition-all"></textarea>
+        </section>
+
+        <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-8">
+            <h2 class="text-lg font-bold mb-4">💰 ช่องทางชำระเงิน</h2>
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4">
+                <div class="bg-white p-2 rounded-xl shadow-sm text-2xl">🏦</div>
+                <div>
+                    <p class="font-bold text-blue-900">ธนาคารกรุงเทพ (BBL)</p>
+                    <p class="text-blue-700 text-sm mt-1">ชื่อบัญชี: <span class="font-bold">ณัฐฑิชา สัจจะวัฒนะ</span></p>
+                    <p class="text-blue-800 font-bold mt-1 tracking-wider">XXX-X-XXXXX-X</p> 
+                    <p class="text-[10px] text-blue-400 mt-2">*กรุณาแนบสลิปหลังจากโอนเงิน</p>
                 </div>
             </div>
+            
+            <div class="mt-6">
+                <p class="text-sm font-bold mb-3">แนบสลิปการโอนเงิน</p>
+                <input type="file" id="slip" accept="image/*" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer w-full">
+            </div>
+        </section>
+
+        <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-pink-50/50 border border-pink-50">
+            <div class="space-y-3 mb-6" id="summaryArea">
+                </div>
+            <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
+                ยืนยันการสั่งซื้อ 🚀
+            </button>
+            <p class="text-center text-[10px] text-gray-400 mt-4">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <script>
+        let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
-            authDomain: "coolnow-1d8f4.firebaseapp.com",
-            projectId: "coolnow-1d8f4",
-            storageBucket: "coolnow-1d8f4.firebasestorage.app",
-            messagingSenderId: "857055916856",
-            appId: "1:857055916856:web:c32673482de318e04a07cd"
-        };
+        function renderCheckout() {
+            const itemsContainer = document.getElementById('checkoutItems');
+            const summaryArea = document.getElementById('summaryArea');
+            let subtotal = 0;
+            let totalItems = 0;
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        onAuthStateChanged(auth, (user) => {
-            const emailAlert = document.getElementById('emailAlert');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (user) {
-                document.getElementById('custEmail').value = user.email;
-                document.getElementById('custName').value = user.displayName || "";
-                document.getElementById('userShortName').innerText = user.displayName ? user.displayName.split(' ')[0] : "Account";
-                if(user.photoURL) document.getElementById('userThumb').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
-
-                if (user.emailVerified) {
-                    emailAlert.classList.add('hidden');
-                    submitBtn.disabled = false;
-                } else {
-                    emailAlert.classList.remove('hidden');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = `กรุณายืนยันอีเมลก่อนสั่งซื้อ`;
-                }
-            } else {
-                window.location.href = 'auth.html';
-            }
-        });
-
-        window.confirmOrder = function() {
-            const name = document.getElementById('custName').value;
-            const address = document.getElementById('custAddress').value;
-            const phone = document.getElementById('custPhone').value;
-            const slip = document.getElementById('slipUpload').files[0];
-            const total = document.getElementById('total').innerText;
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (!name || !address || phone.length < 10 || !slip) {
-                alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน และแนบสลิปการโอนเงินให้เรียบร้อย');
+            if (cart.length === 0) {
+                window.location.href = 'index.html';
                 return;
             }
 
-            // Loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<div class="spinner"></div>`;
-
-            // Save order info for Success Page
-            const orderData = {
-                customerName: name.split(' ')[0],
-                totalAmount: total
-            };
-            sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
-            
-            // ล้างตะกร้าเมื่อสั่งซื้อสำเร็จ
-            localStorage.removeItem('coolNowCart');
-
-            setTimeout(() => {
-                window.location.href = 'order-success.html';
-            }, 1500);
-        }
-    </script>
-
-    <script>
-        function loadOrderData() {
-            const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if (cart.length === 0) { window.location.href = 'products.html'; return; }
-
-            const listContainer = document.getElementById('checkout-items-list');
-            let subtotal = 0;
-            let totalItems = 0;
-            listContainer.innerHTML = '';
-
-            cart.forEach(item => {
-                subtotal += (item.price * item.qty);
+            itemsContainer.innerHTML = '';
+            cart.forEach((item, index) => {
+                subtotal += item.price * item.qty;
                 totalItems += item.qty;
-                listContainer.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                        <div class="flex items-center gap-4">
-                            <img src="${item.img}" class="w-12 h-12 object-contain bg-white rounded-xl p-1 shadow-sm">
-                            <div>
-                                <p class="text-xs font-bold text-gray-800">${item.name}</p>
-                                <p class="text-[10px] text-gray-400 font-medium">${item.qty} ชิ้น x ${item.price.toLocaleString()}฿</p>
-                            </div>
+                itemsContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
+                        <img src="${item.img}" class="w-20 h-20 object-contain bg-gray-50 rounded-2xl">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm">${item.name}</h3>
+                            <p class="text-pink-500 font-bold">${item.price} ฿</p>
                         </div>
-                        <p class="text-sm font-bold text-gray-700">${(item.price * item.qty).toLocaleString()}฿</p>
-                    </div>`;
+                        <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl">
+                            <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">-</button>
+                            <span class="font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">+</button>
+                        </div>
+                    </div>
+                `;
             });
 
-            // Logic: 1 ชิ้น 40฿, 2 ชิ้นขึ้นไป ส่งฟรี
-            const shippingFee = totalItems >= 2 ? 0 : 40;
-            const finalTotal = subtotal + shippingFee;
+            const shippingFee = (totalItems >= 2) ? 0 : 40;
+            const total = subtotal + shippingFee;
 
-            document.getElementById('subtotal').innerText = subtotal.toLocaleString() + ' ฿';
-            
-            const shippingDisplay = document.getElementById('shippingFee');
-            if(shippingFee === 0) {
-                shippingDisplay.innerText = 'ฟรี';
-                shippingDisplay.className = 'text-green-500 font-bold';
-            } else {
-                shippingDisplay.innerText = '40 ฿';
-                shippingDisplay.className = 'text-gray-800';
-            }
-
-            document.getElementById('total').innerText = finalTotal.toLocaleString() + ' ฿';
-            
-            // Generate PromptPay QR (Dynamic Amount)
-            document.getElementById('paymentQR').src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
+            summaryArea.innerHTML = `
+                <div class="flex justify-between text-gray-400 font-medium">
+                    <span>ราคาสินค้า</span>
+                    <span>${subtotal.toLocaleString()} ฿</span>
+                </div>
+                <div class="flex justify-between text-gray-400 font-medium">
+                    <span>ค่าจัดส่ง</span>
+                    <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span>
+                </div>
+                <div class="flex justify-between items-end pt-4 border-t mt-2">
+                    <span class="text-xl font-bold">ยอดสุทธิ</span>
+                    <span class="text-3xl font-bold text-pink-500">${total.toLocaleString()} ฿</span>
+                </div>
+            `;
         }
 
-        document.getElementById('slipUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    document.getElementById('slipPreview').src = ev.target.result;
-                    document.getElementById('slipPreviewContainer').classList.remove('hidden');
-                    document.getElementById('uploadLabel').innerHTML = '✅ เปลี่ยนสลิป';
-                    document.getElementById('uploadLabel').className = 'cursor-pointer bg-green-50 text-green-600 px-8 py-4 rounded-2xl text-sm font-bold inline-block border border-green-100';
+        function updateQty(index, amt) {
+            cart[index].qty += amt;
+            if (cart[index].qty <= 0) {
+                if(confirm('ต้องการลบสินค้านี้ออกใช่หรือไม่?')) {
+                    cart.splice(index, 1);
+                } else {
+                    cart[index].qty = 1;
                 }
-                reader.readAsDataURL(file);
             }
-        });
+            localStorage.setItem('coolNowCart', JSON.stringify(cart));
+            renderCheckout();
+        }
 
-        document.addEventListener('DOMContentLoaded', loadOrderData);
+        function confirmOrder() {
+            const address = document.getElementById('address').value;
+            const slip = document.getElementById('slip').files[0];
+
+            if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
+            if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
+
+            // ส่วนส่งข้อมูลไป Firebase หรือแจ้งเตือนความสำเร็จ
+            alert('ได้รับคำสั่งซื้อของคุณแล้ว! ขอบคุณที่ใช้บริการ Cool Now');
+            localStorage.removeItem('coolNowCart');
+            window.location.href = 'order-success.html';
+        }
+
+        window.onload = renderCheckout;
     </script>
 </body>
 </html>
