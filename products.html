@@ -26,13 +26,13 @@
             <a href="index.html" class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></a>
             <div class="relative hidden md:block">
                 <input type="text" id="searchInput" placeholder="ค้นหากลิ่นที่ต้องการ..." 
-                       class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 transition-all">
+                       class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 focus:bg-white transition-all">
                 <span class="absolute left-3 top-2 text-gray-400">🔍</span>
             </div>
         </div>
         
         <div class="flex items-center gap-6 text-gray-600 text-sm">
-            <a href="index.html" class="hover:text-pink-500 transition">หน้าแรก</a>
+            <a href="index.html" class="hover:text-pink-500 transition font-medium">หน้าแรก</a>
             <a href="products.html" class="text-pink-500 font-bold border-b-2 border-pink-500">สินค้า</a>
             
             <div id="authSection" class="flex items-center gap-3 border-l pl-6">
@@ -85,7 +85,7 @@
                     <h1 class="text-3xl font-bold text-gray-800">Cooling Products</h1>
                     <p class="text-sm text-gray-400 mt-1">สดชื่นไปกับสเปรย์ฉีดตัวสูตรธรรมชาติ</p>
                 </div>
-                <p class="text-xs text-gray-400 font-medium">แสดงสินค้าทั้งหมด</p>
+                <p id="resultCount" class="text-xs text-gray-400 font-medium">กำลังโหลดสินค้า...</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8" id="productGrid">
@@ -105,7 +105,7 @@
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="text-2xl font-bold text-gray-800">100<span class="text-sm ml-1 text-pink-500">฿</span></span>
-                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Bubble Gum', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
+                                <button onclick="handleAddToCart(this, 'Body Spray - Bubble Gum', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
                             </div>
                         </div>
                     </div>
@@ -127,11 +127,16 @@
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="text-2xl font-bold text-gray-800">100<span class="text-sm ml-1 text-pink-500">฿</span></span>
-                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Lemon Mint', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
+                                <button onclick="handleAddToCart(this, 'Body Spray - Lemon Mint', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <div id="emptySearch" class="hidden flex-col items-center py-20 text-gray-300">
+                <span class="text-6xl mb-4">🔎</span>
+                <p>ไม่พบสินค้าที่คุณกำลังมองหา...</p>
             </div>
         </section>
     </main>
@@ -144,8 +149,7 @@
         </div>
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-8 border-t bg-gray-50">
-            <div id="cartSummary" class="mb-6 space-y-1">
-                </div>
+            <div id="cartSummary" class="mb-6 space-y-1"></div>
             <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 active-push transition hover:bg-pink-600">สั่งซื้อสินค้า</button>
         </div>
     </div>
@@ -165,17 +169,17 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        let currentUser = null;
+        window.currentUser = null;
 
         onAuthStateChanged(auth, (user) => {
-            currentUser = user;
+            window.currentUser = user;
             const authSection = document.getElementById('authSection');
             if(user) {
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
                 authSection.innerHTML = `
                     <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
                         <div class="text-right hidden sm:block">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName.split(' ')[0]}</p>
+                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
                             <p class="text-[9px] text-gray-400 font-bold uppercase">Account</p>
                         </div>
                         <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition">
@@ -192,7 +196,7 @@
             const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
             if(cart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
             
-            if(!currentUser) {
+            if(!window.currentUser) {
                 alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
                 window.location.href = 'auth.html';
             } else {
@@ -212,8 +216,15 @@
         function toggleCart(isOpen) {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartDrawerOverlay');
-            if (isOpen) { drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); }
-            else { drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('hidden'); }
+            if (isOpen) { 
+                drawer.classList.replace('drawer-closed', 'drawer-open'); 
+                overlay.classList.remove('hidden'); 
+                updateCartUI();
+            }
+            else { 
+                drawer.classList.replace('drawer-open', 'drawer-closed'); 
+                overlay.classList.add('hidden'); 
+            }
         }
 
         function handleAddToCart(btn, name, price) {
@@ -223,6 +234,7 @@
             const existing = cart.find(item => item.name === name);
             if (existing) existing.qty += qty;
             else cart.push({ name, price, img, qty });
+            
             card.querySelector('input').value = 1;
             saveAndRefresh();
             toggleCart(true);
@@ -248,11 +260,11 @@
                     <div class="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
                         <div class="flex-1">
-                            <p class="font-bold text-xs text-gray-800">${item.name}</p>
+                            <p class="font-bold text-xs text-gray-800 leading-tight">${item.name}</p>
                             <p class="text-pink-500 font-bold text-sm mt-1">${item.price} ฿</p>
                             <div class="flex items-center gap-3 mt-2">
                                 <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs hover:bg-gray-100">-</button>
-                                <span class="text-xs font-bold">${item.qty}</span>
+                                <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
                                 <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs hover:bg-gray-100">+</button>
                             </div>
                         </div>
@@ -260,43 +272,32 @@
                     </div>`;
             });
 
-            // คำนวณค่าส่ง: 1 ชิ้น 40 บาท, 2 ชิ้นขึ้นไปฟรี
-            const shippingFee = totalItems >= 2 ? 0 : (totalItems === 0 ? 0 : 40);
+            const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
             const finalTotal = subtotal + shippingFee;
-            const promoNotice = totalItems === 1 ? `<p class="text-pink-500 text-[10px] font-bold animate-pulse text-right">ซื้ออีก 1 ชิ้นเพื่อรับสิทธิ์ส่งฟรี!</p>` : '';
-
             countBadge.innerText = totalItems;
             
-            if (totalItems > 0) {
-                summaryDisplay.innerHTML = `
-                    <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
-                        <span>ราคาสินค้า</span>
-                        <span>${subtotal.toLocaleString()} ฿</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
-                        <span>ค่าจัดส่ง</span>
-                        <span class="${shippingFee === 0 ? 'text-green-500' : ''}">${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span>
-                    </div>
-                    ${promoNotice}
-                    <div class="flex justify-between items-end pt-2">
-                        <span class="text-gray-800 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
-                        <span class="text-2xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
-                    </div>
-                `;
-            } else {
-                summaryDisplay.innerHTML = `
-                    <div class="flex justify-between items-end">
-                        <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
-                        <span class="text-2xl font-bold text-pink-500">0 ฿</span>
-                    </div>
-                `;
-            }
+            summaryDisplay.innerHTML = `
+                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
+                    <span>ราคาสินค้า</span>
+                    <span>${subtotal.toLocaleString()} ฿</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
+                    <span>ค่าจัดส่ง</span>
+                    <span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">
+                        ${totalItems === 0 ? '0 ฿' : (shippingFee === 0 ? 'ฟรี' : '40 ฿')}
+                    </span>
+                </div>
+                <div class="flex justify-between items-end pt-2 border-t border-dashed mt-2">
+                    <span class="text-gray-800 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
+                    <span class="text-2xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
+                </div>
+            `;
         }
 
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
-        function removeFromCart(index) { if(confirm('ต้องการลบสินค้าออกจากตะกร้า?')) { cart.splice(index, 1); saveAndRefresh(); } }
+        function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
 
-        // --- Filter Logic ---
+        // --- Filter & URL Search Logic ---
         const searchInput = document.getElementById('searchInput');
         const checkboxes = document.querySelectorAll('.filter-checkbox');
         const cards = document.querySelectorAll('.product-card');
@@ -304,13 +305,31 @@
         function filterProducts() {
             const term = searchInput.value.toLowerCase();
             const activeFilters = Array.from(checkboxes).filter(i => i.checked).map(i => i.value);
+            let visibleCount = 0;
+
             cards.forEach(card => {
                 const name = card.dataset.name.toLowerCase();
                 const scent = card.dataset.scent;
                 const matchesSearch = name.includes(term);
                 const matchesFilter = activeFilters.includes('all') || activeFilters.includes(scent);
-                card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+                
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
             });
+
+            document.getElementById('resultCount').innerText = `พบสินค้า ${visibleCount} รายการ`;
+            document.getElementById('emptySearch').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        // รับค่าค้นหาจาก URL (กรณีมาจากหน้า index)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSearch = urlParams.get('search');
+        if (urlSearch) {
+            searchInput.value = urlSearch;
         }
 
         checkboxes.forEach(cb => {
@@ -326,7 +345,12 @@
         });
 
         searchInput.addEventListener('input', filterProducts);
-        window.addEventListener('DOMContentLoaded', updateCartUI);
+        
+        // เริ่มต้นการทำงาน
+        window.addEventListener('DOMContentLoaded', () => {
+            filterProducts();
+            updateCartUI();
+        });
     </script>
 </body>
 </html>
