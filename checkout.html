@@ -28,9 +28,9 @@
 
     <nav class="bg-white/80 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-gray-50">
         <div class="container mx-auto flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition group">
+            <a href="products.html" class="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition group">
                 <span class="group-hover:-translate-x-1 transition-transform">⬅️</span> 
-                <span class="text-sm font-medium">กลับหน้าหลัก</span>
+                <span class="text-sm font-medium">กลับไปเลือกสินค้า</span>
             </a>
             <div class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></div>
             <div id="userBadge" class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
@@ -92,13 +92,23 @@
                     <h2 class="text-xl font-bold mb-6">สรุปรายการสั่งซื้อ</h2>
                     <div id="checkout-items-list" class="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2"></div>
                     <div class="space-y-3 pt-6 border-t border-gray-50">
-                        <div class="flex justify-between text-gray-400 text-sm font-medium"><span>ยอดรวม</span><span id="subtotal">0 ฿</span></div>
-                        <div class="flex justify-between text-gray-400 text-sm font-medium"><span>ค่าจัดส่ง</span><span class="text-green-500">ฟรี</span></div>
-                        <div class="flex justify-between text-2xl font-bold pt-4 text-gray-800"><span>ยอดสุทธิ</span><span id="total" class="text-pink-500">0 ฿</span></div>
+                        <div class="flex justify-between text-gray-400 text-sm font-medium">
+                            <span>ราคาสินค้า</span>
+                            <span id="subtotal">0 ฿</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400 text-sm font-medium">
+                            <span>ค่าจัดส่ง</span>
+                            <span id="shippingFee" class="text-gray-800">0 ฿</span>
+                        </div>
+                        <div class="flex justify-between text-2xl font-bold pt-4 text-gray-800 border-t border-dashed mt-2">
+                            <span>ยอดสุทธิ</span>
+                            <span id="total" class="text-pink-500">0 ฿</span>
+                        </div>
                     </div>
                     <button id="submitBtn" onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg mt-8 shadow-lg shadow-pink-100 hover:bg-pink-600 transition-all active:scale-[0.98] flex items-center justify-center">
                         ยืนยันการสั่งซื้อ 🚀
                     </button>
+                    <p class="text-[10px] text-center text-gray-400 mt-4">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
                 </div>
             </div>
         </div>
@@ -166,6 +176,9 @@
                 totalAmount: total
             };
             sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+            
+            // ล้างตะกร้าเมื่อสั่งซื้อสำเร็จ
+            localStorage.removeItem('coolNowCart');
 
             setTimeout(() => {
                 window.location.href = 'order-success.html';
@@ -176,14 +189,16 @@
     <script>
         function loadOrderData() {
             const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if (cart.length === 0) { window.location.href = 'index.html'; return; }
+            if (cart.length === 0) { window.location.href = 'products.html'; return; }
 
             const listContainer = document.getElementById('checkout-items-list');
             let subtotal = 0;
+            let totalItems = 0;
             listContainer.innerHTML = '';
 
             cart.forEach(item => {
                 subtotal += (item.price * item.qty);
+                totalItems += item.qty;
                 listContainer.innerHTML += `
                     <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
                         <div class="flex items-center gap-4">
@@ -197,9 +212,25 @@
                     </div>`;
             });
 
+            // Logic: 1 ชิ้น 40฿, 2 ชิ้นขึ้นไป ส่งฟรี
+            const shippingFee = totalItems >= 2 ? 0 : 40;
+            const finalTotal = subtotal + shippingFee;
+
             document.getElementById('subtotal').innerText = subtotal.toLocaleString() + ' ฿';
-            document.getElementById('total').innerText = subtotal.toLocaleString() + ' ฿';
-            document.getElementById('paymentQR').src = `https://promptpay.io/1869900269561/${subtotal}.png`;
+            
+            const shippingDisplay = document.getElementById('shippingFee');
+            if(shippingFee === 0) {
+                shippingDisplay.innerText = 'ฟรี';
+                shippingDisplay.className = 'text-green-500 font-bold';
+            } else {
+                shippingDisplay.innerText = '40 ฿';
+                shippingDisplay.className = 'text-gray-800';
+            }
+
+            document.getElementById('total').innerText = finalTotal.toLocaleString() + ' ฿';
+            
+            // Generate PromptPay QR (Dynamic Amount)
+            document.getElementById('paymentQR').src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
         }
 
         document.getElementById('slipUpload').addEventListener('change', function(e) {
