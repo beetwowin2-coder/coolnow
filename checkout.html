@@ -159,7 +159,7 @@
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             finalTotal = subtotal + shippingFee;
 
-            // Generate PromptPay QR (เลขบัตรปชช/เบอร์โทร + ยอดเงิน)
+            // Generate PromptPay QR
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
@@ -210,23 +210,31 @@
             btn.disabled = true;
             btn.innerHTML = `<div class="spinner"></div> กำลังบันทึกข้อมูล...`;
 
-            // บันทึกที่อยู่ล่าสุดลง LocalStorage (เพื่อใช้ครั้งต่อไป)
-            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
+            // ดึง Email ผู้ใช้จากที่บันทึกไว้ตอน Login (เพื่อให้ประวัติไปโชว์ในหน้าแรกถูกคน)
+            const currentUserEmail = localStorage.getItem('lastLoggedInEmail') || 'guest';
 
-            // บันทึกประวัติลง LocalStorage
-            let history = JSON.parse(localStorage.getItem('coolNow_History')) || [];
+            // บันทึกประวัติลง LocalStorage (Key: orderHistory ตามที่หน้า index เรียกใช้)
+            let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+            if (!allHistory[currentUserEmail]) allHistory[currentUserEmail] = [];
+
             const orderID = "CN" + Math.floor(1000 + Math.random() * 9000);
+            const now = new Date();
             
             const newOrder = {
                 orderId: orderID,
                 total: finalTotal.toLocaleString(),
-                date: new Date().toLocaleDateString('th-TH'),
-                time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+                date: now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                items: cart.map(item => ({ name: item.name, qty: item.qty })) // เก็บรายชื่อสินค้าไว้แสดงใน Modal ประวัติ
             };
-            history.unshift(newOrder);
-            localStorage.setItem('coolNow_History', JSON.stringify(history.slice(0, 10))); // เก็บ 10 รายการล่าสุด
 
-            // เตรียมข้อมูลส่งไปหน้า Success (ใช้ SessionStorage เพราะข้อมูลรูปภาพมีขนาดใหญ่)
+            // เพิ่มออเดอร์ใหม่ไว้ด้านบนสุด
+            allHistory[currentUserEmail].unshift(newOrder);
+            localStorage.setItem('orderHistory', JSON.stringify(allHistory));
+
+            // บันทึกที่อยู่ล่าสุด
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
+
+            // เตรียมข้อมูลส่งไปหน้า Success
             const reader = new FileReader();
             reader.onload = function(e) {
                 const orderData = {
@@ -236,7 +244,7 @@
                     items: cart.map(i => `${i.name} (x${i.qty})`).join(', '),
                     totalAmount: finalTotal.toLocaleString() + ' ฿',
                     address: address,
-                    slipImage: e.target.result // Base64 String
+                    slipImage: e.target.result
                 };
                 sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
                 
@@ -249,7 +257,7 @@
             reader.readAsDataURL(slipFile);
         }
 
-        // 5. Drag & Drop ฟังก์ชัน
+        // 5. Drag & Drop
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
         uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -264,7 +272,6 @@
             }
         });
 
-        // เริ่มต้นทำงาน
         document.addEventListener('DOMContentLoaded', () => {
             renderCheckout();
             loadSavedAddress();
