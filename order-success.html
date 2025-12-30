@@ -16,6 +16,8 @@
             from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+        .step-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
+        .step-dot { position: relative; z-index: 10; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] min-h-screen flex items-center justify-center p-4">
@@ -32,43 +34,60 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-2 tracking-tight">สั่งซื้อสำเร็จ!</h1>
             <p class="text-gray-400 font-light mb-8 leading-relaxed">
                 ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold text-lg">ลูกค้า</span><br>
-                ระบบได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว
+                ระบบได้รับคำสั่งซื้อและหลักฐานชำระเงินแล้ว
             </p>
             
-            <div class="space-y-4 mb-8 text-left bg-gray-50 p-6 rounded-[2rem]">
-                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
-                    <span class="text-gray-400 font-medium">เลขที่รายการ</span>
-                    <span id="orderId" class="font-bold text-gray-800">#CN-XXXXXX</span>
+            <div class="mb-8">
+                <div class="flex justify-between relative mb-8 px-4">
+                    <div class="step-line"></div>
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-xs mb-2 shadow-lg shadow-green-100">1</div>
+                        <span class="text-[10px] font-bold text-gray-500">ชำระเงิน</span>
+                    </div>
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mb-2 shadow-lg shadow-blue-100">2</div>
+                        <span class="text-[10px] font-bold text-gray-800">รอตรวจสอบ</span>
+                    </div>
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-8 h-8 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xs mb-2">3</div>
+                        <span class="text-[10px] font-bold text-gray-400">จัดส่ง</span>
+                    </div>
                 </div>
-                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
-                    <span class="text-gray-400 font-medium">ยอดเงินที่ชำระ</span>
-                    <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
-                    <span class="text-gray-400 font-medium">สถานะ</span>
-                    <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">รอตรวจสอบสลิป</span>
-                </div>
-                <div class="flex justify-between items-center pt-2 text-sm">
-                    <span class="text-gray-400 font-medium">จัดส่งภายใน</span>
-                    <span class="font-bold text-gray-800">2-3 วันทำการ</span>
+
+                <div class="space-y-3 text-left bg-gray-50 p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-center py-1 text-sm">
+                        <span class="text-gray-400">เลขที่รายการ</span>
+                        <span id="orderId" class="font-bold text-gray-800 tracking-wider">#CN-XXXXXX</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 text-sm">
+                        <span class="text-gray-400">ยอดชำระทั้งสิ้น</span>
+                        <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
+                    </div>
+                    <div class="border-t border-gray-100 mt-2 pt-2">
+                        <p class="text-[11px] text-gray-400 text-center italic">*ระบบจะส่งยืนยันการจัดส่งผ่านอีเมล/SMS ของท่าน</p>
+                    </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
-                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95">
-                    กลับหน้าหลัก 🏠
+                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95 active-push">
+                    กลับไปช้อปต่อ 🛍️
                 </a>
-                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-4 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm">
-                    พิมพ์ใบเสร็จ 🖨️
+                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-4 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm flex items-center justify-center gap-2">
+                    บันทึกใบเสร็จ 📄
                 </button>
             </div>
         </div>
 
-        <p class="mt-8 text-xs text-gray-400">พบปัญหา? <a href="https://line.me/ti/p/@yourline" class="text-pink-500 font-bold underline">ติดต่อฝ่ายบริการลูกค้า</a></p>
+        <p class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-2">
+            <span>พบปัญหา?</span>
+            <a href="#" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมินทาง LINE</a>
+        </p>
     </div>
 
+    
+
     <script type="module">
-        // นำเข้า Firebase เพื่อเช็ค User กรณี Session หาย
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -85,10 +104,7 @@
         const auth = getAuth(app);
 
         function initSuccessPage() {
-            // 1. ดึงข้อมูลจาก sessionStorage
-            const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
-            
-            // 2. จัดการพลุกระดาษ (Confetti)
+            // 1. Confetti effect
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -96,20 +112,21 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
-            // 3. แสดงข้อมูล Order
+            // 2. Load Order Data
+            const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
+            
             if (lastOrder) {
                 document.getElementById('displayCustName').innerText = lastOrder.customerName;
-                document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
+                document.getElementById('displayTotal').innerText = lastOrder.totalAmount + ' ฿';
             } else {
-                // ถ้าไม่มีข้อมูลใน Session ให้ลองดึงจาก Firebase
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        document.getElementById('displayCustName').innerText = user.displayName.split(' ')[0];
+                        document.getElementById('displayCustName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า';
                     }
                 });
             }
 
-            // 4. สร้างเลข Order ID แบบสุ่ม
+            // 3. Generate Order ID
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -117,11 +134,9 @@
             const randomNum = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('orderId').innerText = `#CN-${dateStr}${randomNum}`;
 
-            // 5. ล้างตะกร้าและ Session (ทำหลังจากแสดงผล 2 วินาทีเพื่อความปลอดภัย)
-            setTimeout(() => {
-                localStorage.removeItem('coolNowCart');
-                sessionStorage.removeItem('lastOrder');
-            }, 2000);
+            // 4. Cleanup (Only Cart)
+            // เก็บ lastOrder ไว้เผื่อ user กด print ใน 5 นาทีแรก
+            localStorage.removeItem('coolNowCart');
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
