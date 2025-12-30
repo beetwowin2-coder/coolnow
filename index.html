@@ -66,7 +66,7 @@
                     <p class="text-xs md:text-sm text-pink-700 font-bold">โปรโมชั่น: ซื้อ 2 ชิ้นขึ้นไป ส่งฟรี!</p>
                 </div>
                 <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                    <button onclick="scrollToProducts()" class="bg-pink-500 text-white px-10 py-4 rounded-2xl hover:bg-pink-600 transition shadow-lg shadow-pink-100 font-bold active-push">เริ่มช้อปเลย 🛍️</button>
+                    <button onclick="location.href='products.html'" class="bg-pink-500 text-white px-10 py-4 rounded-2xl hover:bg-pink-600 transition shadow-lg shadow-pink-100 font-bold active-push">เริ่มช้อปเลย 🛍️</button>
                 </div>
             </div>
             <div class="w-full md:w-1/2 h-[350px] md:h-[550px] order-1 md:order-2 bg-pink-50/50 flex items-center justify-center p-8">
@@ -76,6 +76,7 @@
     </section>
 
     <section id="product-list" class="container mx-auto mt-16 md:mt-24 px-4 mb-24">
+        <h2 class="text-2xl font-bold mb-8 px-2">สินค้าแนะนำ</h2>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Bubble Gum', 100, 'images/bubble-gum.png')">
                 <div class="relative bg-pink-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
@@ -191,7 +192,6 @@
                 localStorage.setItem('lastLoggedInEmail', user.email);
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
                 
-                // ค้นหาชื่อเล่นจาก Local Storage ถ้ามี
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
                 const nameToShow = user.displayName ? user.displayName.split(' ')[0] : (savedData.address ? 'ลูกค้า' : 'สมาชิก');
 
@@ -295,8 +295,6 @@
 
         window.addEventListener('load', () => { updateCartUI(); });
 
-        function scrollToProducts() { document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); }
-        
         function openQtyModal(name, price, img) {
             tempItem = { name, price, img, qty: 1 };
             document.getElementById('modalName').innerText = name;
@@ -364,11 +362,12 @@
                     </div>`;
             });
 
+            // Logic: 2 items or more = Free Shipping
             const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
             countBadge.innerText = totalItems;
             summaryDisplay.innerHTML = `
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
-                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span>${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span></div>
+                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">${shippingFee === 0 && totalItems > 0 ? 'ฟรี' : (totalItems === 0 ? '0 ฿' : '40 ฿')}</span></div>
                 <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>
             `;
         }
