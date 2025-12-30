@@ -68,17 +68,7 @@
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" class="h-6 mx-auto mb-4" alt="PromptPay">
                     <img id="promptpayQR" src="" class="w-48 h-48 mx-auto rounded-lg shadow-sm" alt="QR Code">
                     <p class="mt-4 font-bold text-blue-900 text-lg">ณัฐฑิชา สัจจะวัฒนะ</p>
-                    <p class="text-gray-500 text-sm tracking-widest leading-none mt-1">186-990-026-9561</p>
-                </div>
-
-                <div class="mt-6 w-full max-w-[280px] bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-4">
-                    <div class="bg-white p-2 rounded-xl shadow-sm">
-                        <img src="images/bkk.png" class="w-6 h-6 object-contain" alt="BBL">
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter leading-none mb-1">ธนาคารกรุงเทพ (BBL)</p>
-                        <p class="text-blue-900 font-bold leading-none">930-0-272847</p>
-                    </div>
+                    <p class="text-gray-500 text-sm tracking-widest leading-none mt-1 uppercase">PromptPay QR</p>
                 </div>
             </div>
             
@@ -86,15 +76,11 @@
                 <p class="text-sm font-bold text-gray-700 ml-1">แนบหลักฐานการโอนเงิน</p>
                 <div id="uploadZone" 
                      class="relative group cursor-pointer border-2 border-dashed border-pink-200 bg-pink-50/30 rounded-[2rem] p-8 transition-all hover:border-pink-400 hover:bg-pink-50 flex flex-col items-center justify-center min-h-[220px]">
-                    
                     <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="previewSlip(this)">
-                    
                     <div id="uploadPrompt" class="text-center">
-                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">📸</div>
-                        <p class="font-bold text-pink-600 uppercase tracking-wide text-sm">คลิกเพื่ออัปโหลดสลิป</p>
-                        <p class="text-[10px] text-pink-400 mt-1 uppercase">JPG, PNG หรือลากไฟล์มาวาง</p>
+                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 text-3xl">📸</div>
+                        <p class="font-bold text-pink-600 text-sm uppercase">คลิกเพื่ออัปโหลดสลิป</p>
                     </div>
-
                     <div id="previewContainer" class="hidden w-full flex flex-col items-center">
                         <img id="slipPreview" src="#" class="max-h-64 rounded-xl shadow-md border-2 border-white mb-3">
                         <button type="button" onclick="resetUpload(event)" class="text-xs font-bold text-pink-500 hover:underline">เปลี่ยนรูปภาพ</button>
@@ -115,13 +101,22 @@
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let finalTotal = 0;
 
+        // ดึงที่อยู่ที่เคยบันทึกไว้อัตโนมัติ (NEW!)
+        function loadSavedAddress() {
+            const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
+            if (savedData) {
+                document.getElementById('phone').value = savedData.phone || '';
+                document.getElementById('address').value = savedData.address || '';
+            }
+        }
+
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
             const qrImg = document.getElementById('promptpayQR');
             
             if (cart.length === 0) {
-                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400 border border-dashed border-gray-200">ไม่มีสินค้าในตะกร้า</div>`;
+                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400">ตะกร้าว่างเปล่า</div>`;
                 return;
             }
 
@@ -134,49 +129,31 @@
                 totalItems += item.qty;
                 html += `
                     <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
-                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl p-2">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
                         <div class="flex-1">
-                            <h3 class="font-bold text-xs text-gray-800">${item.name}</h3>
-                            <p class="text-pink-500 font-bold text-sm">${item.price.toLocaleString()} ฿</p>
+                            <h3 class="font-bold text-xs">${item.name}</h3>
+                            <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
                         </div>
-                        <div class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border">
-                            <button onclick="updateQty(${index}, -1)" class="w-7 h-7 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold text-gray-500">-</button>
-                            <span class="font-bold text-xs min-w-[15px] text-center">${item.qty}</span>
-                            <button onclick="updateQty(${index}, 1)" class="w-7 h-7 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold text-gray-500">+</button>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xs">x ${item.qty}</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
 
             itemsContainer.innerHTML = html;
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             finalTotal = subtotal + shippingFee;
 
+            // สร้าง QR Code อัตโนมัติ
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
-                <div class="flex justify-between text-gray-500 text-sm">
-                    <span>ยอดรวม (${totalItems} ชิ้น)</span>
-                    <span>${subtotal.toLocaleString()} ฿</span>
-                </div>
-                <div class="flex justify-between text-gray-500 text-sm">
-                    <span>ค่าจัดส่ง</span>
-                    <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">
-                        ${shippingFee === 0 ? 'ฟรีค่าจัดส่ง ✨' : '40 ฿'}
-                    </span>
-                </div>
-                <div class="flex justify-between items-end pt-4 border-t border-dashed border-gray-200 mt-2">
-                    <span class="text-lg font-bold text-gray-800">ยอดที่ต้องชำระ</span>
+                <div class="flex justify-between text-gray-500 text-sm"><span>ยอดรวม</span><span>${subtotal.toLocaleString()} ฿</span></div>
+                <div class="flex justify-between text-gray-500 text-sm"><span>ค่าจัดส่ง</span><span>${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span></div>
+                <div class="flex justify-between items-end pt-4 border-t border-dashed mt-2">
+                    <span class="text-lg font-bold">ยอดที่ต้องชำระ</span>
                     <span class="text-3xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
-                </div>
-            `;
-        }
-
-        function updateQty(index, amount) {
-            cart[index].qty += amount;
-            if (cart[index].qty <= 0) cart.splice(index, 1);
-            localStorage.setItem('coolNowCart', JSON.stringify(cart));
-            renderCheckout();
+                </div>`;
         }
 
         function previewSlip(input) {
@@ -205,52 +182,49 @@
             const phone = document.getElementById('phone').value;
             const address = document.getElementById('address').value;
             const slipFile = document.getElementById('slipInput').files[0];
-            const phoneError = document.getElementById('phoneError');
             const btn = document.getElementById('confirmBtn');
 
-            // รีเซ็ต Error
-            phoneError.classList.add('hidden');
-
-            // ตรวจสอบความถูกต้อง
-            if (cart.length === 0) return alert('ตะกร้าว่างเปล่า');
-            
-            // Check Phone (ต้องเป็นตัวเลข 10 หลักและขึ้นต้นด้วย 0)
-            if (phone.length !== 10 || !phone.startsWith('0')) {
-                phoneError.classList.remove('hidden');
-                document.getElementById('phone').focus();
-                return;
-            }
-
+            if (phone.length !== 10) return alert('กรุณากรอกเบอร์โทรให้ครบ 10 หลัก');
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
-            if (!slipFile) return alert('กรุณาแนบสลิปการโอนเงิน');
+            if (!slipFile) return alert('กรุณาแนบสลิป');
 
             btn.disabled = true;
-            btn.innerHTML = "กำลังบันทึกข้อมูล...";
+            btn.innerHTML = "กำลังดำเนินการ...";
 
+            // 1. บันทึกข้อมูลลูกค้า (จดจำที่อยู่) - NEW!
+            const customerData = { phone, address };
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
+
+            // 2. บันทึกประวัติการสั่งซื้อ - NEW!
+            let history = JSON.parse(localStorage.getItem('coolNow_History')) || [];
+            const orderID = "CN" + Math.floor(1000 + Math.random() * 9000); // สุ่มเลข Order
+            history.unshift({
+                orderId: orderID,
+                total: finalTotal.toLocaleString(),
+                date: new Date().toLocaleDateString('th-TH')
+            });
+            localStorage.setItem('coolNow_History', JSON.stringify(history.slice(0, 5)));
+
+            // 3. เตรียมข้อมูลส่งไปหน้า Success
             const reader = new FileReader();
             reader.onload = function(e) {
-                const itemsSummary = cart.map(item => `- ${item.name} (${item.qty} ชิ้น)`).join('\n');
-                
                 const orderData = {
-                    customerName: address.split('\n')[0].trim(), // ดึงชื่อจากบรรทัดแรกของที่อยู่
+                    customerName: address.split('\n')[0],
                     phone: phone,
-                    items: itemsSummary,
+                    items: cart.map(i => `- ${i.name} (${i.qty})`).join('\n'),
                     totalAmount: finalTotal.toLocaleString() + ' ฿',
-                    address: `เบอร์โทร: ${phone}\nที่อยู่: ${address}`,
+                    address: address,
                     slipImage: e.target.result
                 };
-
                 sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
                 
-                setTimeout(() => {
-                    localStorage.removeItem('coolNowCart');
-                    window.location.href = 'order-success.html';
-                }, 1000);
+                localStorage.removeItem('coolNowCart'); // ล้างตะกร้า
+                window.location.href = 'order-success.html';
             };
             reader.readAsDataURL(slipFile);
         }
 
-        // Drag & Drop logic
+        // Drag & Drop
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
         uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -265,7 +239,10 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', renderCheckout);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCheckout();
+            loadSavedAddress(); // โหลดข้อมูลเก่าทันทีที่เข้าหน้า
+        });
     </script>
 </body>
 </html>
