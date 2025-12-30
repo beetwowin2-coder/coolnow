@@ -17,7 +17,6 @@
         .qr-container { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
         textarea::placeholder, input::placeholder { color: #cbd5e1; font-weight: 300; }
         
-        /* Loading Spinner */
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -110,11 +109,38 @@
         </div>
     </main>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
+            authDomain: "coolnow-1d8f4.firebaseapp.com",
+            projectId: "coolnow-1d8f4",
+            storageBucket: "coolnow-1d8f4.firebasestorage.app",
+            messagingSenderId: "857055916856",
+            appId: "1:857055916856:web:c32673482de318e04a07cd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        window.loggedInUserEmail = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.loggedInUserEmail = user.email;
+            } else {
+                alert("กรุณาเข้าสู่ระบบก่อนชำระเงินครับ");
+                window.location.href = 'index.html'; // หรือไปหน้า login ของคุณ
+            }
+        });
+    </script>
+
     <script>
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let finalTotal = 0;
 
-        // 1. โหลดข้อมูลที่อยู่เดิม
         function loadSavedAddress() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
             if (savedData) {
@@ -123,7 +149,6 @@
             }
         }
 
-        // 2. แสดงรายการสินค้าและคำนวณเงิน
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
@@ -159,7 +184,6 @@
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             finalTotal = subtotal + shippingFee;
 
-            // Generate PromptPay QR
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
@@ -171,7 +195,6 @@
                 </div>`;
         }
 
-        // 3. จัดการรูปภาพสลิป
         function previewSlip(input) {
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
@@ -194,26 +217,22 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // 4. กดยืนยันการสั่งซื้อ
         function confirmOrder(event) {
             const phone = document.getElementById('phone').value;
             const address = document.getElementById('address').value;
             const slipFile = document.getElementById('slipInput').files[0];
             const btn = document.getElementById('confirmBtn');
 
-            // Validation
             if (phone.length !== 10) return alert('กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก');
             if (!address.trim()) return alert('กรุณากรอกชื่อและที่อยู่สำหรับจัดส่ง');
             if (!slipFile) return alert('กรุณาแนบหลักฐานการโอนเงิน (สลิป)');
 
-            // แสดงสถานะ Loading
             btn.disabled = true;
             btn.innerHTML = `<div class="spinner"></div> กำลังบันทึกข้อมูล...`;
 
-            // ดึง Email ผู้ใช้จากที่บันทึกไว้ตอน Login (เพื่อให้ประวัติไปโชว์ในหน้าแรกถูกคน)
-            const currentUserEmail = localStorage.getItem('lastLoggedInEmail') || 'guest';
+            // ดึง Email จากตัวแปร Global ที่ Firebase set ไว้
+            const currentUserEmail = window.loggedInUserEmail || 'guest';
 
-            // บันทึกประวัติลง LocalStorage (Key: orderHistory ตามที่หน้า index เรียกใช้)
             let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
             if (!allHistory[currentUserEmail]) allHistory[currentUserEmail] = [];
 
@@ -224,17 +243,15 @@
                 orderId: orderID,
                 total: finalTotal.toLocaleString(),
                 date: now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-                items: cart.map(item => ({ name: item.name, qty: item.qty })) // เก็บรายชื่อสินค้าไว้แสดงใน Modal ประวัติ
+                items: cart.map(item => ({ name: item.name, qty: item.qty }))
             };
 
-            // เพิ่มออเดอร์ใหม่ไว้ด้านบนสุด
+            // บันทึกเข้าประวัติ
             allHistory[currentUserEmail].unshift(newOrder);
             localStorage.setItem('orderHistory', JSON.stringify(allHistory));
-
-            // บันทึกที่อยู่ล่าสุด
             localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
 
-            // เตรียมข้อมูลส่งไปหน้า Success
+            // เตรียมส่งข้อมูลไป Success Page
             const reader = new FileReader();
             reader.onload = function(e) {
                 const orderData = {
@@ -248,16 +265,13 @@
                 };
                 sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
                 
-                // ล้างตะกร้าสินค้า
                 localStorage.removeItem('coolNowCart');
-                
-                // ไปหน้าสำเร็จ
                 window.location.href = 'order-success.html';
             };
             reader.readAsDataURL(slipFile);
         }
 
-        // 5. Drag & Drop
+        // Drag & Drop
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
         uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
