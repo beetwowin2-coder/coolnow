@@ -24,8 +24,7 @@
     <main class="container mx-auto max-w-2xl px-4">
         <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
 
-        <div id="checkoutItems" class="space-y-4 mb-8">
-            </div>
+        <div id="checkoutItems" class="space-y-4 mb-8"></div>
 
         <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
             <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📍 ที่อยู่จัดส่ง</h2>
@@ -78,8 +77,7 @@
         </section>
 
         <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-pink-100/30 border border-pink-50">
-            <div class="space-y-3 mb-6" id="summaryArea">
-                </div>
+            <div class="space-y-3 mb-6" id="summaryArea"></div>
             <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
                 ยืนยันการสั่งซื้อ 🚀
             </button>
@@ -87,8 +85,8 @@
     </main>
 
     <script>
-        // โหลดข้อมูลตะกร้า
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
+        let finalTotal = 0; // ตัวแปรเก็บยอดรวมสุทธิ
 
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
@@ -125,12 +123,10 @@
                 `;
             });
 
-            // ค่าจัดส่ง: 2 ชิ้นขึ้นไปฟรี (ปกติ 40)
             const shippingFee = (totalItems >= 2) ? 0 : 40;
-            const total = subtotal + shippingFee;
+            finalTotal = subtotal + shippingFee; // เก็บค่าลงตัวแปร Global
 
-            // อัปเดต QR Code ให้ใส่ยอดเงินอัตโนมัติ
-            qrImg.src = `https://promptpay.io/1869900269561/${total}.png`;
+            qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
                 <div class="flex justify-between text-gray-400 font-medium">
@@ -145,12 +141,11 @@
                 </div>
                 <div class="flex justify-between items-end pt-4 border-t border-dashed border-gray-200 mt-2">
                     <span class="text-xl font-bold text-gray-800">ยอดสุทธิที่ต้องชำระ</span>
-                    <span class="text-3xl font-bold text-pink-500">${total.toLocaleString()} ฿</span>
+                    <span class="text-3xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
                 </div>
             `;
         }
 
-        // ฟังก์ชันบวก-ลบสินค้า
         function updateQty(index, amount) {
             cart[index].qty += amount;
             if (cart[index].qty <= 0) {
@@ -187,12 +182,18 @@
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
             if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
 
+            // บันทึกข้อมูลเพื่อส่งไปยังหน้า Success
+            const orderSummary = {
+                customerName: address.split('\n')[0].split(',')[0].trim() || 'คุณลูกค้า',
+                totalAmount: finalTotal.toLocaleString() + ' ฿'
+            };
+            sessionStorage.setItem('lastOrder', JSON.stringify(orderSummary));
+
             alert('ยืนยันการสั่งซื้อสำเร็จ! ระบบได้รับข้อมูลของคุณแล้ว');
             localStorage.removeItem('coolNowCart');
-            window.location.href = 'order-success.html'; // หน้าขอบคุณ
+            window.location.href = 'order-success.html'; 
         }
 
-        // เริ่มต้นการทำงาน
         window.onload = renderCheckout;
     </script>
 </body>
