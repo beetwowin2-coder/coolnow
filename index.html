@@ -18,7 +18,6 @@
         .hero-bg { background: radial-gradient(circle at top right, #fff5f8, #ffffff); }
         #cartItemsList::-webkit-scrollbar { width: 4px; }
         #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
-        /* สไตล์เพิ่มเติมสำหรับ Modal ประวัติ */
         .history-item { border-left: 4px solid #ec4899; }
     </style>
 </head>
@@ -41,9 +40,11 @@
                 <span>📜</span> <span class="hidden sm:inline">ประวัติการสั่งซื้อ</span>
             </button>
             <a href="products.html" class="hover:text-pink-500 font-medium transition">สินค้าทั้งหมด</a>
+            
             <div id="authSection" class="flex items-center gap-2">
                 <div class="spinner"></div>
             </div>
+
             <div class="flex items-center gap-3 md:gap-4 border-l pl-4 md:pl-6">
                 <div class="relative cursor-pointer hover:text-pink-500 transition-transform active-push" onclick="toggleCart(true)">
                     <span class="text-xl md:text-2xl">🛒</span>
@@ -95,6 +96,28 @@
         </div>
     </section>
 
+    <div id="addressModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">📍 จัดการที่อยู่จัดส่ง</h3>
+                <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">เบอร์โทรศัพท์</label>
+                    <input id="storePhone" type="tel" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" placeholder="08x-xxx-xxxx">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">ที่อยู่จัดส่งถาวร</label>
+                    <textarea id="storeAddress" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" rows="4" placeholder="บ้านเลขที่, ถนน, แขวง..."></textarea>
+                </div>
+                <button onclick="saveGlobalAddress()" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg active-push">
+                    บันทึกข้อมูลถาวร 💾
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="qtyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
@@ -125,8 +148,7 @@
                 <h3 class="text-xl font-bold flex items-center gap-2">📜 ประวัติการสั่งซื้อ</h3>
                 <button onclick="toggleModal('historyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
             </div>
-            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-                </div>
+            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2"></div>
         </div>
     </div>
 
@@ -168,12 +190,15 @@
             if(user) {
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
                 authSection.innerHTML = `
-                    <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
-                        <div class="text-right hidden sm:block">
+                    <div class="flex items-center gap-2 group">
+                        <div class="text-right hidden sm:block cursor-pointer" onclick="location.href='auth.html'">
                             <p class="text-[10px] font-bold text-gray-800 leading-none">${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
                             <p class="text-[9px] text-gray-400 font-bold">Account</p>
                         </div>
-                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300">
+                        <button onclick="openAddressModal()" class="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center border border-pink-100 hover:bg-pink-100 transition active-push" title="จัดการที่อยู่">
+                            📍
+                        </button>
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 cursor-pointer" onclick="location.href='auth.html'">
                             ${photo}
                         </div>
                     </div>`;
@@ -204,17 +229,32 @@
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
 
-        // ระบบประวัติการสั่งซื้อ (NEW!)
+        // --- ระบบจัดการที่อยู่ (Address Management) ---
+        function openAddressModal() {
+            const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
+            document.getElementById('storePhone').value = savedData.phone || '';
+            document.getElementById('storeAddress').value = savedData.address || '';
+            toggleModal('addressModal', true);
+        }
+
+        function saveGlobalAddress() {
+            const phone = document.getElementById('storePhone').value;
+            const address = document.getElementById('storeAddress').value;
+            if(!phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
+
+            const customerData = { phone, address, lastUpdated: new Date().toISOString() };
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
+            
+            alert("บันทึกที่อยู่เรียบร้อย! ระบบจะใช้ข้อมูลนี้ในการสั่งซื้อครั้งถัดไปครับ");
+            toggleModal('addressModal', false);
+        }
+
+        // --- ระบบประวัติการสั่งซื้อ ---
         function openHistoryModal() {
             const history = JSON.parse(localStorage.getItem('coolNow_History')) || [];
             const container = document.getElementById('historyList');
-            
             if (history.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 text-gray-400">
-                        <p class="text-4xl mb-2">🏜️</p>
-                        <p class="text-sm">คุณยังไม่มีประวัติการสั่งซื้อ</p>
-                    </div>`;
+                container.innerHTML = `<div class="text-center py-10 text-gray-400"><p class="text-4xl mb-2">🏜️</p><p class="text-sm">คุณยังไม่มีประวัติการสั่งซื้อ</p></div>`;
             } else {
                 container.innerHTML = history.map(order => `
                     <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500">
@@ -223,22 +263,14 @@
                             <span class="text-[10px] text-gray-400 font-bold">${order.date}</span>
                         </div>
                         <p class="text-pink-500 font-bold mt-1">${order.total} ฿</p>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             }
             toggleModal('historyModal', true);
         }
 
-        // ระบบจดจำที่อยู่เบื้องต้น (ดึงข้อมูลแสดงใน Console)
-        window.addEventListener('load', () => {
-            const savedAddress = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
-            if(savedAddress) {
-                console.log("Welcome back! ระบบจำที่อยู่ของคุณไว้แล้ว");
-            }
-            updateCartUI();
-        });
+        // --- ระบบตะกร้าสินค้า ---
+        window.addEventListener('load', () => { updateCartUI(); });
 
-        // --- ฟังก์ชันเดิมที่มีการใช้งานอยู่แล้ว ---
         function scrollToProducts() { document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); }
         
         function openQtyModal(name, price, img) {
@@ -320,7 +352,6 @@
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
         function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
 
-        // Setup Search
         const searchInput = document.getElementById('indexSearchInput');
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && searchInput.value.trim()) {
