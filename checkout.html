@@ -10,6 +10,7 @@
         body { font-family: 'Kanit', sans-serif; }
         .active-push:active { transform: scale(0.98); }
         #uploadZone.drag-over { border-color: #ec4899; background-color: #fdf2f8; }
+        .qr-container { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800 pb-20">
@@ -21,7 +22,7 @@
     </nav>
 
     <main class="container mx-auto max-w-2xl px-4">
-        <h1 class="text-3xl font-bold mb-8">สรุปรายการสั่งซื้อ</h1>
+        <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
 
         <div id="checkoutItems" class="space-y-4 mb-8">
             </div>
@@ -33,16 +34,24 @@
         </section>
 
         <section class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 mb-8">
-            <h2 class="text-lg font-bold mb-6">💰 ช่องทางชำระเงิน</h2>
+            <h2 class="text-lg font-bold mb-6">💰 ชำระเงินผ่าน พร้อมเพย์ / บัญชีธนาคาร</h2>
             
-            <div class="bg-blue-50 border border-blue-100 rounded-[2rem] p-6 flex items-start gap-4 mb-8">
-                <div class="bg-white p-3 rounded-2xl shadow-sm">
-                    <img src="https://www.bbl.co.th/images/logo.png" class="w-8 h-8 object-contain" alt="ธนาคารกรุงเทพ">
+            <div class="flex flex-col items-center mb-8">
+                <div class="bg-white p-6 rounded-3xl border-2 border-blue-500 qr-container text-center max-w-[280px]">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" class="h-6 mx-auto mb-4" alt="PromptPay">
+                    <img id="promptpayQR" src="https://promptpay.io/1869900269561.png" class="w-48 h-48 mx-auto rounded-lg" alt="QR Code">
+                    <p class="mt-4 font-bold text-blue-900 text-lg">ณัฐฑิชา สัจจะวัฒนะ</p>
+                    <p class="text-gray-500 text-sm">186-990-026-9561</p>
                 </div>
-                <div>
-                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">ธนาคารกรุงเทพ (BBL)</p>
-                    <p class="text-blue-900 font-bold text-lg leading-none mt-1">ณัฐฑิชา สัจจะวัฒนะ</p>
-                    <p class="text-blue-700 font-bold text-2xl tracking-tighter mt-2">930-0-272847</p>
+
+                <div class="mt-6 w-full bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-4">
+                    <div class="bg-white p-2 rounded-xl shadow-sm">
+                        <img src="https://www.bbl.co.th/images/logo.png" class="w-6 h-6 object-contain">
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">ธนาคารกรุงเทพ (BBL)</p>
+                        <p class="text-blue-900 font-bold leading-none">930-0-272847</p>
+                    </div>
                 </div>
             </div>
             
@@ -56,7 +65,7 @@
                     
                     <div id="uploadPrompt" class="text-center">
                         <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">📸</div>
-                        <p class="font-bold text-pink-600 uppercase tracking-tight">คลิกเพื่ออัพโหลดสลิป</p>
+                        <p class="font-bold text-pink-600 uppercase">คลิกเพื่ออัพโหลดสลิป</p>
                         <p class="text-xs text-pink-400 mt-1">หรือลากไฟล์รูปภาพมาวางที่นี่</p>
                     </div>
 
@@ -78,49 +87,54 @@
     </main>
 
     <script>
-        // ดึงข้อมูลจากตะกร้าที่มาจากหน้าแรก
+        // โหลดข้อมูลตะกร้า
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
 
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
-            let subtotal = 0;
-            let totalItems = 0;
-
+            const qrImg = document.getElementById('promptpayQR');
+            
             if (cart.length === 0) {
-                itemsContainer.innerHTML = `<div class="bg-white p-8 rounded-[2rem] text-center text-gray-400 border border-dashed">ไม่มีสินค้าในตะกร้า</div>`;
+                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400 border border-dashed border-gray-200">ไม่มีสินค้าในตะกร้า</div>`;
+                summaryArea.innerHTML = `<p class="text-center text-gray-400 font-bold">ยอดเป็น 0 บาท</p>`;
                 return;
             }
 
+            let subtotal = 0;
+            let totalItems = 0;
             itemsContainer.innerHTML = '';
+
             cart.forEach((item, index) => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
                 
-                // รายละเอียดสินค้าพร้อม Shopping Control (+/-)
                 itemsContainer.innerHTML += `
                     <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
-                        <img src="${item.img}" class="w-16 h-16 md:w-20 md:h-20 object-contain bg-gray-50 rounded-2xl">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-2xl">
                         <div class="flex-1">
-                            <h3 class="font-bold text-sm md:text-base leading-tight text-gray-800">${item.name}</h3>
+                            <h3 class="font-bold text-sm leading-tight text-gray-800">${item.name}</h3>
                             <p class="text-pink-500 font-bold mt-1">${item.price.toLocaleString()} ฿</p>
                         </div>
                         <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
                             <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">-</button>
-                            <span class="font-bold w-4 text-center text-sm">${item.qty}</span>
+                            <span class="font-bold min-w-[20px] text-center text-sm">${item.qty}</span>
                             <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">+</button>
                         </div>
                     </div>
                 `;
             });
 
-            // ค่าจัดส่งตามเงื่อนไขหน้าแรก: 2 ชิ้นขึ้นไปฟรี (ปกติ 40)
+            // ค่าจัดส่ง: 2 ชิ้นขึ้นไปฟรี (ปกติ 40)
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             const total = subtotal + shippingFee;
 
+            // อัปเดต QR Code ให้ใส่ยอดเงินอัตโนมัติ
+            qrImg.src = `https://promptpay.io/1869900269561/${total}.png`;
+
             summaryArea.innerHTML = `
                 <div class="flex justify-between text-gray-400 font-medium">
-                    <span>ราคาสินค้ารวม</span>
+                    <span>ราคาสินค้ารวม (${totalItems} ชิ้น)</span>
                     <span>${subtotal.toLocaleString()} ฿</span>
                 </div>
                 <div class="flex justify-between text-gray-400 font-medium">
@@ -129,18 +143,18 @@
                         ${shippingFee === 0 ? 'ฟรีค่าจัดส่ง' : '40 ฿'}
                     </span>
                 </div>
-                <div class="flex justify-between items-end pt-4 border-t border-dashed mt-2">
-                    <span class="text-xl font-bold text-gray-800">ยอดสุทธิ</span>
+                <div class="flex justify-between items-end pt-4 border-t border-dashed border-gray-200 mt-2">
+                    <span class="text-xl font-bold text-gray-800">ยอดสุทธิที่ต้องชำระ</span>
                     <span class="text-3xl font-bold text-pink-500">${total.toLocaleString()} ฿</span>
                 </div>
             `;
         }
 
-        // ฟังก์ชันปรับจำนวนสินค้า
-        function updateQty(index, amt) {
-            cart[index].qty += amt;
+        // ฟังก์ชันบวก-ลบสินค้า
+        function updateQty(index, amount) {
+            cart[index].qty += amount;
             if (cart[index].qty <= 0) {
-                if(confirm('ต้องการลบสินค้านี้ออกใช่หรือไม่?')) {
+                if(confirm('ต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?')) {
                     cart.splice(index, 1);
                 } else {
                     cart[index].qty = 1;
@@ -150,7 +164,6 @@
             renderCheckout();
         }
 
-        // แสดงตัวอย่างสลิป
         function previewSlip(input) {
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
@@ -166,19 +179,20 @@
             }
         }
 
-        // ยืนยันการสั่งซื้อ
         function confirmOrder() {
             const address = document.getElementById('address').value;
             const slip = document.getElementById('slipInput').files[0];
 
+            if (cart.length === 0) return alert('ไม่มีสินค้าในตะกร้า');
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
             if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
 
             alert('ยืนยันการสั่งซื้อสำเร็จ! ระบบได้รับข้อมูลของคุณแล้ว');
             localStorage.removeItem('coolNowCart');
-            window.location.href = 'order-success.html';
+            window.location.href = 'order-success.html'; // หน้าขอบคุณ
         }
 
+        // เริ่มต้นการทำงาน
         window.onload = renderCheckout;
     </script>
 </body>
