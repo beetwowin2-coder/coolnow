@@ -148,8 +148,7 @@
                 <h3 class="text-xl font-bold flex items-center gap-2">📜 ประวัติการสั่งซื้อ</h3>
                 <button onclick="toggleModal('historyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
             </div>
-            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-                </div>
+            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2"></div>
         </div>
     </div>
 
@@ -189,14 +188,17 @@
             window.currentUser = user;
             const authSection = document.getElementById('authSection');
             if(user) {
-                // เก็บเมล์ผู้ใช้ไว้เพื่อให้หน้า Checkout และ History ทำงานถูกต้อง
                 localStorage.setItem('lastLoggedInEmail', user.email);
-                
                 const photo = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
+                
+                // ค้นหาชื่อเล่นจาก Local Storage ถ้ามี
+                const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
+                const nameToShow = user.displayName ? user.displayName.split(' ')[0] : (savedData.address ? 'ลูกค้า' : 'สมาชิก');
+
                 authSection.innerHTML = `
                     <div class="flex items-center gap-2 group">
                         <div class="text-right hidden sm:block cursor-pointer" onclick="location.href='auth.html'">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none">${user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า'}</p>
+                            <p class="text-[10px] font-bold text-gray-800 leading-none">${nameToShow}</p>
                             <p class="text-[9px] text-gray-400 font-bold">Account</p>
                         </div>
                         <button onclick="openAddressModal()" class="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center border border-pink-100 hover:bg-pink-100 transition active-push" title="จัดการที่อยู่">
@@ -207,6 +209,7 @@
                         </div>
                     </div>`;
             } else {
+                localStorage.removeItem('lastLoggedInEmail');
                 authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">Login</a>`;
             }
         });
@@ -244,7 +247,8 @@
             const phone = document.getElementById('storePhone').value;
             const address = document.getElementById('storeAddress').value;
             if(!phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
-            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
+            const customerData = { phone, address, lastUpdated: new Date().toISOString() };
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
             alert("บันทึกที่อยู่เรียบร้อย!");
             toggleModal('addressModal', false);
         }
@@ -252,7 +256,7 @@
         function openHistoryModal() {
             const container = document.getElementById('historyList');
             if (!window.currentUser) {
-                container.innerHTML = `<div class="text-center py-10"><p>กรุณาล็อคอินเพื่อดูประวัติ</p><a href="auth.html" class="text-pink-500 font-bold">ไปหน้าล็อคอิน</a></div>`;
+                container.innerHTML = `<div class="text-center py-10"><p class="font-bold">กรุณาล็อคอินเพื่อดูประวัติ</p><br><a href="auth.html" class="bg-pink-500 text-white px-6 py-2 rounded-full text-xs">Login</a></div>`;
                 toggleModal('historyModal', true);
                 return;
             }
@@ -261,22 +265,35 @@
             const userOrders = allHistory[window.currentUser.email] || [];
 
             if (userOrders.length === 0) {
-                container.innerHTML = `<p class="text-center py-10 text-gray-400">ยังไม่มีประวัติการสั่งซื้อ</p>`;
+                container.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">ยังไม่มีประวัติการสั่งซื้อ</p>`;
             } else {
                 container.innerHTML = userOrders.map(order => `
-                    <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm mb-3">
-                        <div class="flex justify-between">
-                            <span class="font-bold text-sm">#${order.orderId}</span>
-                            <span class="text-[10px] text-gray-400">${order.date}</span>
+                    <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500 mb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">#${order.orderId}</p>
+                                <p class="text-[10px] text-gray-400 font-bold">${order.date}</p>
+                            </div>
+                            <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">สำเร็จ</span>
                         </div>
-                        <div class="text-[11px] text-gray-600 my-2">
-                            ${order.items ? order.items.map(i => `<div>- ${i.name} (x${i.qty})</div>`).join('') : ''}
+                        <div class="my-3 space-y-1 border-y border-gray-100 py-2">
+                            ${order.items ? order.items.map(item => `
+                                <div class="flex justify-between text-[11px] text-gray-600">
+                                    <span>• ${item.name}</span>
+                                    <span class="font-bold">x${item.qty}</span>
+                                </div>
+                            `).join('') : ''}
                         </div>
-                        <div class="text-right text-pink-500 font-bold">${order.total} ฿</div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-[10px] text-gray-400 font-bold">ยอดรวม</span>
+                            <p class="text-pink-500 font-bold text-base">${order.total} ฿</p>
+                        </div>
                     </div>`).join('');
             }
             toggleModal('historyModal', true);
         }
+
+        window.addEventListener('load', () => { updateCartUI(); });
 
         function scrollToProducts() { document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' }); }
         
@@ -325,6 +342,7 @@
             const countBadge = document.getElementById('cart-count');
             const summaryDisplay = document.getElementById('cartSummary');
             let subtotal = 0, totalItems = 0;
+            
             list.innerHTML = cart.length === 0 ? `<div class="text-center py-20 text-gray-300">🛒 ตะกร้าว่างเปล่า</div>` : '';
 
             cart.forEach((item, index) => {
@@ -332,9 +350,9 @@
                 totalItems += item.qty;
                 list.innerHTML += `
                     <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                        <img src="${item.img}" class="w-16 h-16 object-contain">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
                         <div class="flex-1">
-                            <p class="font-bold text-xs">${item.name}</p>
+                            <p class="font-bold text-xs truncate">${item.name}</p>
                             <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
                             <div class="flex items-center gap-3 mt-2">
                                 <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs">-</button>
@@ -342,7 +360,7 @@
                                 <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs">+</button>
                             </div>
                         </div>
-                        <button onclick="removeFromCart(${index})">🗑️</button>
+                        <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500">🗑️</button>
                     </div>`;
             });
 
@@ -351,7 +369,8 @@
             summaryDisplay.innerHTML = `
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span>${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span></div>
-                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>`;
+                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>
+            `;
         }
 
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
@@ -363,8 +382,6 @@
                 window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
             }
         });
-
-        window.addEventListener('load', updateCartUI);
     </script>
 </body>
 </html>
