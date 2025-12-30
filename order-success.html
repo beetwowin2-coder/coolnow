@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-3 text-left bg-gray-50 p-6 rounded-[2rem]">
+                <div class="space-y-3 text-left bg-gray-50 p-6 rounded-[2rem] relative overflow-hidden">
                     <div class="flex justify-between items-center py-1 text-sm">
                         <span class="text-gray-400">เลขที่รายการ</span>
                         <span id="orderId" class="font-bold text-gray-800 tracking-wider">#CN-XXXXXX</span>
@@ -63,8 +63,15 @@
                         <span class="text-gray-400">ยอดชำระทั้งสิ้น</span>
                         <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
                     </div>
-                    <div class="border-t border-gray-100 mt-2 pt-2">
-                        <p class="text-[11px] text-gray-400 text-center italic">*โปรดแคปหน้าจอนี้ และสลิปโอนเงิน กดปุ่มส่ง LINE เพื่อยืนยัน</p>
+
+                    <div class="mt-4 pt-4 border-t border-dashed border-gray-200 flex flex-col items-center gap-3">
+                        <p class="text-[12px] font-bold text-gray-600 uppercase tracking-wide">เพิ่มเพื่อนเพื่อส่งหลักฐาน</p>
+                        <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+                            <img src="https://qr-official.line.me/gs/M_030jlujn_GW.png?oat_content=qr" alt="LINE QR Code" class="w-32 h-32 object-contain">
+                        </div>
+                        <p class="text-[11px] text-gray-400 text-center italic leading-tight">
+                            *โปรดแคปหน้าจอนี้พร้อมสลิปโอนเงิน<br>และสแกนส่งมาที่ LINE ของเรา
+                        </p>
                     </div>
                 </div>
             </div>
@@ -138,13 +145,11 @@
             localStorage.removeItem('coolNowCart');
         }
 
-        // ฟังก์ชันส่งข้อมูลเข้า LINE โดยใช้ลิงก์ตรง
         window.sendLineNotify = function() {
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             const orderId = document.getElementById('orderId').innerText;
             
             if (!lastOrder) {
-                // หากไม่มีข้อมูลใน session ให้ส่งไปที่หน้า LINE เปล่าๆ
                 window.location.href = "https://lin.ee/RhhUwXf";
                 return;
             }
@@ -158,19 +163,14 @@
                           `--------------------------\n` +
                           `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}`;
 
-            // ใช้การส่งข้อความผ่าน URL Scheme ของ LINE ไปยังที่อยู่ที่ระบุ
-            // หมายเหตุ: ลิงก์ lin.ee เป็นลิงก์เพิ่มเพื่อน แต่เราสามารถส่งข้อความไปหา OA ได้
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
-            
-            // นำทางลูกค้าไปยัง LINE เพื่อให้เขากดส่งข้อความ
             window.location.href = lineUrl;
 
-            // หลังจากส่งไป LINE สักพัก หากลูกค้ากลับมาหน้านี้ จะแสดง Alert แนะนำให้กดเพิ่มเพื่อนถ้ายังไม่ได้ทำ
             setTimeout(() => {
-                if(confirm("กรุณากด 'ส่ง' ข้อความในแอป LINE และอย่าลืมเพิ่มเพื่อนที่ https://lin.ee/RhhUwXf เพื่อรับการแจ้งเตือนเลขพัสดุ")) {
+                if(confirm("กรุณากด 'ส่ง' ข้อความในแอป LINE และอย่าลืมเพิ่มเพื่อนเพื่อรับการแจ้งเตือนเลขพัสดุ")) {
                     window.location.href = "https://lin.ee/RhhUwXf";
                 }
-            }, 2000);
+            }, 2500);
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
