@@ -64,7 +64,7 @@
                         <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
                     </div>
                     <div class="border-t border-gray-100 mt-2 pt-2">
-                        <p class="text-[11px] text-gray-400 text-center italic">*โปรดแคปหน้าจอนี้ หรือกดปุ่มส่ง LINE เพื่อยืนยัน</p>
+                        <p class="text-[11px] text-gray-400 text-center italic">*โปรดแคปหน้าจอนี้ และสลิปโอนเงิน กดปุ่มส่ง LINE เพื่อยืนยัน</p>
                     </div>
                 </div>
             </div>
@@ -95,7 +95,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Firebase Config (คงไว้ตามเดิม)
         const firebaseConfig = {
             apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
             authDomain: "coolnow-1d8f4.firebaseapp.com",
@@ -108,7 +107,6 @@
         const auth = getAuth(app);
 
         function initSuccessPage() {
-            // 1. Confetti effect
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -116,7 +114,6 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
-            // 2. Load Order Data จาก sessionStorage (ที่ส่งมาจากหน้า checkout)
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
             if (lastOrder) {
@@ -130,7 +127,6 @@
                 });
             }
 
-            // 3. Generate Order ID
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -139,21 +135,20 @@
             const finalOrderID = `#CN-${dateStr}${randomNum}`;
             document.getElementById('orderId').innerText = finalOrderID;
 
-            // 4. ล้างตะกร้า
             localStorage.removeItem('coolNowCart');
         }
 
-        // ฟังก์ชันส่งข้อมูลเข้า LINE
+        // ฟังก์ชันส่งข้อมูลเข้า LINE โดยใช้ลิงก์ตรง
         window.sendLineNotify = function() {
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             const orderId = document.getElementById('orderId').innerText;
             
             if (!lastOrder) {
-                alert('ไม่พบข้อมูลการสั่งซื้อ กรุณาติดต่อแอดมิน');
+                // หากไม่มีข้อมูลใน session ให้ส่งไปที่หน้า LINE เปล่าๆ
+                window.location.href = "https://lin.ee/RhhUwXf";
                 return;
             }
 
-            // จัดรูปแบบข้อความ
             const message = `✨ แจ้งชำระเงินใหม่ ✨\n` +
                           `--------------------------\n` +
                           `เลขที่สั่งซื้อ: ${orderId}\n` +
@@ -163,12 +158,19 @@
                           `--------------------------\n` +
                           `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}`;
 
-            // ลิงก์ไปยัง LINE OA (เปลี่ยน @yourid เป็น ID ร้านคุณ)
-            const lineOA_ID = "@RhhUwXf"; 
-            const encodedMsg = encodeURIComponent(message);
-            const lineUrl = `https://line.me/R/oaMessage/${lineOA_ID}/?${encodedMsg}`;
-
+            // ใช้การส่งข้อความผ่าน URL Scheme ของ LINE ไปยังที่อยู่ที่ระบุ
+            // หมายเหตุ: ลิงก์ lin.ee เป็นลิงก์เพิ่มเพื่อน แต่เราสามารถส่งข้อความไปหา OA ได้
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+            
+            // นำทางลูกค้าไปยัง LINE เพื่อให้เขากดส่งข้อความ
             window.location.href = lineUrl;
+
+            // หลังจากส่งไป LINE สักพัก หากลูกค้ากลับมาหน้านี้ จะแสดง Alert แนะนำให้กดเพิ่มเพื่อนถ้ายังไม่ได้ทำ
+            setTimeout(() => {
+                if(confirm("กรุณากด 'ส่ง' ข้อความในแอป LINE และอย่าลืมเพิ่มเพื่อนที่ https://lin.ee/RhhUwXf เพื่อรับการแจ้งเตือนเลขพัสดุ")) {
+                    window.location.href = "https://lin.ee/RhhUwXf";
+                }
+            }, 2000);
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
