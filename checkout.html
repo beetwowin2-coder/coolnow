@@ -15,24 +15,14 @@
             transform: scale(1.02);
         }
         .qr-container { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
-        textarea::placeholder { color: #cbd5e1; font-weight: 300; }
-        /* สไตล์เสริมสำหรับสถานะ Loading */
-        .loading-shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        textarea::placeholder, input::placeholder { color: #cbd5e1; font-weight: 300; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800 pb-20">
 
     <nav class="p-6">
         <a href="index.html" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 transition group">
-            <span class="group-hover:-translate-x-1 transition-transform">←</span> กลับไปหน้าหลัก
+            <span class="group-hover:-translate-x-1 transition-transform">←</span> กลับไปเลือกสินค้า
         </a>
     </nav>
 
@@ -43,11 +33,29 @@
 
         <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
             <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                <span class="text-xl">📍</span> ที่อยู่จัดส่ง
+                <span class="text-xl">📍</span> ข้อมูลการจัดส่ง
             </h2>
-            <textarea id="address" 
-                      placeholder="ระบุชื่อ-นามสกุล, เบอร์โทรศัพท์ และที่อยู่สำหรับจัดส่งสินค้า..." 
-                      class="w-full h-32 bg-gray-50 rounded-2xl p-4 focus:outline-none border border-transparent focus:border-pink-200 focus:bg-white transition-all resize-none"></textarea>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-bold text-gray-600 mb-1 block ml-1">เบอร์โทรศัพท์ติดต่อ</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">📞</span>
+                        <input type="tel" id="phone" maxlength="10"
+                               placeholder="เช่น 0812345678"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               class="w-full bg-gray-50 rounded-2xl py-4 pl-12 pr-4 focus:outline-none border border-transparent focus:border-pink-200 focus:bg-white transition-all text-lg tracking-widest">
+                    </div>
+                    <p id="phoneError" class="text-pink-500 text-xs mt-2 ml-1 hidden">! กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)</p>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-gray-600 mb-1 block ml-1">ชื่อ-นามสกุล และที่อยู่โดยละเอียด</label>
+                    <textarea id="address" 
+                            placeholder="ระบุชื่อ และที่อยู่สำหรับจัดส่ง (บ้านเลขที่, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์)" 
+                            class="w-full h-32 bg-gray-50 rounded-2xl p-4 focus:outline-none border border-transparent focus:border-pink-200 focus:bg-white transition-all resize-none"></textarea>
+                </div>
+            </div>
         </section>
 
         <section class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 mb-8">
@@ -83,8 +91,8 @@
                     
                     <div id="uploadPrompt" class="text-center">
                         <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">📸</div>
-                        <p class="font-bold text-pink-600 uppercase tracking-wide">คลิกเพื่ออัปโหลดสลิป</p>
-                        <p class="text-xs text-pink-400 mt-1">หรือลากไฟล์รูปภาพมาวางที่นี่</p>
+                        <p class="font-bold text-pink-600 uppercase tracking-wide text-sm">คลิกเพื่ออัปโหลดสลิป</p>
+                        <p class="text-[10px] text-pink-400 mt-1 uppercase">JPG, PNG หรือลากไฟล์มาวาง</p>
                     </div>
 
                     <div id="previewContainer" class="hidden w-full flex flex-col items-center">
@@ -113,8 +121,7 @@
             const qrImg = document.getElementById('promptpayQR');
             
             if (cart.length === 0) {
-                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400 border border-dashed border-gray-200 font-light italic">ไม่มีสินค้าในตะกร้าของคุณ</div>`;
-                summaryArea.innerHTML = `<p class="text-center text-gray-400 font-bold">ยอดเป็น 0 บาท</p>`;
+                itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400 border border-dashed border-gray-200">ไม่มีสินค้าในตะกร้า</div>`;
                 return;
             }
 
@@ -125,18 +132,17 @@
             cart.forEach((item, index) => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
-                
                 html += `
-                    <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-                        <img src="${item.img}" class="w-20 h-20 object-contain bg-gray-50 rounded-2xl p-2" loading="lazy">
+                    <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl p-2">
                         <div class="flex-1">
-                            <h3 class="font-bold text-sm leading-tight text-gray-800">${item.name}</h3>
-                            <p class="text-pink-500 font-bold mt-1">${item.price.toLocaleString()} ฿</p>
+                            <h3 class="font-bold text-xs text-gray-800">${item.name}</h3>
+                            <p class="text-pink-500 font-bold text-sm">${item.price.toLocaleString()} ฿</p>
                         </div>
-                        <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                            <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push text-gray-500 hover:text-pink-500">-</button>
-                            <span class="font-bold min-w-[20px] text-center text-sm">${item.qty}</span>
-                            <button onclick="updateQty(${index}, 1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push text-gray-500 hover:text-pink-500">+</button>
+                        <div class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border">
+                            <button onclick="updateQty(${index}, -1)" class="w-7 h-7 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold text-gray-500">-</button>
+                            <span class="font-bold text-xs min-w-[15px] text-center">${item.qty}</span>
+                            <button onclick="updateQty(${index}, 1)" class="w-7 h-7 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold text-gray-500">+</button>
                         </div>
                     </div>
                 `;
@@ -149,18 +155,18 @@
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
-                <div class="flex justify-between text-gray-500 font-medium">
-                    <span>ราคาสินค้ารวม (${totalItems} ชิ้น)</span>
+                <div class="flex justify-between text-gray-500 text-sm">
+                    <span>ยอดรวม (${totalItems} ชิ้น)</span>
                     <span>${subtotal.toLocaleString()} ฿</span>
                 </div>
-                <div class="flex justify-between text-gray-500 font-medium">
+                <div class="flex justify-between text-gray-500 text-sm">
                     <span>ค่าจัดส่ง</span>
                     <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">
                         ${shippingFee === 0 ? 'ฟรีค่าจัดส่ง ✨' : '40 ฿'}
                     </span>
                 </div>
                 <div class="flex justify-between items-end pt-4 border-t border-dashed border-gray-200 mt-2">
-                    <span class="text-xl font-bold text-gray-800">ยอดสุทธิที่ต้องชำระ</span>
+                    <span class="text-lg font-bold text-gray-800">ยอดที่ต้องชำระ</span>
                     <span class="text-3xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
                 </div>
             `;
@@ -168,13 +174,7 @@
 
         function updateQty(index, amount) {
             cart[index].qty += amount;
-            if (cart[index].qty <= 0) {
-                if(confirm('ต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?')) {
-                    cart.splice(index, 1);
-                } else {
-                    cart[index].qty = 1;
-                }
-            }
+            if (cart[index].qty <= 0) cart.splice(index, 1);
             localStorage.setItem('coolNowCart', JSON.stringify(cart));
             renderCheckout();
         }
@@ -183,10 +183,9 @@
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
             const preview = document.getElementById('slipPreview');
-            
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     preview.src = e.target.result;
                     prompt.classList.add('hidden');
                     container.classList.remove('hidden');
@@ -202,6 +201,56 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
+        function confirmOrder(event) {
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const slipFile = document.getElementById('slipInput').files[0];
+            const phoneError = document.getElementById('phoneError');
+            const btn = document.getElementById('confirmBtn');
+
+            // รีเซ็ต Error
+            phoneError.classList.add('hidden');
+
+            // ตรวจสอบความถูกต้อง
+            if (cart.length === 0) return alert('ตะกร้าว่างเปล่า');
+            
+            // Check Phone (ต้องเป็นตัวเลข 10 หลักและขึ้นต้นด้วย 0)
+            if (phone.length !== 10 || !phone.startsWith('0')) {
+                phoneError.classList.remove('hidden');
+                document.getElementById('phone').focus();
+                return;
+            }
+
+            if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
+            if (!slipFile) return alert('กรุณาแนบสลิปการโอนเงิน');
+
+            btn.disabled = true;
+            btn.innerHTML = "กำลังบันทึกข้อมูล...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const itemsSummary = cart.map(item => `- ${item.name} (${item.qty} ชิ้น)`).join('\n');
+                
+                const orderData = {
+                    customerName: address.split('\n')[0].trim(), // ดึงชื่อจากบรรทัดแรกของที่อยู่
+                    phone: phone,
+                    items: itemsSummary,
+                    totalAmount: finalTotal.toLocaleString() + ' ฿',
+                    address: `เบอร์โทร: ${phone}\nที่อยู่: ${address}`,
+                    slipImage: e.target.result
+                };
+
+                sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+                
+                setTimeout(() => {
+                    localStorage.removeItem('coolNowCart');
+                    window.location.href = 'order-success.html';
+                }, 1000);
+            };
+            reader.readAsDataURL(slipFile);
+        }
+
+        // Drag & Drop logic
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
         uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -215,49 +264,6 @@
                 previewSlip(document.getElementById('slipInput'));
             }
         });
-
-        // ฟังก์ชันยืนยันการสั่งซื้อที่ปรับปรุงใหม่ (รองรับการส่งรูปสลิป)
-        function confirmOrder(event) {
-            const address = document.getElementById('address').value;
-            const slipFile = document.getElementById('slipInput').files[0];
-            const btn = document.getElementById('confirmBtn');
-
-            if (cart.length === 0) return alert('กรุณาเลือกสินค้าก่อนสั่งซื้อ');
-            if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่งให้ครบถ้วน');
-            if (!slipFile) return alert('กรุณาแนบรูปภาพสลิปการโอนเงิน');
-
-            btn.innerHTML = `
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                กำลังประมวลผลข้อมูล...
-            `;
-            btn.disabled = true;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const itemsSummary = cart.map(item => `- ${item.name} (${item.qty} ชิ้น)`).join('\n');
-                
-                const orderData = {
-                    customerName: address.split('\n')[0].trim(),
-                    items: itemsSummary,
-                    totalAmount: finalTotal.toLocaleString() + ' ฿',
-                    address: address,
-                    slipImage: e.target.result // ข้อมูลรูปภาพ Base64
-                };
-
-                // เก็บข้อมูลใน sessionStorage
-                sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
-
-                // ล้างตะกร้าและไปหน้าสำเร็จ
-                setTimeout(() => {
-                    localStorage.removeItem('coolNowCart');
-                    window.location.href = 'order-success.html';
-                }, 800);
-            };
-            reader.readAsDataURL(slipFile);
-        }
 
         document.addEventListener('DOMContentLoaded', renderCheckout);
     </script>
