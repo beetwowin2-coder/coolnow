@@ -19,11 +19,31 @@
         .step-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
         .step-dot { position: relative; z-index: 10; }
         .item-row:not(:last-child) { border-bottom: 1px dashed #f1f5f9; }
+        
+        /* Animation สำหรับแถบแจ้งเตือนด้านบน */
+        .capture-banner { animation: slideDown 0.5s ease-out; }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Animation กะพริบเน้นย้ำเรื่องสลิป */
+        .pulse-text {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.98); }
+        }
     </style>
 </head>
-<body class="bg-[#FBFBFD] min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-md w-full text-center">
+    <div class="capture-banner fixed top-0 left-0 right-0 bg-yellow-400 text-yellow-900 py-2.5 text-center text-[13px] font-bold shadow-md z-50">
+        📸 กรุณาแคปหน้าจอนี้เก็บไว้ และส่งรูปสลิปยืนยันใน LINE อีกครั้ง
+    </div>
+
+    <div class="max-w-md w-full text-center mt-12 mb-8">
         <div class="relative mb-6">
             <div class="success-check w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-200 relative z-10">
                 <span class="text-white text-4xl">✓</span>
@@ -59,15 +79,14 @@
                             <span id="orderId" class="text-gray-700">#CN-XXXXXX</span>
                         </div>
                         <div class="flex justify-between items-baseline">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ยอดสุทธิ</span>
+                            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ยอดโอนสุทธิ</span>
                             <span id="displayTotal" class="text-xl font-bold text-pink-500">0 ฿</span>
                         </div>
                     </div>
 
                     <div class="p-4 space-y-2">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
-                        <div id="itemsContainer" class="text-xs text-gray-600 space-y-1">
-                            </div>
+                        <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
 
                     <div class="px-4 pb-4">
@@ -84,18 +103,35 @@
                     </div>
 
                     <div class="px-4 pb-4">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการโอน</p>
-                        <div class="w-full h-32 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-inner">
-                            <img id="displaySlip" src="" alt="Slip" class="h-full w-full object-contain p-1">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการชำระเงิน</p>
+                        <div class="w-full h-40 bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden mb-3">
+                            <img id="displaySlip" src="" alt="Slip" class="h-full w-full object-contain p-2">
                         </div>
+                        
+                        <div class="bg-red-50 border border-red-100 rounded-lg p-2 text-center pulse-text">
+                            <p class="text-[12px] text-red-600 font-bold leading-tight">
+                                ⚠️ อย่าลืมส่งรูปสลิปนี้ทางไลน์ <br>เพื่อความรวดเร็วในการจัดส่ง
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-5 border-t border-green-100 text-center">
+                        <p class="text-[11px] font-bold text-green-600 uppercase mb-3">สแกนเพิ่มเพื่อนเพื่อส่งสลิป</p>
+                        <div class="bg-white p-2 w-32 h-32 mx-auto rounded-2xl shadow-sm mb-3 border border-green-100">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://lin.ee/RhhUwXf" alt="LINE QR" class="w-full h-full">
+                        </div>
+                        <p class="text-[10px] text-green-700 font-medium">LINE ID: @CoolNow (มี @)</p>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
-                <button onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex items-center justify-center gap-2 active:scale-95 transition-all">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
-                    แจ้งยืนยันผ่าน LINE 💬
+                <button onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center leading-tight active:scale-95 transition-all">
+                    <div class="flex items-center gap-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
+                        <span>แจ้งยืนยัน & ส่งสลิปทาง LINE</span>
+                    </div>
+                    <span class="text-[10px] font-light opacity-80 mt-1">คลิกเพื่อส่งสลิปให้แอดมินทันที</span>
                 </button>
 
                 <a href="index.html" class="w-full bg-white border-2 border-pink-100 text-pink-500 py-3.5 rounded-2xl font-bold hover:bg-pink-50 transition-all flex items-center justify-center gap-2 active:scale-95 text-sm">
@@ -106,13 +142,13 @@
 
         <p class="mt-6 text-[11px] text-gray-400 flex items-center justify-center gap-2">
             <span>พบปัญหา?</span>
-            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมิน</a>
+            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4 font-bold italic">ติดต่อแอดมิน</a>
         </p>
     </div>
 
     <script>
         function initSuccessPage() {
-            // Celebrate with confetti
+            // ฉลองด้วย Confetti
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -123,16 +159,15 @@
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
             if (lastOrder) {
-                // Display Customer Info
                 document.getElementById('displayCustName').innerText = lastOrder.customerName || 'ลูกค้า';
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
                 document.getElementById('displayPhone').innerText = lastOrder.phone || 'ไม่ได้ระบุ';
                 
-                // Show only address part in the address box
+                // แยกที่อยู่ออกมาแสดงผล
                 const cleanAddress = lastOrder.address.replace(`เบอร์โทร: ${lastOrder.phone}\nที่อยู่: `, '');
                 document.getElementById('displayAddress').innerText = cleanAddress;
                 
-                // Render Items list
+                // รายการสินค้า
                 const itemsContainer = document.getElementById('itemsContainer');
                 const itemList = lastOrder.items.split('\n');
                 itemsContainer.innerHTML = itemList.map(item => `
@@ -141,13 +176,13 @@
                     </div>
                 `).join('');
 
-                // Render Slip Image
+                // รูปสลิป
                 if (lastOrder.slipImage) {
                     document.getElementById('displaySlip').src = lastOrder.slipImage;
                 }
             }
 
-            // Generate Order ID (Format: #CN-YYMMDDxxxx)
+            // สุ่มเลขที่สั่งซื้อ
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -156,7 +191,7 @@
             const finalOrderID = `#CN-${dateStr}${randomNum}`;
             document.getElementById('orderId').innerText = finalOrderID;
 
-            // Clear Cart from local storage
+            // ล้างตะกร้าในเครื่อง
             localStorage.removeItem('coolNowCart');
         }
 
@@ -169,27 +204,25 @@
                 return;
             }
 
-            // Format message for LINE
             const message = `✨ แจ้งชำระเงินใหม่ ✨\n` +
-                          `--------------------------\n` +
                           `เลขที่สั่งซื้อ: ${orderId}\n` +
                           `คุณลูกค้า: ${lastOrder.customerName}\n` +
                           `เบอร์โทร: ${lastOrder.phone}\n` +
                           `ยอดโอน: ${lastOrder.totalAmount}\n` +
+                          `--------------------------\n` +
                           `รายการสินค้า:\n${lastOrder.items}\n` +
                           `--------------------------\n` +
                           `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}\n\n` +
-                          `*(โปรดส่งรูปสลิปตามเข้ามาในแชทนี้อีกครั้งเพื่อยืนยัน)*`;
+                          `📸 กำลังส่งรูปสลิปตามเข้าไปนะค้า...`;
 
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
             window.location.href = lineUrl;
 
-            // Follow-up reminder
+            // ย้ำเตือนก่อนไปหน้าไลน์
             setTimeout(() => {
-                if(confirm("ส่งข้อความแล้ว อย่าลืมแนบ 'รูปสลิป' ส่งตามเข้าไปใน LINE เพื่อความรวดเร็วในการตรวจสอบนะคะ")) {
-                    window.location.href = "https://lin.ee/RhhUwXf";
-                }
-            }, 2500);
+                alert("✅ ระบบกำลังพาคุณไปที่ LINE\n\nเมื่อถึงหน้าแชทแล้ว อย่าลืมกด 'ส่งรูปสลิป' ให้แอดมินด้วยนะค้า เพื่อความรวดเร็วในการจัดส่งค่ะ 🙏");
+                window.location.href = "https://lin.ee/RhhUwXf";
+            }, 2000);
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
