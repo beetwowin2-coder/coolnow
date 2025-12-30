@@ -9,9 +9,8 @@
     <style>
         body { font-family: 'Kanit', sans-serif; }
         .form-input:focus { border-color: #ec4899; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1); }
-        .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* สไตล์สำหรับปุ่มที่ถูกปิดใช้งาน */
         button:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.6; }
     </style>
 </head>
@@ -22,18 +21,18 @@
             <span class="text-xl">📧</span>
             <div>
                 <p class="text-sm font-bold text-yellow-800">กรุณายืนยันอีเมลของคุณ</p>
-                <p class="text-xs text-yellow-700">ระบบพบว่าคุณยังไม่ได้คลิกลิงก์ยืนยันในอีเมล โปรดยืนยันก่อนทำการสั่งซื้อ</p>
+                <p class="text-xs text-yellow-700">โปรดยืนยันอีเมลก่อนทำการสั่งซื้อ (ตรวจสอบใน Inbox หรือ Junk mail)</p>
             </div>
         </div>
     </div>
 
-    <nav class="bg-white/80 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50">
+    <nav class="bg-white/80 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-gray-50">
         <div class="container mx-auto flex items-center justify-between">
-            <a href="products.html" class="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition group">
+            <a href="index.html" class="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition group">
                 <span class="group-hover:-translate-x-1 transition-transform">⬅️</span> 
-                <span class="text-sm font-medium">Continue Shopping</span>
+                <span class="text-sm font-medium">กลับหน้าหลัก</span>
             </a>
-            <img src="images/logo.png" alt="Logo" class="h-8 md:h-9">
+            <div class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></div>
             <div id="userBadge" class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
                 <div id="userThumb" class="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-[10px]">👤</div>
                 <span id="userShortName" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account</span>
@@ -58,7 +57,7 @@
                             <input type="tel" id="custPhone" maxlength="10" placeholder="08x-xxx-xxxx" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 focus:outline-none transition form-input">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">อีเมล (ยืนยันแล้ว)</label>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">อีเมล</label>
                             <input type="email" id="custEmail" readonly class="w-full bg-gray-100 border border-gray-100 rounded-2xl px-5 py-4 text-gray-500 cursor-not-allowed">
                         </div>
                         <div class="md:col-span-2">
@@ -77,13 +76,13 @@
                         <div class="text-center md:text-left">
                             <p class="font-bold text-gray-800 text-lg">Thai QR Payment</p>
                             <p class="text-sm text-pink-500 font-bold">สแกนจ่ายยอดเงินขึ้นอัตโนมัติ</p>
-                            <p class="text-xs text-gray-500 mt-2">ชื่อบัญชี: ณัฐฑิชา สัจจะวัฒนะ</p>
+                            <p class="text-[10px] text-gray-400 mt-2 leading-relaxed">กรุณาตรวจสอบชื่อบัญชีและยอดเงินก่อนกดยืนยัน<br>ระบบจะตรวจสอบสลิปภายใน 24 ชม.</p>
                         </div>
                     </div>
                     <div class="text-center">
                         <input type="file" id="slipUpload" accept="image/*" class="hidden">
-                        <div id="slipPreviewContainer" class="hidden mb-4"><img id="slipPreview" class="max-w-[200px] mx-auto rounded-xl shadow-md"></div>
-                        <label for="slipUpload" id="uploadLabel" class="cursor-pointer bg-gray-100 px-8 py-4 rounded-2xl text-sm font-bold inline-block">📸 แนบสลิปการโอน</label>
+                        <div id="slipPreviewContainer" class="hidden mb-4"><img id="slipPreview" class="max-w-[200px] mx-auto rounded-xl shadow-md border-4 border-white"></div>
+                        <label for="slipUpload" id="uploadLabel" class="cursor-pointer bg-gray-100 px-8 py-4 rounded-2xl text-sm font-bold inline-block hover:bg-gray-200 transition">📸 แนบสลิปการโอน</label>
                     </div>
                 </div>
             </div>
@@ -91,13 +90,13 @@
             <div class="lg:w-[40%]">
                 <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 sticky top-28">
                     <h2 class="text-xl font-bold mb-6">สรุปรายการสั่งซื้อ</h2>
-                    <div id="checkout-items-list" class="space-y-4 mb-8"></div>
-                    <div class="space-y-3 pt-6 border-t">
-                        <div class="flex justify-between text-gray-400"><span>ยอดรวม</span><span id="subtotal">0 ฿</span></div>
-                        <div class="flex justify-between text-gray-400"><span>ค่าจัดส่ง</span><span id="shipping">ฟรี</span></div>
-                        <div class="flex justify-between text-2xl font-bold pt-4"><span>ยอดสุทธิ</span><span id="total" class="text-pink-500">0 ฿</span></div>
+                    <div id="checkout-items-list" class="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2"></div>
+                    <div class="space-y-3 pt-6 border-t border-gray-50">
+                        <div class="flex justify-between text-gray-400 text-sm font-medium"><span>ยอดรวม</span><span id="subtotal">0 ฿</span></div>
+                        <div class="flex justify-between text-gray-400 text-sm font-medium"><span>ค่าจัดส่ง</span><span class="text-green-500">ฟรี</span></div>
+                        <div class="flex justify-between text-2xl font-bold pt-4 text-gray-800"><span>ยอดสุทธิ</span><span id="total" class="text-pink-500">0 ฿</span></div>
                     </div>
-                    <button id="submitBtn" onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg mt-8 shadow-lg shadow-pink-100">
+                    <button id="submitBtn" onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg mt-8 shadow-lg shadow-pink-100 hover:bg-pink-600 transition-all active:scale-[0.98] flex items-center justify-center">
                         ยืนยันการสั่งซื้อ 🚀
                     </button>
                 </div>
@@ -122,21 +121,18 @@
         const auth = getAuth(app);
 
         onAuthStateChanged(auth, (user) => {
+            const emailAlert = document.getElementById('emailAlert');
+            const submitBtn = document.getElementById('submitBtn');
+
             if (user) {
                 document.getElementById('custEmail').value = user.email;
                 document.getElementById('custName').value = user.displayName || "";
                 document.getElementById('userShortName').innerText = user.displayName ? user.displayName.split(' ')[0] : "Account";
                 if(user.photoURL) document.getElementById('userThumb').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
 
-                // --- ตรวจสอบการยืนยันอีเมล ---
-                const emailAlert = document.getElementById('emailAlert');
-                const submitBtn = document.getElementById('submitBtn');
-
-                // หมายเหตุ: Google Login จะ verified อัตโนมัติเสมอ
                 if (user.emailVerified) {
                     emailAlert.classList.add('hidden');
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = `ยืนยันการสั่งซื้อ 🚀`;
                 } else {
                     emailAlert.classList.remove('hidden');
                     submitBtn.disabled = true;
@@ -146,13 +142,41 @@
                 window.location.href = 'auth.html';
             }
         });
+
+        window.confirmOrder = function() {
+            const name = document.getElementById('custName').value;
+            const address = document.getElementById('custAddress').value;
+            const phone = document.getElementById('custPhone').value;
+            const slip = document.getElementById('slipUpload').files[0];
+            const total = document.getElementById('total').innerText;
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!name || !address || phone.length < 10 || !slip) {
+                alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน และแนบสลิปการโอนเงินให้เรียบร้อย');
+                return;
+            }
+
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<div class="spinner"></div>`;
+
+            // Save order info for Success Page
+            const orderData = {
+                customerName: name.split(' ')[0],
+                totalAmount: total
+            };
+            sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+
+            setTimeout(() => {
+                window.location.href = 'order-success.html';
+            }, 1500);
+        }
     </script>
 
     <script>
-        // โหลดข้อมูลตะกร้าและ QR Code
         function loadOrderData() {
             const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if (cart.length === 0) { window.location.href = 'products.html'; return; }
+            if (cart.length === 0) { window.location.href = 'index.html'; return; }
 
             const listContainer = document.getElementById('checkout-items-list');
             let subtotal = 0;
@@ -161,24 +185,23 @@
             cart.forEach(item => {
                 subtotal += (item.price * item.qty);
                 listContainer.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
-                        <div class="flex items-center gap-3">
-                            <img src="${item.img}" class="w-10 h-10 object-contain">
+                    <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <img src="${item.img}" class="w-12 h-12 object-contain bg-white rounded-xl p-1 shadow-sm">
                             <div>
-                                <p class="text-xs font-bold">${item.name}</p>
-                                <p class="text-[10px] text-gray-400">${item.qty} x ${item.price}฿</p>
+                                <p class="text-xs font-bold text-gray-800">${item.name}</p>
+                                <p class="text-[10px] text-gray-400 font-medium">${item.qty} ชิ้น x ${item.price.toLocaleString()}฿</p>
                             </div>
                         </div>
-                        <p class="text-sm font-bold">${item.price * item.qty}฿</p>
+                        <p class="text-sm font-bold text-gray-700">${(item.price * item.qty).toLocaleString()}฿</p>
                     </div>`;
             });
 
-            document.getElementById('subtotal').innerText = subtotal + ' ฿';
-            document.getElementById('total').innerText = subtotal + ' ฿';
+            document.getElementById('subtotal').innerText = subtotal.toLocaleString() + ' ฿';
+            document.getElementById('total').innerText = subtotal.toLocaleString() + ' ฿';
             document.getElementById('paymentQR').src = `https://promptpay.io/1869900269561/${subtotal}.png`;
         }
 
-        // จัดการรูปภาพสลิป
         document.getElementById('slipUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -186,21 +209,12 @@
                 reader.onload = (ev) => {
                     document.getElementById('slipPreview').src = ev.target.result;
                     document.getElementById('slipPreviewContainer').classList.remove('hidden');
+                    document.getElementById('uploadLabel').innerHTML = '✅ เปลี่ยนสลิป';
+                    document.getElementById('uploadLabel').className = 'cursor-pointer bg-green-50 text-green-600 px-8 py-4 rounded-2xl text-sm font-bold inline-block border border-green-100';
                 }
                 reader.readAsDataURL(file);
             }
         });
-
-        function confirmOrder() {
-            const slip = document.getElementById('slipUpload').files[0];
-            if(!document.getElementById('custAddress').value || !slip) {
-                alert('กรุณากรอกที่อยู่และแนบสลิปให้ครบถ้วน');
-                return;
-            }
-            alert('สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการครับ');
-            localStorage.removeItem('coolNowCart');
-            window.location.href = 'index.html';
-        }
 
         document.addEventListener('DOMContentLoaded', loadOrderData);
     </script>
