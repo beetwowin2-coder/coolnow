@@ -18,60 +18,70 @@
         }
         .step-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
         .step-dot { position: relative; z-index: 10; }
+        .item-row:not(:last-child) { border-bottom: 1px dashed #f1f5f9; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] min-h-screen flex items-center justify-center p-4">
 
     <div class="max-w-md w-full text-center">
-        <div class="relative mb-8">
-            <div class="success-check w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-200 relative z-10">
-                <span class="text-white text-5xl">✓</span>
+        <div class="relative mb-6">
+            <div class="success-check w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-200 relative z-10">
+                <span class="text-white text-4xl">✓</span>
             </div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-100 rounded-full animate-ping opacity-30"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-green-100 rounded-full animate-ping opacity-30"></div>
         </div>
 
-        <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2 tracking-tight">สั่งซื้อสำเร็จ!</h1>
-            <p class="text-gray-400 font-light mb-8 leading-relaxed">
-                ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold text-lg">ลูกค้า</span><br>
-                ระบบได้รับคำสั่งซื้อและหลักฐานชำระเงินแล้ว
-            </p>
+        <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-50">
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">สั่งซื้อเรียบร้อย!</h1>
+            <p class="text-gray-400 text-sm font-light mb-6">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
             
-            <div class="mb-8">
-                <div class="flex justify-between relative mb-8 px-4">
+            <div class="mb-6">
+                <div class="flex justify-between relative mb-6 px-8">
                     <div class="step-line"></div>
                     <div class="step-dot flex flex-col items-center">
-                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-xs mb-2 shadow-lg shadow-green-100">1</div>
-                        <span class="text-[10px] font-bold text-gray-500">ชำระเงิน</span>
+                        <div class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-green-100">1</div>
+                        <span class="text-[9px] font-bold text-gray-500 uppercase">จ่ายแล้ว</span>
                     </div>
                     <div class="step-dot flex flex-col items-center">
-                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs mb-2 shadow-lg shadow-blue-100">2</div>
-                        <span class="text-[10px] font-bold text-gray-800">รอตรวจสอบ</span>
+                        <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-blue-100">2</div>
+                        <span class="text-[9px] font-bold text-gray-800 uppercase">รอเช็ค</span>
                     </div>
                     <div class="step-dot flex flex-col items-center">
-                        <div class="w-8 h-8 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xs mb-2">3</div>
-                        <span class="text-[10px] font-bold text-gray-400">จัดส่ง</span>
+                        <div class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-[10px] mb-1">3</div>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">ส่งของ</span>
                     </div>
                 </div>
 
-                <div class="space-y-3 text-left bg-gray-50 p-6 rounded-[2rem] relative overflow-hidden">
-                    <div class="flex justify-between items-center py-1 text-sm">
-                        <span class="text-gray-400">เลขที่รายการ</span>
-                        <span id="orderId" class="font-bold text-gray-800 tracking-wider">#CN-XXXXXX</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1 text-sm">
-                        <span class="text-gray-400">ยอดชำระทั้งสิ้น</span>
-                        <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
+                <div class="text-left bg-gray-50 rounded-3xl overflow-hidden border border-gray-100">
+                    <div class="p-4 bg-gray-100/50 space-y-1 border-bottom border-white">
+                        <div class="flex justify-between text-[11px] uppercase tracking-wider font-bold text-gray-400">
+                            <span>เลขที่สั่งซื้อ</span>
+                            <span id="orderId" class="text-gray-700">#CN-XXXXXX</span>
+                        </div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ยอดสุทธิ</span>
+                            <span id="displayTotal" class="text-xl font-bold text-pink-500">0 ฿</span>
+                        </div>
                     </div>
 
-                    <div class="mt-4 pt-4 border-t border-dashed border-gray-200 flex flex-col items-center gap-3">
-                        <p class="text-[12px] font-bold text-gray-600 uppercase tracking-wide">เพิ่มเพื่อนเพื่อส่งหลักฐาน</p>
-                        <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                            <img src="https://qr-official.line.me/gs/M_030jlujn_GW.png?oat_content=qr" alt="LINE QR Code" class="w-32 h-32 object-contain">
+                    <div class="p-4 space-y-2">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
+                        <div id="itemsContainer" class="text-sm text-gray-600 space-y-1">
+                            </div>
+                    </div>
+
+                    <div class="px-4 pb-4">
+                        <div class="p-3 bg-white/60 rounded-xl border border-white text-[12px] text-gray-500 leading-relaxed">
+                            <p class="font-bold text-gray-700 mb-1 flex items-center gap-1">📍 ที่อยู่จัดส่ง</p>
+                            <div id="displayAddress" class="line-clamp-2 italic">ไม่ได้ระบุที่อยู่</div>
                         </div>
-                        <p class="text-[11px] text-gray-400 text-center italic leading-tight">
-                            *โปรดแคปหน้าจอนี้พร้อมสลิปโอนเงิน<br>และสแกนส่งมาที่ LINE ของเรา
-                        </p>
+                    </div>
+
+                    <div class="px-4 pb-4">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการโอน</p>
+                        <div class="w-full h-32 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-inner">
+                            <img id="displaySlip" src="" alt="Slip" class="h-full w-full object-contain p-1">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,37 +92,19 @@
                     แจ้งยืนยันผ่าน LINE 💬
                 </button>
 
-                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95">
+                <a href="index.html" class="w-full bg-white border-2 border-pink-100 text-pink-500 py-3.5 rounded-2xl font-bold hover:bg-pink-50 transition-all flex items-center justify-center gap-2 active:scale-95 text-sm">
                     กลับไปช้อปต่อ 🛍️
                 </a>
-                
-                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-3 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm flex items-center justify-center gap-2">
-                    บันทึกใบเสร็จ 📄
-                </button>
             </div>
         </div>
 
-        <p class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-2">
+        <p class="mt-6 text-[11px] text-gray-400 flex items-center justify-center gap-2">
             <span>พบปัญหา?</span>
-            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4 text-xs">ติดต่อแอดมิน</a>
+            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมิน</a>
         </p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
-            authDomain: "coolnow-1d8f4.firebaseapp.com",
-            projectId: "coolnow-1d8f4",
-            storageBucket: "coolnow-1d8f4.firebasestorage.app",
-            messagingSenderId: "857055916856",
-            appId: "1:857055916856:web:c32673482de318e04a07cd"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
+    <script>
         function initSuccessPage() {
             confetti({
                 particleCount: 150,
@@ -124,16 +116,29 @@
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
             if (lastOrder) {
+                // แสดงชื่อลูกค้า
                 document.getElementById('displayCustName').innerText = lastOrder.customerName;
+                // แสดงยอดเงิน
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
-            } else {
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        document.getElementById('displayCustName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า';
-                    }
-                });
+                // แสดงที่อยู่ (แบบย่อ)
+                document.getElementById('displayAddress').innerText = lastOrder.address;
+                
+                // แสดงรายการสินค้าแบบแยกบรรทัด
+                const itemsContainer = document.getElementById('itemsContainer');
+                const itemList = lastOrder.items.split('\n');
+                itemsContainer.innerHTML = itemList.map(item => `
+                    <div class="flex justify-between item-row pb-1">
+                        <span>${item}</span>
+                    </div>
+                `).join('');
+
+                // แสดงรูปสลิป
+                if (lastOrder.slipImage) {
+                    document.getElementById('displaySlip').src = lastOrder.slipImage;
+                }
             }
 
+            // สร้างเลขที่สั่งซื้อ
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -142,6 +147,7 @@
             const finalOrderID = `#CN-${dateStr}${randomNum}`;
             document.getElementById('orderId').innerText = finalOrderID;
 
+            // ล้างตะกร้า
             localStorage.removeItem('coolNowCart');
         }
 
@@ -161,16 +167,17 @@
                           `ยอดโอน: ${lastOrder.totalAmount}\n` +
                           `รายการสินค้า:\n${lastOrder.items}\n` +
                           `--------------------------\n` +
-                          `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}`;
+                          `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}\n\n` +
+                          `*(โปรดแนบรูปสลิปส่งมาในแชทนี้อีกครั้ง)*`;
 
             const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
             window.location.href = lineUrl;
 
             setTimeout(() => {
-                if(confirm("กรุณากด 'ส่ง' ข้อความในแอป LINE และอย่าลืมเพิ่มเพื่อนเพื่อรับการแจ้งเตือนเลขพัสดุ")) {
+                if(confirm("ส่งข้อความแล้ว อย่าลืมส่ง 'รูปสลิป' เข้าในแชท LINE ด้วยนะค้า")) {
                     window.location.href = "https://lin.ee/RhhUwXf";
                 }
-            }, 2500);
+            }, 2000);
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
