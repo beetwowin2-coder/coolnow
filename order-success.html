@@ -81,11 +81,9 @@
 
         <p class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-2">
             <span>พบปัญหา?</span>
-            <a href="#" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมินทาง LINE</a>
+            <a href="https://line.me/ti/p/@yourlineid" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมินทาง LINE</a>
         </p>
     </div>
-
-    
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -104,7 +102,7 @@
         const auth = getAuth(app);
 
         function initSuccessPage() {
-            // 1. Confetti effect
+            // 1. Confetti effect - เฉลิมฉลองการสั่งซื้อ
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -112,13 +110,15 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
-            // 2. Load Order Data
+            // 2. Load Order Data จาก sessionStorage
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
             if (lastOrder) {
                 document.getElementById('displayCustName').innerText = lastOrder.customerName;
-                document.getElementById('displayTotal').innerText = lastOrder.totalAmount + ' ฿';
+                // แสดงผลยอดเงิน (lastOrder.totalAmount มีหน่วย ฿ มาด้วยอยู่แล้ว)
+                document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
             } else {
+                // กรณีโหลดข้อมูลไม่เจอ ให้พยายามดึงจาก Auth
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         document.getElementById('displayCustName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า';
@@ -126,7 +126,7 @@
                 });
             }
 
-            // 3. Generate Order ID
+            // 3. Generate Order ID อัตโนมัติ (ปีเดือนวัน + สุ่ม)
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -134,8 +134,7 @@
             const randomNum = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('orderId').innerText = `#CN-${dateStr}${randomNum}`;
 
-            // 4. Cleanup (Only Cart)
-            // เก็บ lastOrder ไว้เผื่อ user กด print ใน 5 นาทีแรก
+            // 4. ล้างตะกร้าสินค้า
             localStorage.removeItem('coolNowCart');
         }
 
