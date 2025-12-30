@@ -39,11 +39,10 @@
             border: 3px solid #f3f3f3;
             border-top: 3px solid #06C755;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             animation: spin 1s linear infinite;
             display: inline-block;
-            margin-right: 8px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -54,7 +53,7 @@
 <body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="capture-banner fixed top-0 left-0 right-0 bg-yellow-400 text-yellow-900 py-2.5 text-center text-[13px] font-bold shadow-md z-50">
-        📸 ระบบจะส่งข้อมูลให้แอดมินอัตโนมัติเมื่อกดปุ่มด้านล่าง
+        📸 ระบบจะส่งสลิปให้แอดมินอัตโนมัติเมื่อกดปุ่มด้านล่าง
     </div>
 
     <div class="max-w-md w-full text-center mt-12 mb-8">
@@ -124,7 +123,7 @@
                     </div>
 
                     <div class="bg-green-50 p-5 border-t border-green-100 text-center">
-                        <p class="text-[11px] font-bold text-green-600 uppercase mb-3">แอดไลน์เพื่อติดตามสถานะ</p>
+                        <p class="text-[11px] font-bold text-green-600 uppercase mb-3">แอดไลน์เพื่อรับเลขพัสดุ</p>
                         <div class="bg-white p-2 w-28 h-28 mx-auto rounded-2xl shadow-sm mb-3 border border-green-100">
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://lin.ee/RhhUwXf" alt="LINE QR" class="w-full h-full">
                         </div>
@@ -134,12 +133,12 @@
             </div>
 
             <div class="flex flex-col gap-3">
-                <button id="submitBtn" onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center leading-tight active:scale-95 transition-all">
-                    <div id="btnContent" class="flex items-center gap-2">
+                <button id="notifyBtn" onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center leading-tight active:scale-95 transition-all">
+                    <div id="btnLabel" class="flex items-center gap-2">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
-                        <span>คลิกเพื่อแจ้งโอนเงินทันที</span>
+                        <span>แจ้งยืนยัน & ส่งสลิปให้แอดมิน</span>
                     </div>
-                    <span id="btnSubtext" class="text-[10px] font-light opacity-80 mt-1">ไม่ต้องส่งสลิปซ้ำในแชท ระบบจัดการให้ค่ะ</span>
+                    <span id="btnSubLabel" class="text-[10px] font-light opacity-80 mt-1">ไม่ต้องพิมพ์ใหม่ ระบบจัดการให้ทันที</span>
                 </button>
 
                 <a href="index.html" class="w-full bg-white border-2 border-pink-100 text-pink-500 py-3.5 rounded-2xl font-bold hover:bg-pink-50 transition-all flex items-center justify-center gap-2 active:scale-95 text-sm">
@@ -147,15 +146,10 @@
                 </a>
             </div>
         </div>
-
-        <p class="mt-6 text-[11px] text-gray-400 flex items-center justify-center gap-2">
-            <span>พบปัญหา?</span>
-            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4 font-bold italic">ติดต่อแอดมิน</a>
-        </p>
     </div>
 
     <script>
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxXIHSgNR4weIjs-kSubpUEzVh-pUyGabKN4mOVMVy5jITBwLOKTFLl3t9Oy9yGRs3rsw/exec';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbz5C5TZDQrCJB--npetFGJsYmGTwTG8spyuxcfNIPvR3PY5u3jFEON72rqgnSX694vJNQ/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initSuccessPage() {
@@ -173,26 +167,20 @@
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
                 document.getElementById('displayPhone').innerText = lastOrder.phone || 'ไม่ได้ระบุ';
                 
-                // จัดการที่อยู่
                 const cleanAddress = lastOrder.address.replace(`เบอร์โทร: ${lastOrder.phone}\nที่อยู่: `, '');
                 document.getElementById('displayAddress').innerText = cleanAddress;
                 
-                // รายการสินค้า
                 const itemsContainer = document.getElementById('itemsContainer');
                 const itemList = lastOrder.items.split('\n');
                 itemsContainer.innerHTML = itemList.map(item => `
-                    <div class="flex justify-between item-row pb-1">
-                        <span>${item}</span>
-                    </div>
+                    <div class="flex justify-between item-row pb-1"><span>${item}</span></div>
                 `).join('');
 
-                // แสดงสลิป
                 if (lastOrder.slipImage) {
                     document.getElementById('displaySlip').src = lastOrder.slipImage;
                 }
             }
 
-            // สร้างเลขออเดอร์
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
@@ -207,20 +195,20 @@
         async function sendLineNotify() {
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             const orderId = document.getElementById('orderId').innerText;
-            const btn = document.getElementById('submitBtn');
-            const btnContent = document.getElementById('btnContent');
-            const btnSubtext = document.getElementById('btnSubtext');
+            const btn = document.getElementById('notifyBtn');
+            const label = document.getElementById('btnLabel');
+            const subLabel = document.getElementById('btnSubLabel');
 
             if (!lastOrder || !lastOrder.slipImage) {
-                alert("ไม่พบข้อมูลสลิป กรุณาติดต่อแอดมินทาง LINE ค่ะ");
+                alert("ไม่พบข้อมูลออเดอร์ กรุณาติดต่อแอดมินทางไลน์ค่ะ");
                 return;
             }
 
-            // เริ่มการโหลด
+            // สถานะกำลังโหลด
             btn.disabled = true;
-            btn.style.backgroundColor = "#9ca3af";
-            btnContent.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
-            btnSubtext.innerText = "กรุณาอย่าเพิ่งปิดหน้านี้นะคะ";
+            btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
+            label.innerHTML = `<span class="loader mr-2"></span> กำลังส่งข้อมูลเข้าระบบ...`;
+            subLabel.innerText = "กรุณารอสักครู่ ห้ามปิดหน้าจอค่ะ";
 
             try {
                 // 1. อัปโหลดรูปไป ImgBB
@@ -232,10 +220,10 @@
                     method: "POST",
                     body: formData
                 });
-                const imgData = await imgResponse.json();
+                const imgResult = await imgResponse.json();
                 
-                if(!imgData.success) throw new Error("Upload Fail");
-                const uploadedImageUrl = imgData.data.url;
+                if (!imgResult.success) throw new Error("Image Upload Failed");
+                const imageUrl = imgResult.data.url;
 
                 // 2. ส่งข้อมูลไป Google Apps Script
                 await fetch(GAS_URL, {
@@ -248,22 +236,24 @@
                         phone: lastOrder.phone,
                         totalAmount: lastOrder.totalAmount,
                         items: lastOrder.items,
-                        slipImage: uploadedImageUrl
+                        address: lastOrder.address,
+                        slipImage: imageUrl
                     })
                 });
 
-                // สำเร็จ
-                btn.style.backgroundColor = "#059669";
-                btnContent.innerHTML = "✅ แจ้งโอนสำเร็จแล้ว!";
-                btnSubtext.innerText = "แอดมินได้รับข้อมูลเรียบร้อย ขอบคุณค่ะ";
-                alert("✅ ส่งข้อมูลสำเร็จ! แอดมินได้รับออเดอร์แล้วค่ะ");
+                // แจ้งเตือนสำเร็จ
+                label.innerHTML = `✅ ส่งข้อมูลให้แอดมินเรียบร้อย!`;
+                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบให้นะคะ";
+                btn.classList.replace('bg-gray-400', 'bg-blue-600');
+                
+                alert("✅ ส่งข้อมูลสำเร็จ! แอดมินได้รับสลิปของคุณแล้วค่ะ");
 
             } catch (error) {
                 console.error(error);
-                alert("❌ เกิดข้อผิดพลาดเล็กน้อย แต่ไม่ต้องตกใจค่ะ! กรุณาแคปหน้าจอนี้ส่งให้แอดมินทาง LINE แทนนะคะ");
+                alert("❌ เกิดข้อผิดพลาด! กรุณาแคปหน้าจอนี้ส่งให้แอดมินทางไลน์แทนนะคะ");
                 btn.disabled = false;
-                btn.style.backgroundColor = "#06C755";
-                btnContent.innerHTML = "ลองส่งใหม่อีกครั้ง";
+                btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
+                label.innerHTML = `ลองส่งใหม่อีกครั้ง`;
             }
         }
 
