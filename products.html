@@ -72,6 +72,10 @@
                         </label>
                     </div>
                 </div>
+                <div class="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                    <p class="text-xs text-pink-600 font-bold">PROMOTION! ✨</p>
+                    <p class="text-[10px] text-pink-500 mt-1">ซื้อ 1 ชิ้น ค่าส่ง 40฿<br>ซื้อ 2 ชิ้นขึ้นไป <span class="underline">ส่งฟรี!</span></p>
+                </div>
             </div>
         </aside>
 
@@ -140,10 +144,8 @@
         </div>
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-8 border-t bg-gray-50">
-            <div class="flex justify-between items-end mb-6">
-                <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
-                <span id="cartTotal" class="text-2xl font-bold text-pink-500">0 ฿</span>
-            </div>
+            <div id="cartSummary" class="mb-6 space-y-1">
+                </div>
             <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 active-push transition hover:bg-pink-600">สั่งซื้อสินค้า</button>
         </div>
     </div>
@@ -234,13 +236,13 @@
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const countBadge = document.getElementById('cart-count');
-            const totalDisplay = document.getElementById('cartTotal');
-            let total = 0, totalItems = 0;
+            const summaryDisplay = document.getElementById('cartSummary');
+            let subtotal = 0, totalItems = 0;
             
             list.innerHTML = cart.length === 0 ? '<div class="text-center py-20 text-gray-300 text-sm">ตะกร้าว่างเปล่า</div>' : '';
             
             cart.forEach((item, index) => {
-                total += item.price * item.qty;
+                subtotal += item.price * item.qty;
                 totalItems += item.qty;
                 list.innerHTML += `
                     <div class="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
@@ -257,8 +259,38 @@
                         <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition">🗑️</button>
                     </div>`;
             });
+
+            // คำนวณค่าส่ง: 1 ชิ้น 40 บาท, 2 ชิ้นขึ้นไปฟรี
+            const shippingFee = totalItems >= 2 ? 0 : (totalItems === 0 ? 0 : 40);
+            const finalTotal = subtotal + shippingFee;
+            const promoNotice = totalItems === 1 ? `<p class="text-pink-500 text-[10px] font-bold animate-pulse text-right">ซื้ออีก 1 ชิ้นเพื่อรับสิทธิ์ส่งฟรี!</p>` : '';
+
             countBadge.innerText = totalItems;
-            totalDisplay.innerText = total.toLocaleString() + ' ฿';
+            
+            if (totalItems > 0) {
+                summaryDisplay.innerHTML = `
+                    <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
+                        <span>ราคาสินค้า</span>
+                        <span>${subtotal.toLocaleString()} ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
+                        <span>ค่าจัดส่ง</span>
+                        <span class="${shippingFee === 0 ? 'text-green-500' : ''}">${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span>
+                    </div>
+                    ${promoNotice}
+                    <div class="flex justify-between items-end pt-2">
+                        <span class="text-gray-800 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
+                        <span class="text-2xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
+                    </div>
+                `;
+            } else {
+                summaryDisplay.innerHTML = `
+                    <div class="flex justify-between items-end">
+                        <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
+                        <span class="text-2xl font-bold text-pink-500">0 ฿</span>
+                    </div>
+                `;
+            }
         }
 
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
