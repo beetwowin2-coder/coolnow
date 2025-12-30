@@ -9,7 +9,6 @@
     <style>
         body { font-family: 'Kanit', sans-serif; }
         .active-push:active { transform: scale(0.98); }
-        /* เอฟเฟกต์ตอนลากไฟล์มาวาง */
         #uploadZone.drag-over { 
             border-color: #ec4899; 
             background-color: #fdf2f8;
@@ -30,8 +29,7 @@
     <main class="container mx-auto max-w-2xl px-4">
         <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
 
-        <div id="checkoutItems" class="space-y-4 mb-8">
-            </div>
+        <div id="checkoutItems" class="space-y-4 mb-8"></div>
 
         <section class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 mb-6">
             <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
@@ -88,9 +86,8 @@
         </section>
 
         <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-pink-100/30 border border-pink-50">
-            <div class="space-y-3 mb-6" id="summaryArea">
-                </div>
-            <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
+            <div class="space-y-3 mb-6" id="summaryArea"></div>
+            <button onclick="confirmOrder(event)" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
                 ยืนยันการสั่งซื้อ 🚀
             </button>
         </div>
@@ -100,7 +97,6 @@
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let finalTotal = 0;
 
-        // ฟังก์ชัน Render รายการสินค้าและยอดรวม
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
@@ -137,11 +133,9 @@
             });
 
             itemsContainer.innerHTML = html;
-
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             finalTotal = subtotal + shippingFee;
 
-            // อัปเดต QR Code ตามยอดจริง (พร้อมเพย์แบบใส่ยอดเงิน)
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
@@ -162,7 +156,6 @@
             `;
         }
 
-        // ปรับจำนวนสินค้า
         function updateQty(index, amount) {
             cart[index].qty += amount;
             if (cart[index].qty <= 0) {
@@ -176,7 +169,6 @@
             renderCheckout();
         }
 
-        // แสดงพรีวิวสลิป
         function previewSlip(input) {
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
@@ -193,7 +185,6 @@
             }
         }
 
-        // รีเซ็ตการอัปโหลด
         function resetUpload(event) {
             event.stopPropagation();
             document.getElementById('slipInput').value = "";
@@ -201,20 +192,10 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // ระบบ Drag & Drop
         const uploadZone = document.getElementById('uploadZone');
-
         uploadZone.onclick = () => document.getElementById('slipInput').click();
-
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('drag-over');
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('drag-over');
-        });
-
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('drag-over'); });
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.classList.remove('drag-over');
@@ -225,8 +206,8 @@
             }
         });
 
-        // ยืนยันการสั่งซื้อ
-        function confirmOrder() {
+        // ฟังก์ชันยืนยันการสั่งซื้อที่ปรับปรุงแล้ว
+        function confirmOrder(event) {
             const address = document.getElementById('address').value;
             const slip = document.getElementById('slipInput').files[0];
 
@@ -234,26 +215,29 @@
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่งให้ครบถ้วน');
             if (!slip) return alert('กรุณาแนบรูปภาพสลิปการโอนเงิน');
 
-            // เตรียมข้อมูลส่งไปหน้า Success (จำลอง)
-            const orderSummary = {
-                customerName: address.split('\n')[0].split(',')[0].trim() || 'คุณลูกค้า',
-                totalAmount: finalTotal.toLocaleString() + ' ฿'
+            // 1. สร้างสรุปรายการสินค้าสำหรับส่งเข้า LINE
+            const itemsSummary = cart.map(item => `- ${item.name} (${item.qty} ชิ้น)`).join('\n');
+            
+            // 2. เก็บข้อมูลลง Session Storage เพื่อส่งไปหน้า order-success.html
+            const orderData = {
+                items: itemsSummary,
+                total: finalTotal.toLocaleString(),
+                address: address
             };
-            sessionStorage.setItem('lastOrder', JSON.stringify(orderSummary));
+            sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
 
-            // แสดง Loading เล็กน้อยเพื่อความสมจริง
+            // แสดงสถานะการทำงานบนปุ่ม
             const btn = event.target;
             btn.innerHTML = "กำลังดำเนินการ...";
             btn.disabled = true;
 
             setTimeout(() => {
-                alert('ยืนยันการสั่งซื้อสำเร็จ! ระบบได้รับข้อมูลของคุณแล้ว');
+                // ลบสินค้าออกจากตะกร้าหลังจากสั่งซื้อสำเร็จ
                 localStorage.removeItem('coolNowCart');
                 window.location.href = 'order-success.html'; 
-            }, 1500);
+            }, 1200);
         }
 
-        // เริ่มต้นทำงาน
         document.addEventListener('DOMContentLoaded', renderCheckout);
     </script>
 </body>
