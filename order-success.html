@@ -6,10 +6,11 @@
     <title>Order Success - Cool Now Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Kanit', sans-serif; }
         .success-check {
-            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         @keyframes scaleIn {
             from { transform: scale(0); opacity: 0; }
@@ -21,69 +22,106 @@
 
     <div class="max-w-md w-full text-center">
         <div class="relative mb-8">
-            <div class="success-check w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-green-100 relative z-10">
+            <div class="success-check w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-200 relative z-10">
                 <span class="text-white text-5xl">✓</span>
             </div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-100 rounded-full animate-ping opacity-20"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-100 rounded-full animate-ping opacity-30"></div>
         </div>
 
-        <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Order Success!</h1>
-            <p class="text-gray-400 font-light mb-8">
-                ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-semibold text-lg">ลูกค้า</span>!<br>
-                เราได้รับคำสั่งซื้อและหลักฐานการโอนเงินเรียบร้อยแล้ว
+        <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 tracking-tight">สั่งซื้อสำเร็จ!</h1>
+            <p class="text-gray-400 font-light mb-8 leading-relaxed">
+                ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold text-lg">ลูกค้า</span><br>
+                ระบบได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว
             </p>
             
-            <div class="space-y-4 mb-8 text-left">
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 text-sm">
-                    <span class="text-gray-400">เลขที่รายการ</span>
-                    <span id="orderId" class="font-bold text-gray-800">#CN-000000</span>
+            <div class="space-y-4 mb-8 text-left bg-gray-50 p-6 rounded-[2rem]">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
+                    <span class="text-gray-400 font-medium">เลขที่รายการ</span>
+                    <span id="orderId" class="font-bold text-gray-800">#CN-XXXXXX</span>
                 </div>
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 text-sm">
-                    <span class="text-gray-400">ยอดเงินที่ชำระ</span>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
+                    <span class="text-gray-400 font-medium">ยอดเงินที่ชำระ</span>
                     <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
                 </div>
-                <div class="flex justify-between items-center py-3 border-b border-gray-50 text-sm">
-                    <span class="text-gray-400">สถานะชำระเงิน</span>
-                    <span class="bg-blue-50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">รอตรวจสอบสลิป</span>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
+                    <span class="text-gray-400 font-medium">สถานะ</span>
+                    <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">รอตรวจสอบสลิป</span>
                 </div>
-                <div class="flex justify-between items-center py-3 text-sm">
-                    <span class="text-gray-400">ระยะเวลาจัดส่งโดยประมาณ</span>
+                <div class="flex justify-between items-center pt-2 text-sm">
+                    <span class="text-gray-400 font-medium">จัดส่งภายใน</span>
                     <span class="font-bold text-gray-800">2-3 วันทำการ</span>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
-                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition shadow-lg shadow-pink-100 flex items-center justify-center gap-2">
+                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95">
                     กลับหน้าหลัก 🏠
                 </a>
-                <button onclick="window.print()" class="w-full bg-gray-50 text-gray-500 py-4 rounded-2xl font-medium hover:bg-gray-100 transition text-sm">
+                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-4 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm">
                     พิมพ์ใบเสร็จ 🖨️
                 </button>
             </div>
         </div>
 
-        <p class="mt-8 text-xs text-gray-400">มีปัญหาในการสั่งซื้อ? <a href="#" class="text-pink-500 underline">ติดต่อฝ่ายสนับสนุน</a></p>
+        <p class="mt-8 text-xs text-gray-400">พบปัญหา? <a href="https://line.me/ti/p/@yourline" class="text-pink-500 font-bold underline">ติดต่อฝ่ายบริการลูกค้า</a></p>
     </div>
 
-    <script>
+    <script type="module">
+        // นำเข้า Firebase เพื่อเช็ค User กรณี Session หาย
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
+            authDomain: "coolnow-1d8f4.firebaseapp.com",
+            projectId: "coolnow-1d8f4",
+            storageBucket: "coolnow-1d8f4.firebasestorage.app",
+            messagingSenderId: "857055916856",
+            appId: "1:857055916856:web:c32673482de318e04a07cd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
         function initSuccessPage() {
-            // 1. ดึงข้อมูลจาก sessionStorage ที่เราเก็บมาจากหน้า Checkout
+            // 1. ดึงข้อมูลจาก sessionStorage
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
+            // 2. จัดการพลุกระดาษ (Confetti)
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ec4899', '#3b82f6', '#10b981']
+            });
+
+            // 3. แสดงข้อมูล Order
             if (lastOrder) {
                 document.getElementById('displayCustName').innerText = lastOrder.customerName;
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
+            } else {
+                // ถ้าไม่มีข้อมูลใน Session ให้ลองดึงจาก Firebase
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        document.getElementById('displayCustName').innerText = user.displayName.split(' ')[0];
+                    }
+                });
             }
 
-            // 2. สร้างเลข Order ID (Format: CN + วันที่ + สุ่ม 4 หลัก)
+            // 4. สร้างเลข Order ID แบบสุ่ม
             const date = new Date();
-            const dateStr = date.getFullYear().toString().substring(2) + (date.getMonth()+1).toString().padStart(2, '0') + date.getDate().toString().padStart(2, '0');
+            const dateStr = date.getFullYear().toString().substring(2) + 
+                          (date.getMonth()+1).toString().padStart(2, '0') + 
+                          date.getDate().toString().padStart(2, '0');
             const randomNum = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('orderId').innerText = `#CN-${dateStr}${randomNum}`;
 
-            // 3. ล้างตะกร้าสินค้าในเครื่องลูกค้า
-            localStorage.removeItem('coolNowCart');
+            // 5. ล้างตะกร้าและ Session (ทำหลังจากแสดงผล 2 วินาทีเพื่อความปลอดภัย)
+            setTimeout(() => {
+                localStorage.removeItem('coolNowCart');
+                sessionStorage.removeItem('lastOrder');
+            }, 2000);
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
