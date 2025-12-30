@@ -16,12 +16,12 @@
 
     <nav class="p-6">
         <a href="index.html" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 transition">
-            <span>←</span> ย้อนกลับ
+            <span>←</span> กลับไปหน้าหลัก
         </a>
     </nav>
 
     <main class="container mx-auto max-w-2xl px-4">
-        <h1 class="text-3xl font-bold mb-8 text-center md:text-left">สรุปรายการสั่งซื้อ</h1>
+        <h1 class="text-3xl font-bold mb-8">สรุปรายการสั่งซื้อ</h1>
 
         <div id="checkoutItems" class="space-y-4 mb-8">
             </div>
@@ -41,24 +41,21 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">ธนาคารกรุงเทพ (BBL)</p>
-                    <p class="text-blue-900 font-bold text-lg">ณัฐฑิชา สัจจะวัฒนะ</p>
-                    <p class="text-blue-700 font-bold text-xl tracking-tighter mt-1">930-0-272847</p>
+                    <p class="text-blue-900 font-bold text-lg leading-none mt-1">ณัฐฑิชา สัจจะวัฒนะ</p>
+                    <p class="text-blue-700 font-bold text-2xl tracking-tighter mt-2">930-0-272847</p>
                 </div>
             </div>
             
             <div class="space-y-4">
                 <p class="text-sm font-bold text-gray-700 ml-1">แนบหลักฐานการโอนเงิน</p>
-                
                 <div id="uploadZone" 
                      onclick="document.getElementById('slipInput').click()"
-                     class="relative group cursor-pointer border-2 border-dashed border-pink-200 bg-pink-50/30 rounded-[2rem] p-8 transition-all hover:border-pink-400 hover:bg-pink-50 flex flex-col items-center justify-center min-h-[220px]">
+                     class="relative group cursor-pointer border-2 border-dashed border-pink-200 bg-pink-50/30 rounded-[2rem] p-8 transition-all hover:border-pink-400 hover:bg-pink-50 flex flex-col items-center justify-center min-h-[200px]">
                     
                     <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="previewSlip(this)">
                     
                     <div id="uploadPrompt" class="text-center">
-                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">
-                            📸
-                        </div>
+                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform text-3xl">📸</div>
                         <p class="font-bold text-pink-600 uppercase tracking-tight">คลิกเพื่ออัพโหลดสลิป</p>
                         <p class="text-xs text-pink-400 mt-1">หรือลากไฟล์รูปภาพมาวางที่นี่</p>
                     </div>
@@ -77,14 +74,13 @@
             <button onclick="confirmOrder()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
                 ยืนยันการสั่งซื้อ 🚀
             </button>
-            <p class="text-center text-[10px] text-gray-400 mt-4 tracking-tight">เมื่อกดสั่งซื้อถือว่าท่านยอมรับเงื่อนไขการบริการ</p>
         </div>
     </main>
 
     <script>
+        // ดึงข้อมูลจากตะกร้าที่มาจากหน้าแรก
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
 
-        // ฟังก์ชันวาดรายการสินค้าและคำนวณราคา
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
@@ -92,7 +88,7 @@
             let totalItems = 0;
 
             if (cart.length === 0) {
-                window.location.href = 'index.html';
+                itemsContainer.innerHTML = `<div class="bg-white p-8 rounded-[2rem] text-center text-gray-400 border border-dashed">ไม่มีสินค้าในตะกร้า</div>`;
                 return;
             }
 
@@ -100,12 +96,14 @@
             cart.forEach((item, index) => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
+                
+                // รายละเอียดสินค้าพร้อม Shopping Control (+/-)
                 itemsContainer.innerHTML += `
                     <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
                         <img src="${item.img}" class="w-16 h-16 md:w-20 md:h-20 object-contain bg-gray-50 rounded-2xl">
                         <div class="flex-1">
                             <h3 class="font-bold text-sm md:text-base leading-tight text-gray-800">${item.name}</h3>
-                            <p class="text-pink-500 font-bold mt-1">${item.price} ฿</p>
+                            <p class="text-pink-500 font-bold mt-1">${item.price.toLocaleString()} ฿</p>
                         </div>
                         <div class="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
                             <button onclick="updateQty(${index}, -1)" class="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center font-bold active-push">-</button>
@@ -116,28 +114,29 @@
                 `;
             });
 
+            // ค่าจัดส่งตามเงื่อนไขหน้าแรก: 2 ชิ้นขึ้นไปฟรี (ปกติ 40)
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             const total = subtotal + shippingFee;
 
             summaryArea.innerHTML = `
                 <div class="flex justify-between text-gray-400 font-medium">
-                    <span>ราคาสินค้า</span>
+                    <span>ราคาสินค้ารวม</span>
                     <span>${subtotal.toLocaleString()} ฿</span>
                 </div>
                 <div class="flex justify-between text-gray-400 font-medium">
                     <span>ค่าจัดส่ง</span>
                     <span class="${shippingFee === 0 ? 'text-green-500 font-bold' : ''}">
-                        ${shippingFee === 0 ? 'ฟรี (โปรโมชั่น)' : '40 ฿'}
+                        ${shippingFee === 0 ? 'ฟรีค่าจัดส่ง' : '40 ฿'}
                     </span>
                 </div>
                 <div class="flex justify-between items-end pt-4 border-t border-dashed mt-2">
-                    <span class="text-xl font-bold text-gray-800 uppercase">ยอดสุทธิ</span>
+                    <span class="text-xl font-bold text-gray-800">ยอดสุทธิ</span>
                     <span class="text-3xl font-bold text-pink-500">${total.toLocaleString()} ฿</span>
                 </div>
             `;
         }
 
-        // ปรับจำนวนสินค้า
+        // ฟังก์ชันปรับจำนวนสินค้า
         function updateQty(index, amt) {
             cart[index].qty += amt;
             if (cart[index].qty <= 0) {
@@ -151,43 +150,23 @@
             renderCheckout();
         }
 
-        // แสดงตัวอย่างรูปสลิป
+        // แสดงตัวอย่างสลิป
         function previewSlip(input) {
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
             const preview = document.getElementById('slipPreview');
-            const zone = document.getElementById('uploadZone');
-
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                     prompt.classList.add('hidden');
                     container.classList.remove('hidden');
-                    zone.classList.remove('border-dashed');
-                    zone.classList.add('border-solid', 'border-pink-500', 'bg-white');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // ฟังก์ชันลากไฟล์มาวาง (Drag & Drop)
-        const zone = document.getElementById('uploadZone');
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
-            zone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
-        });
-        zone.addEventListener('dragover', () => zone.classList.add('drag-over'));
-        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-        zone.addEventListener('drop', (e) => {
-            zone.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            if(files.length) {
-                document.getElementById('slipInput').files = files;
-                previewSlip(document.getElementById('slipInput'));
-            }
-        });
-
-        // ยืนยันคำสั่งซื้อ
+        // ยืนยันการสั่งซื้อ
         function confirmOrder() {
             const address = document.getElementById('address').value;
             const slip = document.getElementById('slipInput').files[0];
@@ -195,8 +174,7 @@
             if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
             if (!slip) return alert('กรุณาแนบสลิปการโอนเงิน');
 
-            // ในที่นี้คือตัวอย่างการแจ้งเตือนสำเร็จ
-            alert('ได้รับคำสั่งซื้อของคุณแล้ว! ขอบคุณที่ช้อปกับ Cool Now');
+            alert('ยืนยันการสั่งซื้อสำเร็จ! ระบบได้รับข้อมูลของคุณแล้ว');
             localStorage.removeItem('coolNowCart');
             window.location.href = 'order-success.html';
         }
