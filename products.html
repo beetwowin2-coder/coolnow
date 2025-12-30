@@ -10,63 +10,65 @@
         body { font-family: 'Kanit', sans-serif; overflow-x: hidden; }
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        #cartDrawer { transition: transform 0.3s ease-in-out; }
+        #cartDrawer { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .drawer-open { transform: translateX(0); }
         .drawer-closed { transform: translateX(100%); }
         .modal-active { overflow: hidden; }
-        .spinner { border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 2px solid #ec4899; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        .spinner { border: 2px solid rgba(236, 72, 153, 0.1); border-radius: 50%; border-top: 2px solid #ec4899; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .active-push:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <nav class="bg-white/80 backdrop-blur-md py-4 px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+    <nav class="bg-white/80 backdrop-blur-md py-3 md:py-4 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
         <div class="flex items-center gap-8">
-           <a href="index.html"><img src="images/logo.png" alt="Logo" class="h-10"></a>
+            <a href="index.html" class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></a>
             <div class="relative hidden md:block">
-                <input type="text" id="searchInput" placeholder="Search for sprays, scents..." class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 transition">
+                <input type="text" id="searchInput" placeholder="ค้นหากลิ่นที่ต้องการ..." 
+                       class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 transition-all">
                 <span class="absolute left-3 top-2 text-gray-400">🔍</span>
             </div>
         </div>
         
-        <div class="flex items-center gap-6 text-gray-600 font-light text-sm">
-            <a href="index.html" class="hover:text-pink-500">Home</a>
-            <a href="#" class="text-pink-500 font-normal border-b-2 border-pink-500">Products</a>
+        <div class="flex items-center gap-6 text-gray-600 text-sm">
+            <a href="index.html" class="hover:text-pink-500 transition">หน้าแรก</a>
+            <a href="products.html" class="text-pink-500 font-bold border-b-2 border-pink-500">สินค้า</a>
             
-            <div id="authSection" class="flex items-center gap-3 border-l pl-6 ml-2">
+            <div id="authSection" class="flex items-center gap-3 border-l pl-6">
                 <div class="spinner"></div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="relative cursor-pointer hover:text-pink-500 transition-transform active:scale-90" onclick="toggleCart(true)">
-                    <span class="text-xl">🛒</span>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] rounded-full px-1.5 py-0.5 shadow-sm">0</span>
-                </div>
+            <div class="relative cursor-pointer hover:text-pink-500 transition-transform active-push" onclick="toggleCart(true)">
+                <span class="text-xl md:text-2xl">🛒</span>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shadow-md">0</span>
             </div>
         </div>
     </nav>
 
-    <div class="container mx-auto px-4 py-4 text-xs text-gray-400">
-        <a href="index.html" class="hover:text-pink-500">Home</a> > <span class="text-gray-600">All Products</span>
+    <div class="container mx-auto px-6 py-6 text-[10px] uppercase tracking-widest text-gray-400">
+        <a href="index.html" class="hover:text-pink-500">Home</a> <span class="mx-2">/</span> <span class="text-gray-800 font-bold">All Products</span>
     </div>
 
     <main class="container mx-auto px-4 flex flex-col md:flex-row gap-8 mb-20">
         <aside class="w-full md:w-1/4">
-            <div class="bg-white p-6 rounded-2xl shadow-sm space-y-8 sticky top-24 border border-gray-100">
+            <div class="bg-white p-8 rounded-[2rem] shadow-sm space-y-8 sticky top-28 border border-gray-100">
                 <div>
-                    <h3 class="font-bold mb-4 text-gray-700">Scent Type</h3>
-                    <div class="space-y-3 text-sm" id="filterOptions">
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" value="all" checked class="w-4 h-4 accent-pink-500 filter-checkbox"> 
-                            <span>All Scents</span>
+                    <h3 class="font-bold mb-6 text-gray-800 flex items-center gap-2">
+                        <span class="w-1.5 h-4 bg-pink-500 rounded-full"></span> ประเภทกลิ่น
+                    </h3>
+                    <div class="space-y-4 text-sm" id="filterOptions">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" value="all" checked class="w-5 h-5 rounded-lg accent-pink-500 filter-checkbox"> 
+                            <span class="group-hover:text-pink-500 transition">กลิ่นทั้งหมด</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" value="fruity" class="w-4 h-4 accent-pink-500 filter-checkbox"> 
-                            <span>Fruity & Sweet</span>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" value="fruity" class="w-5 h-5 rounded-lg accent-pink-500 filter-checkbox"> 
+                            <span class="group-hover:text-pink-500 transition">หวานผลไม้ (Fruity)</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" value="mint" class="w-4 h-4 accent-pink-500 filter-checkbox"> 
-                            <span>Mint & Fresh</span>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" value="mint" class="w-5 h-5 rounded-lg accent-pink-500 filter-checkbox"> 
+                            <span class="group-hover:text-pink-500 transition">หอมสดชื่น (Mint & Fresh)</span>
                         </label>
                     </div>
                 </div>
@@ -74,49 +76,54 @@
         </aside>
 
         <section class="w-full md:w-3/4">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-800">Cooling Products</h1>
-                <p class="text-sm text-gray-400">Discover your fresh companion</p>
+            <div class="mb-10 flex justify-between items-end">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Cooling Products</h1>
+                    <p class="text-sm text-gray-400 mt-1">สดชื่นไปกับสเปรย์ฉีดตัวสูตรธรรมชาติ</p>
+                </div>
+                <p class="text-xs text-gray-400 font-medium">แสดงสินค้าทั้งหมด</p>
             </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8" id="productGrid">
-                <div class="product-card bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 p-2" data-scent="fruity" data-name="Cool Body Spray - Bubble Gum">
-                    <div class="relative bg-pink-50 rounded-[1.8rem] aspect-square flex items-center justify-center p-8 overflow-hidden">
-                        <span class="absolute top-4 left-4 bg-purple-500 text-white text-[10px] px-3 py-1 rounded-full z-10 shadow-sm font-medium">Best Seller</span>
-                        <img src="images/bubble-gum.png" alt="Bubble Gum" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-500">
+                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="fruity" data-name="Cool Body Spray - Bubble Gum">
+                    <div class="relative bg-pink-50 rounded-[2rem] aspect-square flex items-center justify-center p-12 overflow-hidden">
+                        <span class="absolute top-5 left-5 bg-purple-500 text-white text-[10px] px-3 py-1.5 rounded-full z-10 shadow-md font-bold uppercase tracking-wider">Best Seller</span>
+                        <img src="images/bubble-gum.png" alt="Bubble Gum" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-700">
                     </div>
                     <div class="p-6">
-                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Body Care</p>
-                        <h2 class="product-title font-bold text-lg mt-1 text-gray-800">Cool Body Spray - Bubble Gum (10 ml)</h2>
-                        <div class="mt-6 flex justify-between items-center gap-4">
-                            <div class="flex items-center border border-gray-100 bg-gray-50 rounded-xl overflow-hidden h-10 shadow-inner">
-                                <button onclick="changeQty(this, -1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-200">-</button>
+                        <p class="text-[10px] text-pink-400 uppercase tracking-[0.2em] font-bold">Signature Scent</p>
+                        <h2 class="product-title font-bold text-lg mt-2 text-gray-800">Body Spray - Bubble Gum</h2>
+                        <div class="mt-8 flex justify-between items-center">
+                            <div class="flex items-center border border-gray-100 bg-gray-50 rounded-2xl overflow-hidden h-12 shadow-inner">
+                                <button onclick="changeQty(this, -1)" class="w-10 h-full flex items-center justify-center hover:bg-white transition">-</button>
                                 <input type="number" value="1" min="1" class="w-10 bg-transparent text-center text-sm font-bold focus:outline-none" readonly>
-                                <button onclick="changeQty(this, 1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-200">+</button>
+                                <button onclick="changeQty(this, 1)" class="w-10 h-full flex items-center justify-center hover:bg-white transition">+</button>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl font-bold text-pink-500">100 ฿</span>
-                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Bubble Gum', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg active:scale-95">🛒</button>
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl font-bold text-gray-800">100<span class="text-sm ml-1 text-pink-500">฿</span></span>
+                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Bubble Gum', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="product-card bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100 p-2" data-scent="mint" data-name="Cool Body Spray - Lemon Mint">
-                    <div class="relative bg-green-50 rounded-[1.8rem] aspect-square flex items-center justify-center p-8 overflow-hidden">
-                        <span class="absolute top-4 left-4 bg-green-500 text-white text-[10px] px-3 py-1 rounded-full z-10 shadow-sm font-medium">New</span>
-                        <img src="images/lemon-mint.png" alt="Lemon Mint" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-500">
+
+                <div class="product-card bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 p-3" data-scent="mint" data-name="Cool Body Spray - Lemon Mint">
+                    <div class="relative bg-green-50 rounded-[2rem] aspect-square flex items-center justify-center p-12 overflow-hidden">
+                        <span class="absolute top-5 left-5 bg-green-500 text-white text-[10px] px-3 py-1.5 rounded-full z-10 shadow-md font-bold uppercase tracking-wider">New</span>
+                        <img src="images/lemon-mint.png" alt="Lemon Mint" class="product-img w-full h-full object-contain group-hover:scale-110 transition duration-700">
                     </div>
                     <div class="p-6">
-                        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Body Care</p>
-                        <h2 class="product-title font-bold text-lg mt-1 text-gray-800">Cool Body Spray - Lemon Mint (10 ml)</h2>
-                        <div class="mt-6 flex justify-between items-center gap-4">
-                            <div class="flex items-center border border-gray-100 bg-gray-50 rounded-xl overflow-hidden h-10 shadow-inner">
-                                <button onclick="changeQty(this, -1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-200">-</button>
+                        <p class="text-[10px] text-green-400 uppercase tracking-[0.2em] font-bold">Refreshing Scent</p>
+                        <h2 class="product-title font-bold text-lg mt-2 text-gray-800">Body Spray - Lemon Mint</h2>
+                        <div class="mt-8 flex justify-between items-center">
+                            <div class="flex items-center border border-gray-100 bg-gray-50 rounded-2xl overflow-hidden h-12 shadow-inner">
+                                <button onclick="changeQty(this, -1)" class="w-10 h-full flex items-center justify-center hover:bg-white transition">-</button>
                                 <input type="number" value="1" min="1" class="w-10 bg-transparent text-center text-sm font-bold focus:outline-none" readonly>
-                                <button onclick="changeQty(this, 1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-200">+</button>
+                                <button onclick="changeQty(this, 1)" class="w-10 h-full flex items-center justify-center hover:bg-white transition">+</button>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl font-bold text-pink-500">100 ฿</span>
-                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Lemon Mint', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg active:scale-95">🛒</button>
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl font-bold text-gray-800">100<span class="text-sm ml-1 text-pink-500">฿</span></span>
+                                <button onclick="handleAddToCart(this, 'Cool Body Spray - Lemon Mint', 100)" class="bg-pink-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg shadow-pink-100 active-push text-xl">🛒</button>
                             </div>
                         </div>
                     </div>
@@ -125,25 +132,25 @@
         </section>
     </main>
 
-    <div id="cartDrawerOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden" onclick="toggleCart(false)"></div>
+    <div id="cartDrawerOverlay" class="fixed inset-0 bg-black/40 z-[70] hidden backdrop-blur-sm" onclick="toggleCart(false)"></div>
     <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[80] shadow-2xl flex flex-col drawer-closed">
-        <div class="p-6 flex justify-between items-center border-b">
-            <h2 class="text-2xl font-bold">Your Cart</h2>
-            <button onclick="toggleCart(false)" class="text-3xl">&times;</button>
+        <div class="p-6 flex justify-between items-center border-b border-gray-50">
+            <h2 class="text-xl font-bold">🛒 ตะกร้าสินค้า</h2>
+            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 transition hover:text-gray-600">&times;</button>
         </div>
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-6 border-t bg-gray-50">
-            <div class="flex justify-between text-xl font-bold mb-6">
-                <span>Total</span>
-                <span id="cartTotal">0 ฿</span>
+        <div class="p-8 border-t bg-gray-50">
+            <div class="flex justify-between items-end mb-6">
+                <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">ยอดรวมทั้งหมด</span>
+                <span id="cartTotal" class="text-2xl font-bold text-pink-500">0 ฿</span>
             </div>
-            <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-pink-600 transition shadow-lg shadow-pink-100">Proceed to Checkout</button>
+            <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 active-push transition hover:bg-pink-600">สั่งซื้อสินค้า</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
@@ -158,7 +165,6 @@
         const auth = getAuth(app);
         let currentUser = null;
 
-        // --- Monitor Auth State (ดึงรูปและชื่อมาแสดง) ---
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             const authSection = document.getElementById('authSection');
@@ -167,27 +173,26 @@
                 authSection.innerHTML = `
                     <div class="flex items-center gap-3 group cursor-pointer" onclick="location.href='auth.html'">
                         <div class="text-right hidden sm:block">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none">Hi, ${user.displayName.split(' ')[0]}</p>
-                            <p class="text-[9px] text-gray-400">Account</p>
+                            <p class="text-[10px] font-bold text-gray-800 leading-none">ยินดีต้อนรับ, ${user.displayName.split(' ')[0]}</p>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase">Account</p>
                         </div>
-                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition">
+                        <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 transition">
                             ${photo}
                         </div>
                     </div>`;
             } else {
                 authSection.innerHTML = `
-                    <a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition">Login</a>`;
+                    <a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition active-push">Login</a>`;
             }
         });
 
-        // --- Global Checkout Function ---
         window.proceedToCheckout = () => {
             const cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if(cart.length === 0) return alert("Cart is empty!");
+            if(cart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
             
             if(!currentUser) {
-                alert("Please login with Google before checkout");
-                window.location.href = 'auth.html'; // ส่งไปหน้า Login
+                alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
+                window.location.href = 'auth.html';
             } else {
                 window.location.href = 'checkout.html';
             }
@@ -195,18 +200,20 @@
     </script>
 
     <script>
-        // [Core UI & Cart & Filter & Search เหมือนเดิมทุกประการ]
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
+
         function changeQty(btn, change) {
             const input = btn.parentElement.querySelector('input');
             input.value = Math.max(1, parseInt(input.value) + change);
         }
+
         function toggleCart(isOpen) {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartDrawerOverlay');
             if (isOpen) { drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); }
             else { drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('hidden'); }
         }
+
         function handleAddToCart(btn, name, price) {
             const card = btn.closest('.product-card');
             const qty = parseInt(card.querySelector('input').value);
@@ -218,42 +225,50 @@
             saveAndRefresh();
             toggleCart(true);
         }
+
         function saveAndRefresh() {
             localStorage.setItem('coolNowCart', JSON.stringify(cart));
             updateCartUI();
         }
+
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const countBadge = document.getElementById('cart-count');
             const totalDisplay = document.getElementById('cartTotal');
             let total = 0, totalItems = 0;
-            list.innerHTML = cart.length === 0 ? '<div class="text-center py-20 text-gray-400">Cart is empty</div>' : '';
+            
+            list.innerHTML = cart.length === 0 ? '<div class="text-center py-20 text-gray-300 text-sm">ตะกร้าว่างเปล่า</div>' : '';
+            
             cart.forEach((item, index) => {
                 total += item.price * item.qty;
                 totalItems += item.qty;
                 list.innerHTML += `
-                    <div class="flex gap-4 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-                        <img src="${item.img}" class="w-16 h-16 object-contain">
+                    <div class="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-lg">
                         <div class="flex-1">
-                            <p class="font-bold text-sm text-gray-800">${item.name}</p>
-                            <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
-                            <div class="flex items-center gap-3 mt-1">
+                            <p class="font-bold text-xs text-gray-800">${item.name}</p>
+                            <p class="text-pink-500 font-bold text-sm mt-1">${item.price} ฿</p>
+                            <div class="flex items-center gap-3 mt-2">
                                 <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs hover:bg-gray-100">-</button>
                                 <span class="text-xs font-bold">${item.qty}</span>
                                 <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs hover:bg-gray-100">+</button>
                             </div>
                         </div>
-                        <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500">🗑️</button>
+                        <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500 transition">🗑️</button>
                     </div>`;
             });
             countBadge.innerText = totalItems;
             totalDisplay.innerText = total.toLocaleString() + ' ฿';
         }
+
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
-        function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
+        function removeFromCart(index) { if(confirm('ต้องการลบสินค้าออกจากตะกร้า?')) { cart.splice(index, 1); saveAndRefresh(); } }
+
+        // --- Filter Logic ---
         const searchInput = document.getElementById('searchInput');
         const checkboxes = document.querySelectorAll('.filter-checkbox');
         const cards = document.querySelectorAll('.product-card');
+
         function filterProducts() {
             const term = searchInput.value.toLowerCase();
             const activeFilters = Array.from(checkboxes).filter(i => i.checked).map(i => i.value);
@@ -265,6 +280,7 @@
                 card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
             });
         }
+
         checkboxes.forEach(cb => {
             cb.addEventListener('change', (e) => {
                 if (e.target.value === 'all' && e.target.checked) {
@@ -276,6 +292,7 @@
                 filterProducts();
             });
         });
+
         searchInput.addEventListener('input', filterProducts);
         window.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
