@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Cool Now</title>
+    <title>ชำระเงิน - Cool Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -16,6 +16,20 @@
         }
         .qr-container { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
         textarea::placeholder, input::placeholder { color: #cbd5e1; font-weight: 300; }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800 pb-20">
@@ -46,7 +60,6 @@
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                class="w-full bg-gray-50 rounded-2xl py-4 pl-12 pr-4 focus:outline-none border border-transparent focus:border-pink-200 focus:bg-white transition-all text-lg tracking-widest">
                     </div>
-                    <p id="phoneError" class="text-pink-500 text-xs mt-2 ml-1 hidden">! กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)</p>
                 </div>
 
                 <div>
@@ -101,7 +114,7 @@
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let finalTotal = 0;
 
-        // ดึงที่อยู่ที่เคยบันทึกไว้อัตโนมัติ (NEW!)
+        // 1. โหลดข้อมูลที่อยู่เดิม
         function loadSavedAddress() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
             if (savedData) {
@@ -110,6 +123,7 @@
             }
         }
 
+        // 2. แสดงรายการสินค้าและคำนวณเงิน
         function renderCheckout() {
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
@@ -117,6 +131,7 @@
             
             if (cart.length === 0) {
                 itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400">ตะกร้าว่างเปล่า</div>`;
+                document.getElementById('confirmBtn').disabled = true;
                 return;
             }
 
@@ -124,18 +139,18 @@
             let totalItems = 0;
             let html = '';
 
-            cart.forEach((item, index) => {
+            cart.forEach(item => {
                 subtotal += item.price * item.qty;
                 totalItems += item.qty;
                 html += `
                     <div class="bg-white p-4 rounded-[1.8rem] border border-gray-100 flex items-center gap-4 shadow-sm">
                         <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
                         <div class="flex-1">
-                            <h3 class="font-bold text-xs">${item.name}</h3>
-                            <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
+                            <h3 class="font-bold text-sm text-gray-700">${item.name}</h3>
+                            <p class="text-pink-500 font-bold">${item.price} ฿</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-xs">x ${item.qty}</span>
+                        <div class="text-right">
+                            <span class="font-bold text-gray-400">x ${item.qty}</span>
                         </div>
                     </div>`;
             });
@@ -144,18 +159,19 @@
             const shippingFee = (totalItems >= 2) ? 0 : 40;
             finalTotal = subtotal + shippingFee;
 
-            // สร้าง QR Code อัตโนมัติ
+            // Generate PromptPay QR (เลขบัตรปชช/เบอร์โทร + ยอดเงิน)
             qrImg.src = `https://promptpay.io/1869900269561/${finalTotal}.png`;
 
             summaryArea.innerHTML = `
-                <div class="flex justify-between text-gray-500 text-sm"><span>ยอดรวม</span><span>${subtotal.toLocaleString()} ฿</span></div>
-                <div class="flex justify-between text-gray-500 text-sm"><span>ค่าจัดส่ง</span><span>${shippingFee === 0 ? 'ฟรี' : '40 ฿'}</span></div>
+                <div class="flex justify-between text-gray-500 text-sm"><span>ยอดรวมสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
+                <div class="flex justify-between text-gray-500 text-sm"><span>ค่าจัดส่ง</span><span>${shippingFee === 0 ? '<span class="text-green-500">ฟรี</span>' : '40 ฿'}</span></div>
                 <div class="flex justify-between items-end pt-4 border-t border-dashed mt-2">
                     <span class="text-lg font-bold">ยอดที่ต้องชำระ</span>
                     <span class="text-3xl font-bold text-pink-500">${finalTotal.toLocaleString()} ฿</span>
                 </div>`;
         }
 
+        // 3. จัดการรูปภาพสลิป
         function previewSlip(input) {
             const prompt = document.getElementById('uploadPrompt');
             const container = document.getElementById('previewContainer');
@@ -178,53 +194,62 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
+        // 4. กดยืนยันการสั่งซื้อ
         function confirmOrder(event) {
             const phone = document.getElementById('phone').value;
             const address = document.getElementById('address').value;
             const slipFile = document.getElementById('slipInput').files[0];
             const btn = document.getElementById('confirmBtn');
 
-            if (phone.length !== 10) return alert('กรุณากรอกเบอร์โทรให้ครบ 10 หลัก');
-            if (!address.trim()) return alert('กรุณากรอกที่อยู่จัดส่ง');
-            if (!slipFile) return alert('กรุณาแนบสลิป');
+            // Validation
+            if (phone.length !== 10) return alert('กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก');
+            if (!address.trim()) return alert('กรุณากรอกชื่อและที่อยู่สำหรับจัดส่ง');
+            if (!slipFile) return alert('กรุณาแนบหลักฐานการโอนเงิน (สลิป)');
 
+            // แสดงสถานะ Loading
             btn.disabled = true;
-            btn.innerHTML = "กำลังดำเนินการ...";
+            btn.innerHTML = `<div class="spinner"></div> กำลังบันทึกข้อมูล...`;
 
-            // 1. บันทึกข้อมูลลูกค้า (จดจำที่อยู่) - NEW!
-            const customerData = { phone, address };
-            localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
+            // บันทึกที่อยู่ล่าสุดลง LocalStorage (เพื่อใช้ครั้งต่อไป)
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
 
-            // 2. บันทึกประวัติการสั่งซื้อ - NEW!
+            // บันทึกประวัติลง LocalStorage
             let history = JSON.parse(localStorage.getItem('coolNow_History')) || [];
-            const orderID = "CN" + Math.floor(1000 + Math.random() * 9000); // สุ่มเลข Order
-            history.unshift({
+            const orderID = "CN" + Math.floor(1000 + Math.random() * 9000);
+            
+            const newOrder = {
                 orderId: orderID,
                 total: finalTotal.toLocaleString(),
-                date: new Date().toLocaleDateString('th-TH')
-            });
-            localStorage.setItem('coolNow_History', JSON.stringify(history.slice(0, 5)));
+                date: new Date().toLocaleDateString('th-TH'),
+                time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+            };
+            history.unshift(newOrder);
+            localStorage.setItem('coolNow_History', JSON.stringify(history.slice(0, 10))); // เก็บ 10 รายการล่าสุด
 
-            // 3. เตรียมข้อมูลส่งไปหน้า Success
+            // เตรียมข้อมูลส่งไปหน้า Success (ใช้ SessionStorage เพราะข้อมูลรูปภาพมีขนาดใหญ่)
             const reader = new FileReader();
             reader.onload = function(e) {
                 const orderData = {
+                    orderId: orderID,
                     customerName: address.split('\n')[0],
                     phone: phone,
-                    items: cart.map(i => `- ${i.name} (${i.qty})`).join('\n'),
+                    items: cart.map(i => `${i.name} (x${i.qty})`).join(', '),
                     totalAmount: finalTotal.toLocaleString() + ' ฿',
                     address: address,
-                    slipImage: e.target.result
+                    slipImage: e.target.result // Base64 String
                 };
                 sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
                 
-                localStorage.removeItem('coolNowCart'); // ล้างตะกร้า
+                // ล้างตะกร้าสินค้า
+                localStorage.removeItem('coolNowCart');
+                
+                // ไปหน้าสำเร็จ
                 window.location.href = 'order-success.html';
             };
             reader.readAsDataURL(slipFile);
         }
 
-        // Drag & Drop
+        // 5. Drag & Drop ฟังก์ชัน
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
         uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -239,9 +264,10 @@
             }
         });
 
+        // เริ่มต้นทำงาน
         document.addEventListener('DOMContentLoaded', () => {
             renderCheckout();
-            loadSavedAddress(); // โหลดข้อมูลเก่าทันทีที่เข้าหน้า
+            loadSavedAddress();
         });
     </script>
 </body>
