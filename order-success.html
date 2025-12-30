@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,16 +64,22 @@
                         <span id="displayTotal" class="font-bold text-pink-500 text-lg">0 ฿</span>
                     </div>
                     <div class="border-t border-gray-100 mt-2 pt-2">
-                        <p class="text-[11px] text-gray-400 text-center italic">*ระบบจะส่งยืนยันการจัดส่งผ่านอีเมล/SMS ของท่าน</p>
+                        <p class="text-[11px] text-gray-400 text-center italic">*โปรดแคปหน้าจอนี้ หรือกดปุ่มส่ง LINE เพื่อยืนยัน</p>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
-                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95 active-push">
+                <button onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
+                    แจ้งยืนยันผ่าน LINE 💬
+                </button>
+
+                <a href="index.html" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95">
                     กลับไปช้อปต่อ 🛍️
                 </a>
-                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-4 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm flex items-center justify-center gap-2">
+                
+                <button onclick="window.print()" class="w-full bg-white border border-gray-100 text-gray-500 py-3 rounded-2xl font-medium hover:bg-gray-50 transition-all text-sm flex items-center justify-center gap-2">
                     บันทึกใบเสร็จ 📄
                 </button>
             </div>
@@ -81,7 +87,7 @@
 
         <p class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-2">
             <span>พบปัญหา?</span>
-            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4">ติดต่อแอดมินทาง LINE</a>
+            <a href="https://lin.ee/RhhUwXf" class="text-pink-500 font-bold underline decoration-pink-200 underline-offset-4 text-xs">ติดต่อแอดมิน</a>
         </p>
     </div>
 
@@ -89,6 +95,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // Firebase Config (คงไว้ตามเดิม)
         const firebaseConfig = {
             apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
             authDomain: "coolnow-1d8f4.firebaseapp.com",
@@ -97,12 +104,11 @@
             messagingSenderId: "857055916856",
             appId: "1:857055916856:web:c32673482de318e04a07cd"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
         function initSuccessPage() {
-            // 1. Confetti effect - เฉลิมฉลองการสั่งซื้อ
+            // 1. Confetti effect
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -110,15 +116,13 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
-            // 2. Load Order Data จาก sessionStorage
+            // 2. Load Order Data จาก sessionStorage (ที่ส่งมาจากหน้า checkout)
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
             
             if (lastOrder) {
                 document.getElementById('displayCustName').innerText = lastOrder.customerName;
-                // แสดงผลยอดเงิน (lastOrder.totalAmount มีหน่วย ฿ มาด้วยอยู่แล้ว)
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
             } else {
-                // กรณีโหลดข้อมูลไม่เจอ ให้พยายามดึงจาก Auth
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         document.getElementById('displayCustName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'ลูกค้า';
@@ -126,16 +130,45 @@
                 });
             }
 
-            // 3. Generate Order ID อัตโนมัติ (ปีเดือนวัน + สุ่ม)
+            // 3. Generate Order ID
             const date = new Date();
             const dateStr = date.getFullYear().toString().substring(2) + 
                           (date.getMonth()+1).toString().padStart(2, '0') + 
                           date.getDate().toString().padStart(2, '0');
             const randomNum = Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('orderId').innerText = `#CN-${dateStr}${randomNum}`;
+            const finalOrderID = `#CN-${dateStr}${randomNum}`;
+            document.getElementById('orderId').innerText = finalOrderID;
 
-            // 4. ล้างตะกร้าสินค้า
+            // 4. ล้างตะกร้า
             localStorage.removeItem('coolNowCart');
+        }
+
+        // ฟังก์ชันส่งข้อมูลเข้า LINE
+        window.sendLineNotify = function() {
+            const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
+            const orderId = document.getElementById('orderId').innerText;
+            
+            if (!lastOrder) {
+                alert('ไม่พบข้อมูลการสั่งซื้อ กรุณาติดต่อแอดมิน');
+                return;
+            }
+
+            // จัดรูปแบบข้อความ
+            const message = `✨ แจ้งชำระเงินใหม่ ✨\n` +
+                          `--------------------------\n` +
+                          `เลขที่สั่งซื้อ: ${orderId}\n` +
+                          `คุณลูกค้า: ${lastOrder.customerName}\n` +
+                          `ยอดโอน: ${lastOrder.totalAmount}\n` +
+                          `รายการสินค้า:\n${lastOrder.items}\n` +
+                          `--------------------------\n` +
+                          `📍 ที่อยู่จัดส่ง:\n${lastOrder.address}`;
+
+            // ลิงก์ไปยัง LINE OA (เปลี่ยน @yourid เป็น ID ร้านคุณ)
+            const lineOA_ID = "@RhhUwXf"; 
+            const encodedMsg = encodeURIComponent(message);
+            const lineUrl = `https://line.me/R/oaMessage/${lineOA_ID}/?${encodedMsg}`;
+
+            window.location.href = lineUrl;
         }
 
         window.addEventListener('DOMContentLoaded', initSuccessPage);
