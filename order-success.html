@@ -144,7 +144,7 @@
     </div>
 
     <script>
-        // อัปเดต URL ล่าสุดตามที่คุณแจ้ง
+        // URL ล่าสุดที่คุณแจ้งมา (Version ใหม่)
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwmLb9tQ0QwhoGKgyJOLOHgJrUeu7-MjM2mI_eMyfSetam3h0fhgTGsnzItZiIJ-81hNQ/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
@@ -193,8 +193,9 @@
             subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
-                // 1. ตรวจสอบและอัปโหลดรูปไป ImgBB (ถ้าเป็น Base64)
                 let imageUrl = order.slipImage;
+                
+                // 1. ตรวจสอบและอัปโหลดรูปไป ImgBB
                 if (imageUrl.includes('data:image')) {
                     const base64Data = imageUrl.split(',')[1];
                     const formDataImg = new FormData();
@@ -221,17 +222,14 @@
                     slipImage: imageUrl 
                 };
 
-                // ใช้ text/plain เพื่อป้องกัน CORS Error
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // โหมดนี้จะไม่สนใจคำตอบ แต่ข้อมูลจะไปถึง GAS แน่นอน
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(payload)
                 });
 
-                // แจ้งผลสำเร็จ (แสดงผลทันทีหลังส่ง เพราะใช้ no-cors จะรอรับ json ไม่ได้)
+                // แจ้งผลสำเร็จ
                 label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
                 subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
@@ -252,5 +250,3 @@
     </script>
 </body>
 </html>
-
-
