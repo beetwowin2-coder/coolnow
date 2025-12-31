@@ -44,10 +44,13 @@
 </head>
 <body class="bg-[#FBFBFD] text-gray-800 pb-20">
 
-    <nav class="p-6">
+    <nav class="p-6 flex justify-between items-center">
         <a href="index.html" class="text-gray-400 hover:text-gray-600 flex items-center gap-2 transition group">
             <span class="group-hover:-translate-x-1 transition-transform">←</span> กลับไปเลือกสินค้า
         </a>
+        <div id="userStatus" class="text-[10px] bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100 text-gray-400">
+            Checking status...
+        </div>
     </nav>
 
     <main class="container mx-auto max-w-2xl px-4">
@@ -136,14 +139,27 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        window.loggedInUserEmail = null;
+        // ตัวแปรเก็บ Identity หลักของ User
+        window.currentUserId = null;
 
         onAuthStateChanged(auth, (user) => {
+            const statusDiv = document.getElementById('userStatus');
             if (user) {
-                window.loggedInUserEmail = user.email;
+                // เลือกใช้ phoneNumber ถ้ามี (Phone Login) ถ้าไม่มีให้ใช้ email (Google Login)
+                window.currentUserId = user.phoneNumber || user.email;
+                statusDiv.innerText = `Logged in as: ${window.currentUserId}`;
+
+                // ถ้าเป็น Phone Login ให้ Auto-fill เบอร์โทรศัพท์
+                if (user.phoneNumber) {
+                    const cleanPhone = user.phoneNumber.replace('+66', '0');
+                    const phoneInput = document.getElementById('phone');
+                    phoneInput.value = cleanPhone;
+                    phoneInput.readOnly = true; 
+                    phoneInput.classList.add('opacity-70', 'cursor-not-allowed');
+                }
             } else {
                 alert("กรุณาเข้าสู่ระบบก่อนชำระเงินครับ");
-                window.location.href = 'index.html';
+                window.location.href = 'account.html'; // เด้งไปหน้าบัญชี/เข้าสู่ระบบ
             }
         });
     </script>
@@ -155,7 +171,11 @@
         function loadSavedAddress() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
             if (savedData) {
-                document.getElementById('phone').value = savedData.phone || '';
+                // โหลดที่อยู่เดิมมาใส่ (ถ้าเบอร์โทรไม่ได้ล็อคจาก Firebase ก็โหลดเบอร์มาด้วย)
+                const phoneInput = document.getElementById('phone');
+                if (!phoneInput.readOnly) {
+                    phoneInput.value = savedData.phone || '';
+                }
                 document.getElementById('address').value = savedData.address || '';
             }
         }
@@ -256,7 +276,6 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
-        // --- ส่วนที่แก้ไข: เพิ่มระบบบีบอัดภาพเพื่อป้องกันการค้าง ---
         function confirmOrder(event) {
             const phone = document.getElementById('phone').value;
             const address = document.getElementById('address').value;
@@ -270,29 +289,14 @@
             btn.disabled = true;
             btn.innerHTML = `<div class="spinner"></div> กำลังบันทึกข้อมูล...`;
 
-            const currentUserEmail = window.loggedInUserEmail || 'guest';
-            let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
-            if (!allHistory[currentUserEmail]) allHistory[currentUserEmail] = [];
-
-            const orderID = "CN" + Math.floor(1000 + Math.random() * 9000);
-            const now = new Date();
-            
-            const newOrder = {
-                orderId: orderID,
-                total: finalTotal.toLocaleString(),
-                date: now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-                items: cart.map(item => ({ name: item.name, qty: item.qty }))
-            };
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // สร้าง Canvas เพื่อ Resize และบีบอัดภาพ
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    const MAX_WIDTH = 800; // ลดความกว้างให้เหลือไม่เกิน 800px
+                    const MAX_WIDTH = 800; 
                     let width = img.width;
                     let height = img.height;
 
@@ -305,8 +309,21 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // แปลงเป็น JPEG คุณภาพ 70% เพื่อให้ขนาดไฟล์เล็กลงมาก
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                    const orderID = "CN" + Math.floor(1000 + Math.random() * 9000);
+                    const now = new Date();
+                    const timestamp = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // ใช้ ID จาก Firebase (ถ้าไม่มีให้เป็น guest)
+                    const userId = window.currentUserId || 'guest';
+
+                    const newOrder = {
+                        orderId: orderID,
+                        total: finalTotal.toLocaleString(),
+                        date: timestamp,
+                        items: cart.map(item => ({ name: item.name, qty: item.qty }))
+                    };
 
                     const orderData = {
                         orderId: orderID,
@@ -318,14 +335,25 @@
                         slipImage: compressedBase64
                     };
 
-                    // บันทึกข้อมูล
-                    allHistory[currentUserEmail].unshift(newOrder);
-                    localStorage.setItem('orderHistory', JSON.stringify(allHistory));
-                    localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
-                    sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
-                    
-                    localStorage.removeItem('coolNowCart');
-                    window.location.href = 'order-success.html';
+                    try {
+                        // บันทึกประวัติแยกตาม User ID
+                        let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+                        if (!allHistory[userId]) allHistory[userId] = [];
+                        
+                        allHistory[userId].unshift(newOrder);
+                        
+                        localStorage.setItem('orderHistory', JSON.stringify(allHistory));
+                        localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
+                        sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+                        
+                        localStorage.removeItem('coolNowCart');
+                        window.location.href = 'order-success.html';
+                    } catch (error) {
+                        console.error("Storage Error:", error);
+                        alert("ขออภัย! หน่วยความจำประวัติการสั่งซื้อเต็ม แต่ข้อมูลคำสั่งซื้อปัจจุบันถูกบันทึกแล้ว");
+                        localStorage.removeItem('coolNowCart');
+                        window.location.href = 'order-success.html';
+                    }
                 };
                 img.src = e.target.result;
             };
@@ -334,18 +362,7 @@
 
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.onclick = () => document.getElementById('slipInput').click();
-        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-        uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('drag-over'); });
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('slipInput').files = files;
-                previewSlip(document.getElementById('slipInput'));
-            }
-        });
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             renderCheckout();
             loadSavedAddress();
