@@ -9,7 +9,7 @@ function injectLineButton() {
                     สอบถามแอดมิน คลิก!
                 </span>
                 <div class="w-14 h-14 bg-[#06C755] rounded-full shadow-xl flex items-center justify-center border-2 border-white">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-8 h-8 filter brightness-0 invert" alt="LINE">
+                    <img src="line.png" class="w-8 h-8" alt="LINE">
                 </div>
             </div>
         </a>
@@ -22,4 +22,5 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectLineButton);
 } else {
     injectLineButton();
+
 }
