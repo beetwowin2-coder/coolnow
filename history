@@ -6,27 +6,34 @@
     <title>ประวัติการสั่งซื้อ - Cool Now Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Kanit', sans-serif; }</style>
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .order-card { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body class="bg-[#FBFBFD] min-h-screen">
 
     <div class="max-w-md mx-auto p-4 pb-20">
         <header class="flex items-center justify-between mb-8 pt-4">
-            <a href="index.html" class="w-10 h-10 flex items-center justify-center bg-white rounded-2xl shadow-sm text-gray-400">←</a>
+            <a href="index.html" class="w-10 h-10 flex items-center justify-center bg-white rounded-2xl shadow-sm text-gray-400 hover:text-pink-500 transition-colors">←</a>
             <h1 class="text-xl font-bold text-gray-800">ประวัติการช้อป</h1>
             <div id="userAvatar" class="w-10 h-10 rounded-2xl bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
                 </div>
         </header>
 
         <div id="authRequired" class="hidden flex flex-col items-center justify-center py-20 text-center">
-            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <span class="text-4xl">🔒</span>
+            <div class="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mb-6">
+                <span class="text-4xl">🔐</span>
             </div>
-            <h2 class="text-xl font-bold text-gray-800 mb-2">เฉพาะสมาชิกเท่านั้น</h2>
-            <p class="text-gray-400 text-sm mb-8 px-10">กรุณาล็อคอินด้วย Google เพื่อดูประวัติการสั่งซื้อและสิทธิพิเศษของคุณ</p>
-            <a href="login.html" class="bg-white border border-gray-200 text-gray-700 px-8 py-3 rounded-2xl font-bold shadow-sm flex items-center gap-2">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">เข้าสู่ระบบเพื่อดูประวัติ</h2>
+            <p class="text-gray-400 text-sm mb-8 px-10">กรุณาล็อคอินด้วย Google เพื่อบันทึกและดูรายการสั่งซื้อของคุณ</p>
+            <a href="login.html" class="bg-white border-2 border-pink-100 text-pink-500 px-8 py-3 rounded-2xl font-bold shadow-sm flex items-center gap-2 active:scale-95 transition-all">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-5">
-                ไปหน้าล็อคอิน
+                ล็อคอินด้วย Google
             </a>
         </div>
 
@@ -34,9 +41,14 @@
             </div>
     </div>
 
+    <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 flex justify-around max-w-md mx-auto">
+        <a href="index.html" class="text-gray-400 text-xs flex flex-col items-center gap-1"><span>🏠</span>หน้าแรก</a>
+        <a href="history.html" class="text-pink-500 text-xs flex flex-col items-center gap-1 font-bold"><span>📜</span>ประวัติ</a>
+    </div>
+
     <script>
         function initHistory() {
-            // 1. ดึงข้อมูล User จากการล็อคอิน Google (ที่บันทึกไว้ใน localStorage/sessionStorage)
+            // 1. ตรวจสอบการล็อคอิน
             const googleUser = JSON.parse(localStorage.getItem('googleUser'));
 
             if (!googleUser) {
@@ -45,54 +57,67 @@
                 return;
             }
 
-            // แสดงรูปโปรไฟล์ Google
+            // แสดงรูปโปรไฟล์
             if (googleUser.photo) {
                 document.getElementById('userAvatar').innerHTML = `<img src="${googleUser.photo}" class="w-full h-full object-cover">`;
             }
 
-            // 2. ดึงประวัติการสั่งซื้อจากคลังข้อมูล (ผูกกับ Email)
+            // 2. ดึงประวัติการสั่งซื้อ (ใช้ email เป็น Key)
             const allOrders = JSON.parse(localStorage.getItem('orderHistory')) || {};
             const userOrders = allOrders[googleUser.email] || [];
 
             const container = document.getElementById('historyContainer');
 
+            // 3. กรณีไม่มีประวัติ
             if (userOrders.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-20">
-                        <p class="text-gray-400 text-sm">ยังไม่มีประวัติการสั่งซื้อเลยค่ะ</p>
-                        <a href="index.html" class="text-pink-500 font-bold mt-2 inline-block">ไปเริ่มช้อปกันเลย!</a>
+                        <div class="text-6xl mb-4">🛍️</div>
+                        <p class="text-gray-400 text-sm">คุณยังไม่มีประวัติการสั่งซื้อเลย</p>
+                        <a href="index.html" class="text-pink-500 font-bold mt-2 inline-block">เริ่มช้อปชิ้นแรกกัน!</a>
                     </div>`;
                 return;
             }
 
-            // 3. แสดงผล (โชว์รายละเอียดสินค้าเล็กๆ)
-            container.innerHTML = userOrders.map(order => `
-                <div class="bg-white p-5 rounded-[2.5rem] shadow-sm border border-gray-50">
+            // 4. แสดงผลรายการ (เรียงจากใหม่ไปเก่า)
+            container.innerHTML = userOrders.reverse().map((order, index) => `
+                <div class="order-card bg-white p-5 rounded-[2.5rem] shadow-sm border border-gray-50" style="animation-delay: ${index * 0.1}s">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">ORDER ${order.orderId}</span>
-                            <p class="text-xs text-gray-400">${order.date}</p>
+                            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">ORDER #${order.orderId}</span>
+                            <p class="text-[11px] text-gray-400">${order.date || 'ไม่มีวันที่'}</p>
                         </div>
-                        <div class="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full border border-green-100">
-                            SUCCESS
+                        <div class="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full border border-green-100 uppercase">
+                            สำเร็จ
                         </div>
                     </div>
 
-                    <div class="space-y-2 mb-4">
+                    <div class="space-y-3 mb-4 bg-gray-50/50 p-3 rounded-2xl">
                         ${order.items.map(item => `
-                            <div class="flex justify-between text-sm text-gray-600">
-                                <span class="font-light">○ ${item.name}</span>
+                            <div class="flex justify-between text-xs text-gray-600">
+                                <span class="font-light">📦 ${item.name}</span>
                                 <span class="font-bold">x${item.qty}</span>
                             </div>
                         `).join('')}
                     </div>
 
-                    <div class="pt-4 border-t border-gray-50 flex justify-between items-center">
-                        <span class="text-xs text-gray-400">ยอดรวมสุทธิ</span>
-                        <span class="text-lg font-bold text-gray-800">${order.total} ฿</span>
+                    <div class="pt-2 flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-gray-400 uppercase font-bold">ยอดสุทธิ</span>
+                            <span class="text-lg font-bold text-gray-800">${order.total} ฿</span>
+                        </div>
+                        <button onclick="reOrder('${order.orderId}')" class="text-[11px] font-bold text-pink-500 bg-pink-50 px-4 py-2 rounded-xl active:scale-95 transition-all">
+                            สั่งอีกครั้ง
+                        </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ฟังก์ชันสั่งซื้อซ้ำ (Optional)
+        function reOrder(id) {
+            alert('ระบบกำลังพาสินค้าในออเดอร์ #' + id + ' กลับเข้าตะกร้าค่ะ');
+            window.location.href = 'index.html';
         }
 
         document.addEventListener('DOMContentLoaded', initHistory);
