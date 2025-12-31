@@ -30,7 +30,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ตกแต่งปุ่มเพิ่มลด */
         .qty-btn {
             width: 28px;
             height: 28px;
@@ -161,10 +160,8 @@
             }
         }
 
-        // --- เพิ่ม Logic สำหรับเพิ่ม-ลดสินค้า ---
         window.updateQty = function(index, change) {
             cart[index].qty += change;
-            
             if (cart[index].qty < 1) {
                 if (confirm('ต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?')) {
                     cart.splice(index, 1);
@@ -172,13 +169,11 @@
                     cart[index].qty = 1;
                 }
             }
-            
             localStorage.setItem('coolNowCart', JSON.stringify(cart));
             renderCheckout();
         }
 
         function renderCheckout() {
-            // ดึงข้อมูลล่าสุดจาก cart
             const itemsContainer = document.getElementById('checkoutItems');
             const summaryArea = document.getElementById('summaryArea');
             const qrImg = document.getElementById('promptpayQR');
@@ -187,7 +182,7 @@
             if (cart.length === 0) {
                 itemsContainer.innerHTML = `<div class="bg-white p-12 rounded-[2rem] text-center text-gray-400">ตะกร้าว่างเปล่า</div>`;
                 summaryArea.innerHTML = "";
-                qrImg.src = ""; // เคลียร์ QR
+                qrImg.src = "";
                 confirmBtn.disabled = true;
                 confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 return;
@@ -261,6 +256,7 @@
             document.getElementById('previewContainer').classList.add('hidden');
         }
 
+        // --- ส่วนที่แก้ไข: เพิ่มระบบบีบอัดภาพเพื่อป้องกันการค้าง ---
         function confirmOrder(event) {
             const phone = document.getElementById('phone').value;
             const address = document.getElementById('address').value;
@@ -288,24 +284,50 @@
                 items: cart.map(item => ({ name: item.name, qty: item.qty }))
             };
 
-            allHistory[currentUserEmail].unshift(newOrder);
-            localStorage.setItem('orderHistory', JSON.stringify(allHistory));
-            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
-
             const reader = new FileReader();
             reader.onload = function(e) {
-                const orderData = {
-                    orderId: orderID,
-                    customerName: address.split('\n')[0],
-                    phone: phone,
-                    items: cart.map(i => `${i.name} (x${i.qty})`).join(', '),
-                    totalAmount: finalTotal.toLocaleString() + ' ฿',
-                    address: address,
-                    slipImage: e.target.result
+                const img = new Image();
+                img.onload = function() {
+                    // สร้าง Canvas เพื่อ Resize และบีบอัดภาพ
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const MAX_WIDTH = 800; // ลดความกว้างให้เหลือไม่เกิน 800px
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // แปลงเป็น JPEG คุณภาพ 70% เพื่อให้ขนาดไฟล์เล็กลงมาก
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                    const orderData = {
+                        orderId: orderID,
+                        customerName: address.split('\n')[0],
+                        phone: phone,
+                        items: cart.map(i => `${i.name} (x${i.qty})`).join(', '),
+                        totalAmount: finalTotal.toLocaleString() + ' ฿',
+                        address: address,
+                        slipImage: compressedBase64
+                    };
+
+                    // บันทึกข้อมูล
+                    allHistory[currentUserEmail].unshift(newOrder);
+                    localStorage.setItem('orderHistory', JSON.stringify(allHistory));
+                    localStorage.setItem('coolNow_CustomerData', JSON.stringify({ phone, address }));
+                    sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+                    
+                    localStorage.removeItem('coolNowCart');
+                    window.location.href = 'order-success.html';
                 };
-                sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
-                localStorage.removeItem('coolNowCart');
-                window.location.href = 'order-success.html';
+                img.src = e.target.result;
             };
             reader.readAsDataURL(slipFile);
         }
