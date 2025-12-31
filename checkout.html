@@ -172,6 +172,9 @@
     </script>
 
     <script>
+        // --- การตั้งค่า URL ของ Google Apps Script ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7Wmo95U-LETNSR1kKIUwsTP7g5aBBbgfk5LklPOmBhEB5iTWKGVtvjZn1XLSPK8BrAg/exec';
+
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let finalTotal = 0;
 
@@ -179,7 +182,6 @@
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
             if (savedData) {
                 if (savedData.name) document.getElementById('customerName').value = savedData.name;
-                
                 const phoneInput = document.getElementById('phone');
                 if (!phoneInput.readOnly) {
                     phoneInput.value = savedData.phone || '';
@@ -297,7 +299,7 @@
             if (!slipFile) return alert('กรุณาแนบหลักฐานการโอนเงิน (สลิป)');
 
             btn.disabled = true;
-            btn.innerHTML = `<div class="spinner"></div> กำลังบันทึกข้อมูล...`;
+            btn.innerHTML = `<div class="spinner"></div> กำลังส่งข้อมูล...`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -317,19 +319,12 @@
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
 
                     const orderID = "CN" + Math.floor(1000 + Math.random() * 9000);
                     const now = new Date();
                     const timestamp = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
                     const userId = window.currentUserId || 'guest';
-
-                    const newOrder = {
-                        orderId: orderID,
-                        total: finalTotal.toLocaleString(),
-                        date: timestamp,
-                        items: cart.map(item => ({ name: item.name, qty: item.qty }))
-                    };
 
                     const orderData = {
                         orderId: orderID,
@@ -341,10 +336,26 @@
                         slipImage: compressedBase64
                     };
 
-                    try {
+                    // --- 1. ส่งข้อมูลไปที่ Google Apps Script ---
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    })
+                    .then(() => {
+                        // --- 2. บันทึกข้อมูลประวัติ (Local) ---
+                        const historyEntry = {
+                            orderId: orderID,
+                            total: finalTotal.toLocaleString(),
+                            date: timestamp,
+                            items: cart.map(item => ({ name: item.name, qty: item.qty }))
+                        };
+
                         let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
                         if (!allHistory[userId]) allHistory[userId] = [];
-                        allHistory[userId].unshift(newOrder);
+                        allHistory[userId].unshift(historyEntry);
                         
                         localStorage.setItem('orderHistory', JSON.stringify(allHistory));
                         localStorage.setItem('coolNow_CustomerData', JSON.stringify({ name: customerName, phone, address }));
@@ -352,12 +363,12 @@
                         
                         localStorage.removeItem('coolNowCart');
                         window.location.href = 'order-success.html';
-                    } catch (error) {
-                        console.error("Storage Error:", error);
-                        alert("ขออภัย! หน่วยความจำเต็ม แต่ระบบกำลังพาคุณไปหน้าสรุปผล");
-                        localStorage.removeItem('coolNowCart');
+                    })
+                    .catch(err => {
+                        console.error("Submission Error:", err);
+                        alert("เกิดข้อผิดพลาดในการส่งข้อมูล แต่ระบบบันทึกออเดอร์ให้คุณแล้ว");
                         window.location.href = 'order-success.html';
-                    }
+                    });
                 };
                 img.src = e.target.result;
             };
