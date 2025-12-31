@@ -41,7 +41,7 @@
 
         <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-1">สั่งซื้อเรียบร้อย!</h1>
-            <p class="text-gray-400 text-sm font-light mb-8">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">...</span> ที่ไว้วางใจเรา</p>
+            <p class="text-gray-400 text-sm font-light mb-8">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
             
             <div class="text-left bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 mb-6">
                 <div class="p-4 bg-gray-100/50 space-y-1 border-b border-white">
@@ -60,18 +60,18 @@
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ชื่อผู้รับ</p>
                         <p id="displayFullName" class="text-xs text-gray-700 font-bold"></p>
                     </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">เบอร์โทรศัพท์</p>
-                        <p id="displayPhone" class="text-xs text-gray-700 font-bold"></p>
-                    </div>
-                    <div>
+
+                    <div class="pt-2 border-t border-gray-200/50">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ที่อยู่จัดส่ง</p>
+                        <p id="displayPhone" class="text-xs text-gray-700 font-bold mb-1"></p>
                         <p id="displayAddress" class="text-xs text-gray-500 leading-relaxed"></p>
                     </div>
+
                     <div class="pt-2 border-t border-gray-200/50">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
                         <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
+
                     <div class="pt-2">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการโอน</p>
                         <div class="w-full h-32 bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -87,28 +87,30 @@
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
                         <span>แจ้งโอนเงินให้แอดมิน</span>
                     </div>
-                    <span id="btnSubLabel" class="text-[10px] font-light opacity-80 mt-1">กดปุ่มนี้เพื่อส่งสลิปเข้าระบบทันที</span>
+                    <span id="btnSubLabel" class="text-[10px] font-light opacity-80 mt-1">กดปุ่มนี้เพื่อส่งสลิปเข้าไลน์ร้านทันที</span>
                 </button>
-                <a href="index.html" class="text-gray-400 text-sm font-bold py-2">กลับไปหน้าหลัก</a>
+
+                <a href="index.html" class="w-full bg-white border-2 border-pink-100 text-pink-500 py-3.5 rounded-2xl font-bold hover:bg-pink-50 transition-all flex items-center justify-center gap-2 active:scale-95 text-sm">
+                    กลับไปช้อปต่อ 🛍️
+                </a>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. วาง URL ของ Google Apps Script (GAS) ที่ Deploy แล้วที่นี่
-        const GAS_URL = 'ใส่_URL_เว็บแอป_ของคุณที่นี่'; 
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbw2ZCnPiP9SPxAcTdm0uaai8WMV5jR1yT16iyyTkizqXurTtHYZ_VPgK1Te_V9-TjPWWg/exec';
+'; 
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initPage() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ec4899', '#3b82f6', '#10b981'] });
 
             const order = JSON.parse(sessionStorage.getItem('lastOrder'));
             if (!order) { window.location.href = 'index.html'; return; }
 
-            // ดึงชื่อมาแสดงผล
+            // แสดงข้อมูล
             document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
-            document.getElementById('displayFullName').innerText = order.customerName || '-';
-            
+            document.getElementById('displayFullName').innerText = order.customerName || '-'; // แสดงชื่อในช่องชื่อผู้รับ
             document.getElementById('displayTotal').innerText = order.totalAmount;
             document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
             document.getElementById('displayAddress').innerText = order.address;
@@ -134,10 +136,9 @@
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
             label.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
-            subLabel.innerText = "ห้ามปิดหน้าจอนี้จนกว่าจะเสร็จสิ้น";
+            subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
-                // 1. อัปโหลดรูปสลิปไป ImgBB
                 const base64Data = order.slipImage.split(',')[1];
                 const formData = new FormData();
                 formData.append("image", base64Data);
@@ -150,14 +151,13 @@
                 if (!imgResult.success) throw new Error("Upload Fail");
                 const imageUrl = imgResult.data.url;
 
-                // 2. ส่งข้อมูลไป Google Sheets & LINE ผ่าน GAS
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         orderId: order.orderId,
-                        customerName: order.customerName, // ส่งชื่อแยกไป
+                        customerName: order.customerName,
                         phone: order.phone,
                         totalAmount: order.totalAmount,
                         items: order.items,
@@ -166,14 +166,14 @@
                     })
                 });
 
-                label.innerHTML = `✅ ส่งข้อมูลสำเร็จ!`;
-                subLabel.innerText = "แอดมินได้รับข้อมูลเรียบร้อยแล้วค่ะ";
+                label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
+                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบสลิปให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
-                alert("แจ้งโอนเงินสำเร็จ! ขอบคุณค่ะ");
+                alert("ส่งข้อมูลสำเร็จ! แอดมินได้รับข้อมูลการโอนเงินเรียบร้อยแล้วค่ะ");
 
             } catch (error) {
                 console.error(error);
-                alert("เกิดข้อผิดพลาด กรุณาแคปหน้าจอนี้ส่งให้แอดมินทางแชทนะคะ");
+                alert("ขออภัย! ระบบขัดข้อง กรุณาแคปภาพหน้าจอนี้ส่งให้แอดมินทางไลน์แทนนะคะ");
                 btn.disabled = false;
                 btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
                 label.innerHTML = `<span>ลองส่งอีกครั้ง</span>`;
