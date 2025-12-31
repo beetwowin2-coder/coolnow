@@ -9,10 +9,22 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Kanit', sans-serif; }
-        .success-check { animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes scaleIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .success-check {
+            animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .step-line { position: absolute; top: 12px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
+        .step-dot { position: relative; z-index: 10; }
+        
         .capture-banner { animation: slideDown 0.5s ease-out; }
-        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
         .loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #06C755;
@@ -22,7 +34,10 @@
             animation: spin 1s linear infinite;
             display: inline-block;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center p-4 pt-12">
@@ -43,6 +58,24 @@
             <h1 class="text-2xl font-bold text-gray-800 mb-1">สั่งซื้อเรียบร้อย!</h1>
             <p class="text-gray-400 text-sm font-light mb-8">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
             
+            <div class="mb-8 relative">
+                <div class="step-line"></div>
+                <div class="flex justify-between px-4">
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-green-100">1</div>
+                        <span class="text-[9px] font-bold text-gray-500 uppercase">จ่ายแล้ว</span>
+                    </div>
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-blue-100">2</div>
+                        <span class="text-[9px] font-bold text-gray-800 uppercase">รอเช็คสลิป</span>
+                    </div>
+                    <div class="step-dot flex flex-col items-center">
+                        <div class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-[10px] mb-1">3</div>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">เตรียมส่ง</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="text-left bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 mb-6">
                 <div class="p-4 bg-gray-100/50 space-y-1 border-b border-white">
                     <div class="flex justify-between text-[11px] uppercase tracking-wider font-bold text-gray-400">
@@ -57,19 +90,14 @@
 
                 <div class="p-4 space-y-3">
                     <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ชื่อผู้รับ</p>
-                        <p id="displayFullName" class="text-xs text-gray-700 font-bold"></p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
+                        <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
 
                     <div class="pt-2 border-t border-gray-200/50">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ที่อยู่จัดส่ง</p>
                         <p id="displayPhone" class="text-xs text-gray-700 font-bold mb-1"></p>
                         <p id="displayAddress" class="text-xs text-gray-500 leading-relaxed"></p>
-                    </div>
-
-                    <div class="pt-2 border-t border-gray-200/50">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
-                        <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
 
                     <div class="pt-2">
@@ -95,30 +123,49 @@
                 </a>
             </div>
         </div>
+
+        <div class="flex items-center justify-center gap-3 text-gray-400 text-xs">
+            <div class="w-12 h-12 bg-white p-1 rounded-lg shadow-sm">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://lin.ee/RhhUwXf" alt="QR">
+            </div>
+            <p class="text-left leading-tight">พบปัญหา? สแกนไลน์<br><span class="font-bold text-gray-600">คุยกับแอดมิน</span></p>
+        </div>
     </div>
 
     <script>
+        // ตั้งค่าตัวแปรสำคัญ
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbw2ZCnPiP9SPxAcTdm0uaai8WMV5jR1yT16iyyTkizqXurTtHYZ_VPgK1Te_V9-TjPWWg/exec';
-'; 
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initPage() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ec4899', '#3b82f6', '#10b981'] });
+            // แสดงพลุฉลอง
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ec4899', '#3b82f6', '#10b981']
+            });
 
+            // ดึงข้อมูลจาก Session
             const order = JSON.parse(sessionStorage.getItem('lastOrder'));
-            if (!order) { window.location.href = 'index.html'; return; }
+            
+            if (!order) {
+                window.location.href = 'index.html';
+                return;
+            }
 
-            // แสดงข้อมูล
+            // แสดงข้อมูลในหน้าเว็บ
             document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
-            document.getElementById('displayFullName').innerText = order.customerName || '-'; // แสดงชื่อในช่องชื่อผู้รับ
             document.getElementById('displayTotal').innerText = order.totalAmount;
             document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
             document.getElementById('displayAddress').innerText = order.address;
             document.getElementById('orderId').innerText = `#${order.orderId}`;
             document.getElementById('displaySlip').src = order.slipImage;
 
+            // แสดงรายการสินค้า
             const itemsContainer = document.getElementById('itemsContainer');
-            itemsContainer.innerHTML = order.items.split(',').map(item => `
+            const itemsArray = order.items.split(',');
+            itemsContainer.innerHTML = itemsArray.map(item => `
                 <div class="flex justify-between border-b border-gray-100 pb-1 mb-1">
                     <span>${item.trim()}</span>
                 </div>
@@ -133,12 +180,14 @@
 
             if (!order) return;
 
+            // สถานะ Loading
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
             label.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
             subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
+                // 1. อัปโหลดรูปสลิปไป Cloud (ImgBB)
                 const base64Data = order.slipImage.split(',')[1];
                 const formData = new FormData();
                 formData.append("image", base64Data);
@@ -148,9 +197,11 @@
                     body: formData
                 });
                 const imgResult = await imgResponse.json();
+                
                 if (!imgResult.success) throw new Error("Upload Fail");
                 const imageUrl = imgResult.data.url;
 
+                // 2. ส่งข้อมูลเข้า Google Sheets / Line Notify ผ่าน Apps Script
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -166,9 +217,11 @@
                     })
                 });
 
+                // สำเร็จ
                 label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
                 subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบสลิปให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
+                
                 alert("ส่งข้อมูลสำเร็จ! แอดมินได้รับข้อมูลการโอนเงินเรียบร้อยแล้วค่ะ");
 
             } catch (error) {
@@ -184,3 +237,6 @@
     </script>
 </body>
 </html>
+
+
+
