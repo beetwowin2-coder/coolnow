@@ -122,5 +122,6 @@
 
         document.addEventListener('DOMContentLoaded', initHistory);
     </script>
+<script src="footer.js"></script>
 </body>
 </html>
