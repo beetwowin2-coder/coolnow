@@ -18,6 +18,8 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ซ่อนลูกศรใน input number */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] flex flex-col min-h-screen text-gray-800">
@@ -56,20 +58,44 @@
         </div>
 
         <div id="loginSection" class="hidden bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/30 max-w-md w-full border border-gray-50 text-center">
-            <div class="w-20 h-20 bg-pink-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl">
-                ✨
-            </div>
+            <div class="w-20 h-20 bg-pink-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl">✨</div>
             <h2 class="text-2xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ</h2>
             <p class="text-gray-400 text-sm mb-10 leading-relaxed">เข้าสู่ระบบเพื่อสะสมคะแนน<br>และจัดการที่อยู่จัดส่งของคุณ</p>
             
-            <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-4 rounded-2xl font-bold hover:bg-gray-50 transition shadow-sm active:scale-[0.98]">
-                <img src="images/google.png" class="w-5" alt="Google">
-                <span>เข้าใช้งานด้วย Google</span>
-            </button>
+            <div class="space-y-3">
+                <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-4 rounded-2xl font-bold hover:bg-gray-50 transition shadow-sm active:scale-[0.98]">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5" alt="Google">
+                    <span>เข้าใช้งานด้วย Google</span>
+                </button>
 
-            <p class="text-[10px] text-gray-300 mt-10 uppercase tracking-[0.2em]">
-                Secure Cloud Authentication
-            </p>
+                <button id="phoneLoginBtn" class="w-full flex items-center justify-center gap-3 bg-pink-500 text-white py-4 rounded-2xl font-bold hover:bg-pink-600 transition shadow-lg shadow-pink-100 active:scale-[0.98]">
+                    <span>📱 เข้าใช้งานด้วยเบอร์โทร</span>
+                </button>
+            </div>
+
+            <p class="text-[10px] text-gray-300 mt-10 uppercase tracking-[0.2em]">Secure Cloud Authentication</p>
+        </div>
+
+        <div id="phoneModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+            <div class="bg-white p-8 rounded-[2.5rem] max-w-sm w-full shadow-2xl relative">
+                <button onclick="closePhoneModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600">✕</button>
+                
+                <div id="step1">
+                    <h3 class="text-xl font-bold mb-2">ยืนยันเบอร์โทรศัพท์</h3>
+                    <p class="text-gray-400 text-sm mb-6">ระบุเบอร์โทรศัพท์เพื่อรับรหัส OTP</p>
+                    <input type="tel" id="phoneNumber" placeholder="08xxxxxxxx" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-pink-500 text-center text-lg">
+                    <div id="recaptcha-container" class="mb-4 flex justify-center"></div>
+                    <button id="sendOtpBtn" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-pink-100">ส่งรหัส OTP</button>
+                </div>
+
+                <div id="step2" class="hidden text-center">
+                    <h3 class="text-xl font-bold mb-2">กรอกรหัส OTP</h3>
+                    <p class="text-gray-400 text-sm mb-6">รหัส 6 หลัก ส่งไปที่ <span id="targetPhone" class="text-pink-500 font-bold"></span></p>
+                    <input type="number" id="otpCode" placeholder="••••••" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-6 text-center text-3xl tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-pink-500 font-bold">
+                    <button id="verifyOtpBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100">ยืนยันรหัส</button>
+                    <button onclick="resetStep()" class="mt-4 text-xs text-gray-400 underline">เปลี่ยนเบอร์โทรศัพท์</button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -80,11 +106,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signInWithPopup, 
-            GoogleAuthProvider, 
-            signOut 
+            getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, 
+            RecaptchaVerifier, signInWithPhoneNumber 
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -98,23 +121,28 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        auth.languageCode = 'th'; // ตั้งเป็นภาษาไทยสำหรับ SMS และ ReCaptcha
         const provider = new GoogleAuthProvider();
 
         const loader = document.getElementById('loader');
         const profileSection = document.getElementById('profileSection');
         const loginSection = document.getElementById('loginSection');
+        const phoneModal = document.getElementById('phoneModal');
+        
+        let confirmationResult = null;
 
         // ตรวจสอบสถานะ User
         onAuthStateChanged(auth, (user) => {
-            loader.style.display = 'none'; // ปิดตัวโหลดเมื่อรู้สถานะแล้ว
-
+            loader.style.display = 'none';
             if (user) {
                 profileSection.classList.remove('hidden');
                 loginSection.classList.add('hidden');
-                document.getElementById('userName').innerText = user.displayName || "ยินดีต้อนรับ!";
-                document.getElementById('userEmail').innerText = user.email;
+                document.getElementById('userName').innerText = user.displayName || user.phoneNumber || "สมาชิก Cool Now";
+                document.getElementById('userEmail').innerText = user.email || "ล็อกอินผ่านเบอร์โทรศัพท์";
                 if (user.photoURL) {
                     document.getElementById('userPhoto').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
+                } else {
+                    document.getElementById('userPhoto').innerHTML = `<span class="text-5xl">📱</span>`;
                 }
             } else {
                 profileSection.classList.add('hidden');
@@ -122,24 +150,69 @@
             }
         });
 
-        // Login ด้วย Google
-        document.getElementById('googleLoginBtn').onclick = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (err) {
-                console.error("Login Error:", err);
-                if(err.code !== 'auth/popup-closed-by-user') {
-                    alert("เกิดข้อผิดพลาด: " + err.message);
-                }
+        // ------------------ Phone Login Logic ------------------
+
+        // แสดง Modal เบอร์โทร
+        document.getElementById('phoneLoginBtn').onclick = () => {
+            phoneModal.classList.remove('hidden');
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'normal',
+                    'callback': (response) => { /* Captcha ยืนยันสำเร็จ */ }
+                });
             }
         };
 
-        // Logout
+        // ส่ง OTP
+        document.getElementById('sendOtpBtn').onclick = async () => {
+            const num = document.getElementById('phoneNumber').value;
+            if (!num || num.length < 10) return alert("กรุณากรอกเบอร์โทรให้ถูกต้อง");
+
+            const formattedNum = "+66" + num.substring(1); // แปลง 08x เป็น +668x
+            const appVerifier = window.recaptchaVerifier;
+
+            try {
+                const result = await signInWithPhoneNumber(auth, formattedNum, appVerifier);
+                confirmationResult = result;
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('targetPhone').innerText = num;
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาด: " + err.message);
+                if (window.recaptchaVerifier) window.recaptchaVerifier.render().then(id => grecaptcha.reset(id));
+            }
+        };
+
+        // ยืนยัน OTP
+        document.getElementById('verifyOtpBtn').onclick = async () => {
+            const code = document.getElementById('otpCode').value;
+            try {
+                await confirmationResult.confirm(code);
+                phoneModal.classList.add('hidden');
+            } catch (err) {
+                alert("รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่");
+            }
+        };
+
+        // ฟังก์ชันช่วย
+        window.closePhoneModal = () => phoneModal.classList.add('hidden');
+        window.resetStep = () => {
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+        };
+
+        // ------------------ Google & Logout Logic ------------------
+
+        document.getElementById('googleLoginBtn').onclick = async () => {
+            try { await signInWithPopup(auth, provider); } catch (err) {
+                if(err.code !== 'auth/popup-closed-by-user') alert(err.message);
+            }
+        };
+
         document.getElementById('mainLogoutBtn').onclick = () => {
             if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-                signOut(auth).then(() => {
-                    window.location.reload();
-                });
+                signOut(auth).then(() => window.location.reload());
             }
         };
     </script>
