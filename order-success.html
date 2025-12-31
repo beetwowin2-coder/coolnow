@@ -40,7 +40,7 @@
         }
     </style>
 </head>
-<body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center p-4 pt-12">
+<body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center p-4 pt-12 pb-10">
 
     <div class="capture-banner fixed top-0 left-0 right-0 bg-yellow-400 text-yellow-900 py-2.5 text-center text-[12px] font-bold shadow-md z-50">
         ✨ สั่งซื้อสำเร็จ! กรุณากดปุ่มสีเขียวด้านล่างเพื่อแจ้งแอดมิน
@@ -92,6 +92,11 @@
 
                 <div class="p-4 space-y-3">
                     <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ชื่อ-นามสกุล ผู้รับ</p>
+                        <p id="infoFullName" class="text-xs text-gray-700 font-bold"></p>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-200/50">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
                         <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
@@ -111,6 +116,17 @@
                 </div>
             </div>
 
+            <div class="mb-6 bg-green-50 p-4 rounded-3xl border border-green-100 flex items-center gap-4">
+                <div class="w-20 h-20 bg-white p-1 rounded-xl shadow-sm shrink-0">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lin.ee/RhhUwXf" alt="QR Contact">
+                </div>
+                <div class="text-left">
+                    <p class="text-[13px] font-bold text-gray-800">ติดต่อแอดมินและยืนยันคำสั่งซื้อ</p>
+                    <p class="text-[11px] text-gray-500 leading-tight">หากพบปัญหาหรือต้องการตรวจสอบสถานะ แอดไลน์ได้ทันที</p>
+                    <a href="https://lin.ee/RhhUwXf" class="text-[10px] font-bold text-green-600 underline">LINE: @CoolNowStore</a>
+                </div>
+            </div>
+
             <div class="flex flex-col gap-3">
                 <button id="notifyBtn" onclick="sendToAdmin()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center active:scale-95 transition-all">
                     <div id="btnLabel" class="flex items-center gap-2">
@@ -125,17 +141,9 @@
                 </a>
             </div>
         </div>
-
-        <div class="flex items-center justify-center gap-3 text-gray-400 text-xs">
-            <div class="w-12 h-12 bg-white p-1 rounded-lg shadow-sm">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://lin.ee/RhhUwXf" alt="QR">
-            </div>
-            <p class="text-left leading-tight">พบปัญหา? สแกนไลน์<br><span class="font-bold text-gray-600">คุยกับแอดมิน</span></p>
-        </div>
     </div>
 
     <script>
-        // ใช้ URL เดียวกันกับหน้า Checkout
         const GAS_URL = 'https://script.google.com/macros/s/AKfycby7Wmo95U-LETNSR1kKIUwsTP7g5aBBbgfk5LklPOmBhEB5iTWKGVtvjZn1XLSPK8BrAg/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
@@ -153,7 +161,9 @@
                 return;
             }
 
+            // แสดงผลข้อมูลลูกค้า
             document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
+            document.getElementById('infoFullName').innerText = order.customerName || 'ไม่ระบุชื่อ';
             document.getElementById('displayTotal').innerText = order.totalAmount;
             document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
             document.getElementById('displayAddress').innerText = order.address;
@@ -183,7 +193,6 @@
             subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
-                // 1. อัปโหลดรูปสลิปไปที่ ImgBB เพื่อให้ได้ Link (แก้ปัญหารูปไม่ขึ้นใน LINE)
                 const base64Data = order.slipImage.split(',')[1];
                 const formData = new FormData();
                 formData.append("image", base64Data);
@@ -197,10 +206,9 @@
                 if (!imgResult.success) throw new Error("Upload Fail");
                 const imageUrl = imgResult.data.url;
 
-                // 2. ส่งข้อมูลทั้งหมดเข้า Google Apps Script (GAS)
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // สำคัญ: เพื่อไม่ให้ติดปัญหา CORS
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         orderId: order.orderId,
@@ -209,11 +217,10 @@
                         totalAmount: order.totalAmount,
                         items: order.items,
                         address: order.address,
-                        slipImage: imageUrl // ส่ง URL รูปที่ได้จาก ImgBB ไป
+                        slipImage: imageUrl 
                     })
                 });
 
-                // 3. แสดงสถานะสำเร็จ
                 label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
                 subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
