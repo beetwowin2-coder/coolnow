@@ -100,20 +100,24 @@
     <div id="addressModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">📍 จัดการที่อยู่จัดส่ง</h3>
-                <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl">&times;</button>
+                <h3 class="text-xl font-bold">🏠 จัดการข้อมูลจัดส่ง</h3>
+                <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
             </div>
             <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล ผู้รับ</label>
+                    <input id="storeName" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" placeholder="ระบุชื่อจริง-นามสกุล">
+                </div>
                 <div>
                     <label class="text-[10px] font-bold text-gray-400 uppercase">เบอร์โทรศัพท์</label>
                     <input id="storePhone" type="tel" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" placeholder="08x-xxx-xxxx">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">ที่อยู่จัดส่งถาวร</label>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">ที่อยู่จัดส่ง</label>
                     <textarea id="storeAddress" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" rows="4" placeholder="บ้านเลขที่, ถนน, แขวง..."></textarea>
                 </div>
                 <button onclick="saveGlobalAddress()" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg active-push">
-                    บันทึกข้อมูลถาวร 💾
+                    บันทึกข้อมูล 💾
                 </button>
             </div>
         </div>
@@ -190,19 +194,20 @@
             const authSection = document.getElementById('authSection');
             
             if(user) {
-                // Determine User Identity (Google vs Phone)
                 const isPhoneUser = !user.email && user.phoneNumber;
                 localStorage.setItem('lastLoggedInEmail', user.email || user.phoneNumber);
                 
+                // ดึงข้อมูลที่เซฟในเครื่องมาใช้ (ชื่อ)
+                const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
+                
                 let photoHTML = '';
-                let displayName = '';
+                // ลำดับการแสดงชื่อ: 1.ชื่อที่บันทึกไว้ 2.ชื่อจาก Google 3.เบอร์โทร 4.สมาชิก
+                let displayName = savedData.name || user.displayName?.split(' ')[0] || (isPhoneUser ? user.phoneNumber : 'สมาชิก');
 
                 if (isPhoneUser) {
                     photoHTML = `<span class="text-lg">📱</span>`;
-                    displayName = user.phoneNumber;
                 } else {
                     photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
-                    displayName = user.displayName ? user.displayName.split(' ')[0] : 'สมาชิก';
                 }
 
                 authSection.innerHTML = `
@@ -211,8 +216,8 @@
                             <p class="text-[10px] font-bold text-gray-800 leading-none truncate max-w-[80px]">${displayName}</p>
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${isPhoneUser ? 'Verified' : 'Account'}</p>
                         </div>
-                        <button onclick="openAddressModal()" class="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center border border-pink-100 hover:bg-pink-100 transition active-push" title="จัดการที่อยู่">
-                            📍
+                        <button onclick="openAddressModal()" class="px-3 py-1.5 rounded-xl bg-pink-50 text-pink-500 text-[10px] font-bold border border-pink-100 hover:bg-pink-500 hover:text-white transition-all active-push">
+                            จัดการที่อยู่
                         </button>
                         <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 cursor-pointer" onclick="location.href='auth.html'">
                             ${photoHTML}
@@ -232,10 +237,9 @@
                 alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
                 window.location.href = 'auth.html';
             } else {
-                // Check if address exists before moving to checkout
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
-                if(!savedData || !savedData.address) {
-                    alert("กรุณาระบุที่อยู่จัดส่งก่อนชำระเงินครับ");
+                if(!savedData || !savedData.address || !savedData.name) {
+                    alert("กรุณาระบุชื่อและที่อยู่จัดส่งก่อนชำระเงินครับ");
                     openAddressModal();
                 } else {
                     window.location.href = 'checkout.html';
@@ -254,24 +258,34 @@
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
 
+        // ปรับปรุงฟังก์ชันเปิด Modal ให้ดึงชื่อมาด้วย
         function openAddressModal() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
-            // If phone user, auto-fill phone field
-            const userPhone = window.currentUser?.phoneNumber || savedData.phone || '';
-            document.getElementById('storePhone').value = userPhone;
+            document.getElementById('storeName').value = savedData.name || '';
+            document.getElementById('storePhone').value = window.currentUser?.phoneNumber || savedData.phone || '';
             document.getElementById('storeAddress').value = savedData.address || '';
             toggleModal('addressModal', true);
         }
 
+        // ปรับปรุงฟังก์ชันบันทึกให้เก็บชื่อ
         function saveGlobalAddress() {
+            const name = document.getElementById('storeName').value;
             const phone = document.getElementById('storePhone').value;
             const address = document.getElementById('storeAddress').value;
-            if(!phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
             
-            const customerData = { phone, address, lastUpdated: new Date().toISOString() };
+            if(!name || !phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
+            
+            const customerData = { 
+                name: name, 
+                phone: phone, 
+                address: address, 
+                lastUpdated: new Date().toISOString() 
+            };
+            
             localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
-            alert("บันทึกที่อยู่เรียบร้อย!");
+            alert("บันทึกข้อมูลเรียบร้อย!");
             toggleModal('addressModal', false);
+            location.reload(); // รีโหลดเพื่อให้ชื่อที่ Navbar อัปเดต
         }
 
         function openHistoryModal() {
@@ -404,7 +418,6 @@
         });
     </script>
     <script src="footer.js"></script>
+
 </body>
 </html>
-
-
