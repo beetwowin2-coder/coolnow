@@ -16,9 +16,8 @@
             from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-        .step-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
+        .step-line { position: absolute; top: 12px; left: 0; right: 0; height: 2px; background: #f3f4f6; z-index: 0; }
         .step-dot { position: relative; z-index: 10; }
-        .item-row:not(:last-child) { border-bottom: 1px dashed #f1f5f9; }
         
         .capture-banner { animation: slideDown 0.5s ease-out; }
         @keyframes slideDown {
@@ -27,11 +26,11 @@
         }
 
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #06C755;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #06C755;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             animation: spin 1s linear infinite;
             display: inline-block;
         }
@@ -41,13 +40,13 @@
         }
     </style>
 </head>
-<body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-[#FBFBFD] min-h-screen flex flex-col items-center p-4 pt-12">
 
-    <div class="capture-banner fixed top-0 left-0 right-0 bg-yellow-400 text-yellow-900 py-2.5 text-center text-[13px] font-bold shadow-md z-50">
-        📸 ระบบจะส่งสลิปให้แอดมินอัตโนมัติเมื่อกดปุ่มด้านล่าง
+    <div class="capture-banner fixed top-0 left-0 right-0 bg-yellow-400 text-yellow-900 py-2.5 text-center text-[12px] font-bold shadow-md z-50">
+        ✨ สั่งซื้อสำเร็จ! กรุณากดปุ่มสีเขียวด้านล่างเพื่อแจ้งแอดมิน
     </div>
 
-    <div class="max-w-md w-full text-center mt-12 mb-8">
+    <div class="max-w-md w-full text-center mb-8">
         <div class="relative mb-6">
             <div class="success-check w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-200 relative z-10">
                 <span class="text-white text-4xl">✓</span>
@@ -57,93 +56,89 @@
 
         <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-1">สั่งซื้อเรียบร้อย!</h1>
-            <p class="text-gray-400 text-sm font-light mb-6">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
+            <p class="text-gray-400 text-sm font-light mb-8">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
             
-            <div class="mb-6">
-                <div class="flex justify-between relative mb-6 px-8">
-                    <div class="step-line"></div>
+            <div class="mb-8 relative">
+                <div class="step-line"></div>
+                <div class="flex justify-between px-4">
                     <div class="step-dot flex flex-col items-center">
                         <div class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-green-100">1</div>
                         <span class="text-[9px] font-bold text-gray-500 uppercase">จ่ายแล้ว</span>
                     </div>
                     <div class="step-dot flex flex-col items-center">
                         <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-[10px] mb-1 shadow-lg shadow-blue-100">2</div>
-                        <span class="text-[9px] font-bold text-gray-800 uppercase">รอเช็ค</span>
+                        <span class="text-[9px] font-bold text-gray-800 uppercase">รอเช็คสลิป</span>
                     </div>
                     <div class="step-dot flex flex-col items-center">
                         <div class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-[10px] mb-1">3</div>
-                        <span class="text-[9px] font-bold text-gray-400 uppercase">ส่งของ</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">เตรียมส่ง</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-left bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 mb-6">
+                <div class="p-4 bg-gray-100/50 space-y-1 border-b border-white">
+                    <div class="flex justify-between text-[11px] uppercase tracking-wider font-bold text-gray-400">
+                        <span>เลขที่สั่งซื้อ</span>
+                        <span id="orderId" class="text-gray-700">#CN-XXXX</span>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ยอดรวมสุทธิ</span>
+                        <span id="displayTotal" class="text-xl font-bold text-pink-500">0 ฿</span>
                     </div>
                 </div>
 
-                <div class="text-left bg-gray-50 rounded-3xl overflow-hidden border border-gray-100">
-                    <div class="p-4 bg-gray-100/50 space-y-1 border-b border-white">
-                        <div class="flex justify-between text-[11px] uppercase tracking-wider font-bold text-gray-400">
-                            <span>เลขที่สั่งซื้อ</span>
-                            <span id="orderId" class="text-gray-700">#CN-XXXXXX</span>
-                        </div>
-                        <div class="flex justify-between items-baseline">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ยอดโอนสุทธิ</span>
-                            <span id="displayTotal" class="text-xl font-bold text-pink-500">0 ฿</span>
-                        </div>
-                    </div>
-
-                    <div class="p-4 space-y-2">
+                <div class="p-4 space-y-3">
+                    <div>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">รายการสินค้า</p>
                         <div id="itemsContainer" class="text-xs text-gray-600 space-y-1"></div>
                     </div>
 
-                    <div class="px-4 pb-4">
-                        <div class="p-3 bg-white/60 rounded-xl border border-white text-[12px] text-gray-500 leading-relaxed">
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-700 flex items-center gap-1">📞 เบอร์โทรศัพท์</p>
-                                <p id="displayPhone" class="italic">ไม่ได้ระบุ</p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-700 flex items-center gap-1">📍 ที่อยู่จัดส่ง</p>
-                                <div id="displayAddress" class="italic whitespace-pre-line">ไม่ได้ระบุที่อยู่</div>
-                            </div>
-                        </div>
+                    <div class="pt-2 border-t border-gray-200/50">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">ที่อยู่จัดส่ง</p>
+                        <p id="displayPhone" class="text-xs text-gray-700 font-bold mb-1"></p>
+                        <p id="displayAddress" class="text-xs text-gray-500 leading-relaxed"></p>
                     </div>
 
-                    <div class="px-4 pb-4">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการชำระเงิน</p>
-                        <div class="w-full h-48 bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden mb-3">
-                            <img id="displaySlip" src="" alt="Slip" class="h-full w-full object-contain p-2">
-                        </div>
-                    </div>
-
-                    <div class="bg-green-50 p-5 border-t border-green-100 text-center">
-                        <p class="text-[11px] font-bold text-green-600 uppercase mb-3">แอดไลน์เพื่อรับเลขพัสดุ</p>
-                        <div class="bg-white p-2 w-28 h-28 mx-auto rounded-2xl shadow-sm mb-3 border border-green-100">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://lin.ee/RhhUwXf" alt="LINE QR" class="w-full h-full">
+                    <div class="pt-2">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">หลักฐานการโอน</p>
+                        <div class="w-full h-32 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                            <img id="displaySlip" src="" class="h-full w-full object-contain p-2">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
-                <button id="notifyBtn" onclick="sendLineNotify()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center leading-tight active:scale-95 transition-all">
+                <button id="notifyBtn" onclick="sendToAdmin()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 flex flex-col items-center justify-center active:scale-95 transition-all">
                     <div id="btnLabel" class="flex items-center gap-2">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5">
-                        <span>แจ้งยืนยัน & ส่งสลิปให้แอดมิน</span>
+                        <span>แจ้งโอนเงินให้แอดมิน</span>
                     </div>
-                    <span id="btnSubLabel" class="text-[10px] font-light opacity-80 mt-1">ไม่ต้องพิมพ์ใหม่ ระบบจัดการให้ทันที</span>
+                    <span id="btnSubLabel" class="text-[10px] font-light opacity-80 mt-1">กดปุ่มนี้เพื่อส่งสลิปเข้าไลน์ร้านทันที</span>
                 </button>
 
                 <a href="index.html" class="w-full bg-white border-2 border-pink-100 text-pink-500 py-3.5 rounded-2xl font-bold hover:bg-pink-50 transition-all flex items-center justify-center gap-2 active:scale-95 text-sm">
-                    กลับไปหน้าแรก 🛍️
+                    กลับไปช้อปต่อ 🛍️
                 </a>
             </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 text-gray-400 text-xs">
+            <div class="w-12 h-12 bg-white p-1 rounded-lg shadow-sm">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://lin.ee/RhhUwXf" alt="QR">
+            </div>
+            <p class="text-left leading-tight">พบปัญหา? สแกนไลน์<br><span class="font-bold text-gray-600">คุยกับแอดมิน</span></p>
         </div>
     </div>
 
     <script>
+        // ตั้งค่าตัวแปรสำคัญ
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZtZJPbWtqC9keZBzXDYQHdPwE2qi-W14Ok4uTLizu7qi0AmZf9ExGtK4tgpnIf5i5RA/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
-        function initSuccessPage() {
-            // จุดพลุฉลอง
+        function initPage() {
+            // แสดงพลุฉลอง
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -152,54 +147,50 @@
             });
 
             // ดึงข้อมูลจาก Session
-            const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
+            const order = JSON.parse(sessionStorage.getItem('lastOrder'));
             
-            if (lastOrder) {
-                // แสดงผลข้อมูลหน้าเว็บ
-                document.getElementById('displayCustName').innerText = lastOrder.customerName.split(' ')[0] || 'ลูกค้า';
-                document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
-                document.getElementById('displayPhone').innerText = lastOrder.phone;
-                document.getElementById('displayAddress').innerText = lastOrder.address;
-                document.getElementById('orderId').innerText = `#${lastOrder.orderId}`;
-                
-                // แสดงรายการสินค้า
-                const itemsContainer = document.getElementById('itemsContainer');
-                const itemsArray = lastOrder.items.split(',');
-                itemsContainer.innerHTML = itemsArray.map(item => `
-                    <div class="flex justify-between item-row pb-1">
-                        <span>${item.trim()}</span>
-                    </div>
-                `).join('');
-
-                // แสดงรูปสลิป (Base64 ที่บีบอัดแล้ว)
-                if (lastOrder.slipImage) {
-                    document.getElementById('displaySlip').src = lastOrder.slipImage;
-                }
-            } else {
-                // ถ้าไม่มีข้อมูล ให้กลับไปหน้าหลัก
+            if (!order) {
                 window.location.href = 'index.html';
+                return;
             }
+
+            // แสดงข้อมูลในหน้าเว็บ
+            document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
+            document.getElementById('displayTotal').innerText = order.totalAmount;
+            document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
+            document.getElementById('displayAddress').innerText = order.address;
+            document.getElementById('orderId').innerText = `#${order.orderId}`;
+            document.getElementById('displaySlip').src = order.slipImage;
+
+            // แสดงรายการสินค้า
+            const itemsContainer = document.getElementById('itemsContainer');
+            const itemsArray = order.items.split(',');
+            itemsContainer.innerHTML = itemsArray.map(item => `
+                <div class="flex justify-between border-b border-gray-100 pb-1 mb-1">
+                    <span>${item.trim()}</span>
+                </div>
+            `).join('');
         }
 
-        async function sendLineNotify() {
-            const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
+        async function sendToAdmin() {
+            const order = JSON.parse(sessionStorage.getItem('lastOrder'));
             const btn = document.getElementById('notifyBtn');
             const label = document.getElementById('btnLabel');
             const subLabel = document.getElementById('btnSubLabel');
 
-            if (!lastOrder || !lastOrder.slipImage) return alert("ไม่พบข้อมูลสลิป");
+            if (!order) return;
 
-            // เริ่มสถานะ Loading
+            // สถานะ Loading
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
-            label.innerHTML = `<span class="loader"></span> กำลังส่งสลิป...`;
-            subLabel.innerText = "กรุณารอสักครู่ ห้ามปิดหน้านี้นะคะ";
+            label.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
+            subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
-                // 1. อัปโหลดรูปไป ImgBB (เพราะ LINE/Google Sheets รับ Base64 ตรงๆ ไม่ได้ดีเท่า URL)
-                const base64Image = lastOrder.slipImage.split(',')[1];
+                // 1. อัปโหลดรูปสลิปไป Cloud (ImgBB)
+                const base64Data = order.slipImage.split(',')[1];
                 const formData = new FormData();
-                formData.append("image", base64Image);
+                formData.append("image", base64Data);
 
                 const imgResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
                     method: "POST",
@@ -207,43 +198,42 @@
                 });
                 const imgResult = await imgResponse.json();
                 
-                if (!imgResult.success) throw new Error("Image Upload Failed");
+                if (!imgResult.success) throw new Error("Upload Fail");
                 const imageUrl = imgResult.data.url;
 
-                // 2. ส่งข้อมูลทั้งหมดไปยัง Google Apps Script
+                // 2. ส่งข้อมูลเข้า Google Sheets / Line Notify ผ่าน Apps Script
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        orderId: lastOrder.orderId,
-                        customerName: lastOrder.customerName,
-                        phone: lastOrder.phone,
-                        totalAmount: lastOrder.totalAmount,
-                        items: lastOrder.items,
-                        address: lastOrder.address,
-                        slipImage: imageUrl // ส่งเป็น URL ที่อัปโหลดแล้ว
+                        orderId: order.orderId,
+                        customerName: order.customerName,
+                        phone: order.phone,
+                        totalAmount: order.totalAmount,
+                        items: order.items,
+                        address: order.address,
+                        slipImage: imageUrl 
                     })
                 });
 
-                // 3. แจ้งเตือนสำเร็จ
-                label.innerHTML = `✅ ส่งข้อมูลเรียบร้อยแล้ว!`;
-                subLabel.innerText = "แอดมินได้รับสลิปแล้ว ขอบคุณที่อุดหนุนค่ะ";
+                // สำเร็จ
+                label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
+                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบสลิปให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
                 
-                alert("✅ ส่งข้อมูลสำเร็จ! แอดมินได้รับสลิปของคุณแล้วค่ะ");
+                alert("ส่งข้อมูลสำเร็จ! แอดมินได้รับข้อมูลการโอนเงินเรียบร้อยแล้วค่ะ");
 
             } catch (error) {
                 console.error(error);
-                alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาแคปหน้านี้แจ้งแอดมินทางไลน์นะคะ");
+                alert("ขออภัย! ระบบขัดข้อง กรุณาแคปภาพหน้าจอนี้ส่งให้แอดมินทางไลน์แทนนะคะ");
                 btn.disabled = false;
                 btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
-                label.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5"> <span>ลองส่งใหม่อีกครั้ง</span>`;
-                subLabel.innerText = "หากยังไม่ได้ กรุณาติดต่อแอดมินโดยตรง";
+                label.innerHTML = `<span>ลองส่งอีกครั้ง</span>`;
             }
         }
 
-        window.addEventListener('DOMContentLoaded', initSuccessPage);
+        window.onload = initPage;
     </script>
 </body>
 </html>
