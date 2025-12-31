@@ -20,37 +20,64 @@
         #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
         .history-item { border-left: 4px solid #ec4899; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* สไตล์เพิ่มเติมสำหรับเมนูใหม่ */
+        .nav-link { @apply relative flex flex-col items-center justify-center text-gray-500 hover:text-pink-500 transition-all duration-300; }
+        .nav-icon-bg { @apply w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300; }
+        .nav-link:hover .nav-icon-bg { @apply bg-pink-50 text-pink-500; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800">
 
-    <nav class="bg-white/80 backdrop-blur-md py-3 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
-        <div class="flex items-center gap-4 md:gap-8">
+    <nav class="bg-white/90 backdrop-blur-xl py-2 px-4 md:px-8 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-100">
+        <div class="flex items-center gap-6">
             <a href="index.html" class="flex items-center gap-2">
-                <div class="font-bold text-xl tracking-tighter text-gray-800 uppercase">COOL<span class="text-pink-500">NOW</span></div>
+                <div class="font-bold text-2xl tracking-tighter text-gray-800 uppercase">COOL<span class="text-pink-500">NOW</span></div>
             </a>
-            <div class="relative hidden md:block">
+            
+            <div class="relative hidden lg:block">
                 <input type="text" id="indexSearchInput" placeholder="ค้นหากลิ่นที่ชอบ..." 
-                       class="bg-gray-100 rounded-full py-2 px-10 w-64 lg:w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 focus:bg-white transition-all">
-                <span class="absolute left-3 top-2.5 text-xs">🔍</span>
+                       class="bg-gray-100/50 rounded-2xl py-2.5 px-11 w-72 focus:outline-none text-sm border border-transparent focus:border-pink-100 focus:bg-white transition-all shadow-inner">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
             </div>
         </div>
         
-        <div class="flex items-center gap-3 md:gap-6 text-gray-600 text-sm">
-            <button onclick="openHistoryModal()" class="hover:text-pink-500 font-semibold transition flex items-center gap-1.5 active-push">
-                <span>📜</span> <span class="hidden sm:inline">ประวัติ</span>
-            </button>
-            <a href="products.html" class="hover:text-pink-500 font-semibold transition">สินค้า</a>
+        <div class="flex items-center gap-2 sm:gap-4">
             
-            <div id="authSection" class="flex items-center gap-2">
-                <div class="spinner"></div>
-            </div>
-
-            <div class="flex items-center border-l pl-4 ml-1">
-                <div class="relative cursor-pointer hover:scale-110 transition-transform active-push" onclick="toggleCart(true)">
-                    <span class="text-2xl">🛒</span>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md">0</span>
+            <a href="products.html" class="nav-link group px-2">
+                <div class="nav-icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
                 </div>
+                <span class="text-[10px] font-bold uppercase tracking-tight hidden sm:block">สินค้า</span>
+            </a>
+
+            <button onclick="openHistoryModal()" class="nav-link group px-2 active-push">
+                <div class="nav-icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-tight hidden sm:block">ประวัติ</span>
+            </button>
+
+            <button onclick="toggleCart(true)" class="nav-link group px-2 relative active-push">
+                <div class="nav-icon-bg bg-gray-50 text-gray-800 group-hover:bg-pink-500 group-hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <span id="cart-count" class="absolute top-1 right-1 bg-pink-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white shadow-sm">0</span>
+                <span class="text-[10px] font-bold uppercase tracking-tight hidden sm:block">รถเข็น</span>
+            </button>
+
+            <div id="authSection" class="flex items-center border-l pl-4 ml-2">
+                <div class="spinner"></div>
             </div>
         </div>
     </nav>
@@ -104,7 +131,7 @@
     <div id="addressModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">🏠ข้อมูลจัดส่ง</h3>
+                <h3 class="text-xl font-bold">🏠 ข้อมูลจัดส่ง</h3>
                 <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl active-push">&times;</button>
             </div>
             <div class="space-y-4">
@@ -196,26 +223,40 @@
             if(user) {
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
                 const displayName = savedData.name || user.displayName?.split(' ')[0] || (user.phoneNumber ? 'User' : 'Member');
-                const photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '<span class="text-xs">👤</span>';
+                const photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '<span class="text-sm font-bold">U</span>';
 
+                // ปรับแต่ง UI ส่วนโปรไฟล์และไอคอนจัดการที่อยู่ตามสั่ง
                 authSection.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="text-right hidden sm:block cursor-pointer" onclick="location.href='auth.html'">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none truncate max-w-[70px]">${displayName}</p>
-                            <p class="text-[8px] text-pink-500 font-bold uppercase tracking-tighter">Verified</p>
+                    <div class="flex items-center gap-3">
+                        <button onclick="openAddressModal()" class="nav-link group px-1 active-push" title="จัดการที่อยู่">
+                            <div class="nav-icon-bg bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-tight hidden sm:block">ที่อยู่</span>
+                        </button>
+
+                        <div class="flex items-center gap-2 cursor-pointer group" onclick="location.href='auth.html'">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-[11px] font-bold text-gray-800 leading-none truncate max-w-[70px]">${displayName}</p>
+                                <p class="text-[9px] text-green-500 font-bold uppercase tracking-tighter">เข้าใช้งานอยู่</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-2xl bg-pink-500 text-white flex items-center justify-center overflow-hidden border-2 border-white shadow-sm transition-transform group-hover:scale-105">
+                                ${photoHTML}
+                            </div>
                         </div>
-                        <button onclick="openAddressModal()" class="w-8 h-8 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center border border-pink-100 active-push">🏠</button>
-                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 cursor-pointer" onclick="location.href='auth.html'">${photoHTML}</div>
                     </div>`;
             } else {
-                authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">Login</a>`;
+                authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-6 py-2.5 rounded-2xl text-xs font-bold hover:bg-black transition-all active-push shadow-lg shadow-gray-200">เข้าสู่ระบบ</a>`;
             }
         });
 
+        // Script ส่วนที่เหลือคงเดิม...
         window.proceedToCheckout = () => {
             const currentCart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
             if(currentCart.length === 0) return alert("ตะกร้าว่างเปล่าครับ");
-            
             if(!window.currentUser) {
                 alert("กรุณาเข้าสู่ระบบก่อนชำระเงินครับ");
                 window.location.href = 'auth.html';
@@ -232,15 +273,14 @@
     </script>
 
     <script>
+        // JS Functions (คงเดิม)
         let cart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
         let tempItem = {};
-
         function toggleModal(id, show) {
             const modal = document.getElementById(id);
             if (show) { modal.classList.remove('hidden'); document.body.classList.add('modal-active'); }
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
-
         function openAddressModal() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
             document.getElementById('storeName').value = savedData.name || '';
@@ -248,19 +288,15 @@
             document.getElementById('storeAddress').value = savedData.address || '';
             toggleModal('addressModal', true);
         }
-
         function saveGlobalAddress() {
             const name = document.getElementById('storeName').value.trim();
             const phone = document.getElementById('storePhone').value.trim();
             const address = document.getElementById('storeAddress').value.trim();
             if(!name || !phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            
             localStorage.setItem('coolNow_CustomerData', JSON.stringify({ name, phone, address, lastUpdated: new Date() }));
-            alert("บันทึกสำเร็จ!");
+            alert("บันทึกข้อมูลเรียบร้อย!");
             toggleModal('addressModal', false);
-            location.reload();
         }
-
         function openQtyModal(name, price, img) {
             tempItem = { name, price, img, qty: 1 };
             document.getElementById('modalName').innerText = name;
@@ -269,75 +305,55 @@
             document.getElementById('quantity').innerText = '1';
             toggleModal('qtyModal', true);
         }
-
-        function changeModalQty(amt) { 
-            tempItem.qty = Math.max(1, tempItem.qty + amt); 
-            document.getElementById('quantity').innerText = tempItem.qty; 
-        }
-
+        function changeModalQty(amt) { tempItem.qty = Math.max(1, tempItem.qty + amt); document.getElementById('quantity').innerText = tempItem.qty; }
         function addToCart() {
             const idx = cart.findIndex(item => item.name === tempItem.name);
             if (idx > -1) cart[idx].qty += tempItem.qty;
             else cart.push({...tempItem});
-            
             localStorage.setItem('coolNowCart', JSON.stringify(cart));
             updateCartUI();
             toggleModal('qtyModal', false);
             toggleCart(true);
         }
-
         function toggleCart(isOpen) {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartDrawerOverlay');
-            if (isOpen) {
-                drawer.classList.replace('drawer-closed', 'drawer-open');
-                overlay.classList.remove('hidden');
-                updateCartUI();
-            } else {
-                drawer.classList.replace('drawer-open', 'drawer-closed');
-                overlay.classList.add('hidden');
-            }
+            if (isOpen) { drawer.classList.replace('drawer-closed', 'drawer-open'); overlay.classList.remove('hidden'); updateCartUI(); }
+            else { drawer.classList.replace('drawer-open', 'drawer-closed'); overlay.classList.add('hidden'); }
         }
-
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const countBadge = document.getElementById('cart-count');
             const summary = document.getElementById('cartSummary');
             let subtotal = 0, totalQty = 0;
-            
             list.innerHTML = cart.length === 0 ? `<div class="text-center py-20 text-gray-300">🛒 ตะกร้าว่างเปล่า</div>` : '';
-
             cart.forEach((item, i) => {
                 subtotal += item.price * item.qty;
                 totalQty += item.qty;
-                list.innerHTML += `
-                    <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative">
-                        <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
-                        <div class="flex-1">
-                            <p class="font-bold text-xs line-clamp-1 pr-6">${item.name}</p>
-                            <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
-                            <div class="flex items-center gap-3 mt-2">
-                                <button onclick="updateQty(${i},-1)" class="w-6 h-6 border rounded-full text-xs active-push">-</button>
-                                <span class="text-xs font-bold">${item.qty}</span>
-                                <button onclick="updateQty(${i},1)" class="w-6 h-6 border rounded-full text-xs active-push">+</button>
-                            </div>
+                list.innerHTML += `<div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative">
+                    <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
+                    <div class="flex-1">
+                        <p class="font-bold text-xs line-clamp-1 pr-6">${item.name}</p>
+                        <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <button onclick="updateQty(${i},-1)" class="w-6 h-6 border rounded-full text-xs active-push">-</button>
+                            <span class="text-xs font-bold">${item.qty}</span>
+                            <button onclick="updateQty(${i},1)" class="w-6 h-6 border rounded-full text-xs active-push">+</button>
                         </div>
-                        <button onclick="removeItem(${i})" class="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
-                    </div>`;
+                    </div>
+                    <button onclick="removeItem(${i})" class="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
+                </div>`;
             });
-
             const shipping = (totalQty >= 2 || totalQty === 0) ? 0 : 40;
             countBadge.innerText = totalQty;
-            summary.innerHTML = `
-                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาปกติ</span><span>${subtotal} ฿</span></div>
+            summary.innerHTML = `<div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาปกติ</span><span>${subtotal} ฿</span></div>
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span class="${shipping === 0 && totalQty > 0 ? 'text-green-500' : ''}">${shipping === 0 && totalQty > 0 ? 'ฟรี' : shipping + ' ฿'}</span></div>
                 <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${subtotal + shipping} ฿</span></div>`;
         }
-
         function updateQty(i, a) { cart[i].qty = Math.max(1, cart[i].qty + a); syncCart(); }
         function removeItem(i) { cart.splice(i, 1); syncCart(); }
         function syncCart() { localStorage.setItem('coolNowCart', JSON.stringify(cart)); updateCartUI(); }
-
+        
         function openHistoryModal() {
             const container = document.getElementById('historyList');
             if (!window.currentUser) {
@@ -347,7 +363,7 @@
                 const userKey = window.currentUser.email || window.currentUser.phoneNumber;
                 const orders = allHistory[userKey] || [];
                 container.innerHTML = orders.length ? orders.map(o => `
-                    <div class="history-item bg-gray-50 p-4 rounded-2xl border-l-4 border-pink-500 mb-3">
+                    <div class="history-item bg-gray-50 p-4 rounded-2xl border-l-4 border-pink-500 mb-3 shadow-sm">
                         <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase"><span>#${o.orderId}</span><span>${o.date}</span></div>
                         <div class="my-2 text-[11px]">${o.items.map(it => `<div>• ${it.name} x${it.qty}</div>`).join('')}</div>
                         <div class="flex justify-between items-center border-t pt-2 mt-2 font-bold text-sm text-gray-800"><span>ยอดรวม</span><span class="text-pink-500">${o.total} ฿</span></div>
@@ -356,17 +372,11 @@
             toggleModal('historyModal', true);
         }
 
-        // Search Redirect
         document.getElementById('indexSearchInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                window.location.href = `products.html?search=${encodeURIComponent(e.target.value.trim())}`;
-            }
+            if (e.key === 'Enter' && e.target.value.trim()) { window.location.href = `products.html?search=${encodeURIComponent(e.target.value.trim())}`; }
         });
-
         window.addEventListener('load', updateCartUI);
     </script>
     <script src="footer.js"></script>
 </body>
 </html>
-
-
