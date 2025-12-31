@@ -9,7 +9,7 @@ function injectLineButton() {
                     สอบถามแอดมิน คลิก!
                 </span>
                 <div class="w-14 h-14 bg-[#06C755] rounded-full shadow-xl flex items-center justify-center border-2 border-white">
-                    <img src="line.png" class="w-8 h-8" alt="LINE">
+                    <img src="images/line.png" class="w-8 h-8 object-contain" alt="LINE">
                 </div>
             </div>
         </a>
@@ -17,10 +17,9 @@ function injectLineButton() {
     document.body.appendChild(lineBtn);
 }
 
-// เรียกใช้งานทันทีเมื่อโหลดหน้าเว็บ
+// เรียกใช้งาน
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectLineButton);
 } else {
     injectLineButton();
-
 }
