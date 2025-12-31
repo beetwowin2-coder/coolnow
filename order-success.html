@@ -56,7 +56,9 @@
 
         <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-50 mb-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-1">สั่งซื้อเรียบร้อย!</h1>
-            <p class="text-gray-400 text-sm font-light mb-8">ขอบคุณคุณ <span id="displayCustName" class="text-pink-500 font-bold">ลูกค้า</span> ที่ไว้วางใจเรา</p>
+            <p class="text-gray-400 text-sm font-light mb-8 italic">
+                ขอบคุณคุณ <span id="displayCustName" class="text-pink-600 font-bold border-b-2 border-pink-100 pb-0.5">ลูกค้า</span> ที่ไว้วางใจเรา
+            </p>
             
             <div class="mb-8 relative">
                 <div class="step-line"></div>
@@ -133,12 +135,10 @@
     </div>
 
     <script>
-        // ตั้งค่าตัวแปรสำคัญ
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzhsFdt20pwkayak_Ov0zngINPv47NcdtYjE7qPoPUpUFX-d54E76Sk9oGSDk91jWph5Q/exec';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXA2-ogVrGrvJRkEMQhr_ScTGwkhb0XTYZ-FB_ZEFuKM0HNNfbJrzUikCb6k67bYRBbA/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initPage() {
-            // แสดงพลุฉลอง
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -146,15 +146,13 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
-            // ดึงข้อมูลจาก Session
             const order = JSON.parse(sessionStorage.getItem('lastOrder'));
-            
             if (!order) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            // แสดงข้อมูลในหน้าเว็บ
+            // ดึงชื่อ-นามสกุล มาแสดงผล
             document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
             document.getElementById('displayTotal').innerText = order.totalAmount;
             document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
@@ -162,7 +160,6 @@
             document.getElementById('orderId').innerText = `#${order.orderId}`;
             document.getElementById('displaySlip').src = order.slipImage;
 
-            // แสดงรายการสินค้า
             const itemsContainer = document.getElementById('itemsContainer');
             const itemsArray = order.items.split(',');
             itemsContainer.innerHTML = itemsArray.map(item => `
@@ -180,14 +177,12 @@
 
             if (!order) return;
 
-            // สถานะ Loading
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
             label.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
             subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
 
             try {
-                // 1. อัปโหลดรูปสลิปไป Cloud (ImgBB)
                 const base64Data = order.slipImage.split(',')[1];
                 const formData = new FormData();
                 formData.append("image", base64Data);
@@ -201,14 +196,13 @@
                 if (!imgResult.success) throw new Error("Upload Fail");
                 const imageUrl = imgResult.data.url;
 
-                // 2. ส่งข้อมูลเข้า Google Sheets / Line Notify ผ่าน Apps Script
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         orderId: order.orderId,
-                        customerName: order.customerName,
+                        customerName: order.customerName, // ส่งชื่อ-นามสกุลไปยัง GAS
                         phone: order.phone,
                         totalAmount: order.totalAmount,
                         items: order.items,
@@ -217,16 +211,14 @@
                     })
                 });
 
-                // สำเร็จ
                 label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
-                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบสลิปให้นะคะ";
+                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบให้นะคะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
-                
-                alert("ส่งข้อมูลสำเร็จ! แอดมินได้รับข้อมูลการโอนเงินเรียบร้อยแล้วค่ะ");
+                alert("ส่งข้อมูลสำเร็จ! ขอบคุณค่ะ");
 
             } catch (error) {
                 console.error(error);
-                alert("ขออภัย! ระบบขัดข้อง กรุณาแคปภาพหน้าจอนี้ส่งให้แอดมินทางไลน์แทนนะคะ");
+                alert("เกิดข้อผิดพลาด กรุณาลองใหม่ หรือติดต่อแอดมินทางไลน์แทนนะค่ะ");
                 btn.disabled = false;
                 btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
                 label.innerHTML = `<span>ลองส่งอีกครั้ง</span>`;
@@ -237,6 +229,3 @@
     </script>
 </body>
 </html>
-
-
-
