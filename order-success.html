@@ -143,6 +143,7 @@
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initSuccessPage() {
+            // จุดพลุฉลอง
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -150,16 +151,18 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
+            // ดึงข้อมูลจาก Session
             const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
-            const googleUser = JSON.parse(localStorage.getItem('googleUser')); // ดึงข้อมูล Google User
             
             if (lastOrder) {
+                // แสดงผลข้อมูลหน้าเว็บ
                 document.getElementById('displayCustName').innerText = lastOrder.customerName.split(' ')[0] || 'ลูกค้า';
                 document.getElementById('displayTotal').innerText = lastOrder.totalAmount;
                 document.getElementById('displayPhone').innerText = lastOrder.phone;
                 document.getElementById('displayAddress').innerText = lastOrder.address;
                 document.getElementById('orderId').innerText = `#${lastOrder.orderId}`;
                 
+                // แสดงรายการสินค้า
                 const itemsContainer = document.getElementById('itemsContainer');
                 const itemsArray = lastOrder.items.split(',');
                 itemsContainer.innerHTML = itemsArray.map(item => `
@@ -168,42 +171,12 @@
                     </div>
                 `).join('');
 
+                // แสดงรูปสลิป (Base64 ที่บีบอัดแล้ว)
                 if (lastOrder.slipImage) {
                     document.getElementById('displaySlip').src = lastOrder.slipImage;
                 }
-
-                // --- ส่วนบันทึกประวัติ เฉพาะสมาชิก Google เท่านั้น ---
-                if (googleUser && googleUser.email) {
-                    let allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
-                    
-                    // เตรียมรายการสินค้าแบบ Object
-                    const itemDetails = itemsArray.map(i => ({
-                        name: i.trim(),
-                        qty: 1
-                    }));
-
-                    const historyEntry = {
-                        orderId: lastOrder.orderId,
-                        date: new Date().toLocaleDateString('th-TH', { 
-                            year: 'numeric', month: 'long', day: 'numeric', 
-                            hour: '2-digit', minute: '2-digit' 
-                        }),
-                        items: itemDetails,
-                        total: lastOrder.totalAmount,
-                        status: 'สำเร็จ'
-                    };
-
-                    // บันทึกแยกตาม Email
-                    if (!allHistory[googleUser.email]) allHistory[googleUser.email] = [];
-                    
-                    // เช็คไม่ให้บันทึกซ้ำหาก Refresh หน้า
-                    const isDuplicate = allHistory[googleUser.email].some(o => o.orderId === lastOrder.orderId);
-                    if (!isDuplicate) {
-                        allHistory[googleUser.email].unshift(historyEntry);
-                        localStorage.setItem('orderHistory', JSON.stringify(allHistory));
-                    }
-                }
             } else {
+                // ถ้าไม่มีข้อมูล ให้กลับไปหน้าหลัก
                 window.location.href = 'index.html';
             }
         }
@@ -216,12 +189,14 @@
 
             if (!lastOrder || !lastOrder.slipImage) return alert("ไม่พบข้อมูลสลิป");
 
+            // เริ่มสถานะ Loading
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
             label.innerHTML = `<span class="loader"></span> กำลังส่งสลิป...`;
             subLabel.innerText = "กรุณารอสักครู่ ห้ามปิดหน้านี้นะคะ";
 
             try {
+                // 1. อัปโหลดรูปไป ImgBB (เพราะ LINE/Google Sheets รับ Base64 ตรงๆ ไม่ได้ดีเท่า URL)
                 const base64Image = lastOrder.slipImage.split(',')[1];
                 const formData = new FormData();
                 formData.append("image", base64Image);
@@ -235,6 +210,7 @@
                 if (!imgResult.success) throw new Error("Image Upload Failed");
                 const imageUrl = imgResult.data.url;
 
+                // 2. ส่งข้อมูลทั้งหมดไปยัง Google Apps Script
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -246,10 +222,11 @@
                         totalAmount: lastOrder.totalAmount,
                         items: lastOrder.items,
                         address: lastOrder.address,
-                        slipImage: imageUrl
+                        slipImage: imageUrl // ส่งเป็น URL ที่อัปโหลดแล้ว
                     })
                 });
 
+                // 3. แจ้งเตือนสำเร็จ
                 label.innerHTML = `✅ ส่งข้อมูลเรียบร้อยแล้ว!`;
                 subLabel.innerText = "แอดมินได้รับสลิปแล้ว ขอบคุณที่อุดหนุนค่ะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
@@ -261,7 +238,8 @@
                 alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาแคปหน้านี้แจ้งแอดมินทางไลน์นะคะ");
                 btn.disabled = false;
                 btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
-                label.innerHTML = `ลองส่งใหม่อีกครั้ง`;
+                label.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="w-5 h-5"> <span>ลองส่งใหม่อีกครั้ง</span>`;
+                subLabel.innerText = "หากยังไม่ได้ กรุณาติดต่อแอดมินโดยตรง";
             }
         }
 
