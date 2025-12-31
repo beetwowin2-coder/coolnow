@@ -144,11 +144,12 @@
     </div>
 
     <script>
-        // URL ล่าสุดที่คุณแจ้งมา (Version ใหม่)
+        // ตั้งค่าตัวแปรหลัก
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwmLb9tQ0QwhoGKgyJOLOHgJrUeu7-MjM2mI_eMyfSetam3h0fhgTGsnzItZiIJ-81hNQ/exec';
         const IMGBB_KEY = 'aad5a82740b7b28917a50b45df451746';
 
         function initPage() {
+            // พลุเฉลิมฉลอง
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -156,25 +157,34 @@
                 colors: ['#ec4899', '#3b82f6', '#10b981']
             });
 
+            // ดึงข้อมูลจาก sessionStorage
             const order = JSON.parse(sessionStorage.getItem('lastOrder'));
             if (!order) {
                 window.location.href = 'index.html';
                 return;
             }
 
+            // แสดงผลข้อมูลลงใน HTML
             document.getElementById('displayCustName').innerText = order.customerName || 'ลูกค้า';
             document.getElementById('infoFullName').innerText = order.customerName || 'ไม่ระบุชื่อ';
-            document.getElementById('displayTotal').innerText = order.totalAmount;
-            document.getElementById('displayPhone').innerText = `📞 ${order.phone}`;
-            document.getElementById('displayAddress').innerText = order.address;
-            document.getElementById('orderId').innerText = `#${order.orderId}`;
+            document.getElementById('displayTotal').innerText = order.totalAmount + " ฿";
+            document.getElementById('displayPhone').innerText = `📞 ${order.phone || '-'}`;
+            document.getElementById('displayAddress').innerText = order.address || '-';
+            document.getElementById('orderId').innerText = `#${order.orderId || 'CN-XXXX'}`;
             document.getElementById('displaySlip').src = order.slipImage;
 
+            // จัดการรายการสินค้า
             const itemsContainer = document.getElementById('itemsContainer');
-            const itemsArray = order.items ? order.items.split(',') : [];
+            let itemsArray = [];
+            if (typeof order.items === 'string') {
+                itemsArray = order.items.split(',');
+            } else if (Array.isArray(order.items)) {
+                itemsArray = order.items;
+            }
+
             itemsContainer.innerHTML = itemsArray.map(item => `
                 <div class="flex justify-between border-b border-gray-100 pb-1 mb-1">
-                    <span>${item.trim()}</span>
+                    <span>${typeof item === 'string' ? item.trim() : item.name}</span>
                 </div>
             `).join('');
         }
@@ -187,16 +197,17 @@
 
             if (!order) return;
 
+            // เริ่ม Loading
             btn.disabled = true;
             btn.classList.replace('bg-[#06C755]', 'bg-gray-400');
             label.innerHTML = `<span class="loader"></span> กำลังส่งข้อมูล...`;
-            subLabel.innerText = "ห้ามปิดหน้าจอนี้ จนกว่าจะเสร็จสิ้น";
+            subLabel.innerText = "กำลังนำข้อมูลส่งเข้า Google Sheet และ LINE";
 
             try {
                 let imageUrl = order.slipImage;
                 
-                // 1. ตรวจสอบและอัปโหลดรูปไป ImgBB
-                if (imageUrl.includes('data:image')) {
+                // 1. อัปโหลดรูปไป ImgBB (ถ้าเป็น Base64)
+                if (imageUrl && imageUrl.startsWith('data:image')) {
                     const base64Data = imageUrl.split(',')[1];
                     const formDataImg = new FormData();
                     formDataImg.append("image", base64Data);
@@ -217,28 +228,32 @@
                     customerName: order.customerName,
                     phone: order.phone,
                     totalAmount: order.totalAmount,
-                    items: order.items,
+                    items: Array.isArray(order.items) ? order.items.join(', ') : order.items,
                     address: order.address,
                     slipImage: imageUrl 
                 };
 
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'text/plain' },
+                    mode: 'no-cors', // สำคัญสำหรับ Google Apps Script
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 // แจ้งผลสำเร็จ
-                label.innerHTML = `✅ แจ้งแอดมินเรียบร้อย!`;
-                subLabel.innerText = "ขอบคุณค่ะ แอดมินจะรีบตรวจสอบให้นะคะ";
+                label.innerHTML = `✅ ส่งข้อมูลสำเร็จ!`;
+                subLabel.innerText = "แอดมินได้รับข้อมูลแล้วค่ะ";
                 btn.classList.replace('bg-gray-400', 'bg-blue-600');
                 
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 } });
-                alert("ระบบได้รับข้อมูลการโอนเงินแล้ว ขอบคุณค่ะ!");
+                
+                // ลบข้อมูลสั่งซื้อออกเพื่อกันการส่งซ้ำ
+                sessionStorage.removeItem('lastOrder');
+                
+                alert("ระบบบันทึกข้อมูลและแจ้งเตือน LINE เรียบร้อยแล้ว!");
 
             } catch (error) {
-                console.error(error);
+                console.error("Error:", error);
                 alert("เกิดข้อผิดพลาด: " + error.message);
                 btn.disabled = false;
                 btn.classList.replace('bg-gray-400', 'bg-[#06C755]');
