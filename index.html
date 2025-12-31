@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,45 +19,46 @@
         #cartItemsList::-webkit-scrollbar { width: 4px; }
         #cartItemsList::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
         .history-item { border-left: 4px solid #ec4899; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="bg-[#FBFBFD] text-gray-800">
 
-    <nav class="bg-white/80 backdrop-blur-md py-3 md:py-4 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
+    <nav class="bg-white/80 backdrop-blur-md py-3 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
         <div class="flex items-center gap-4 md:gap-8">
             <a href="index.html" class="flex items-center gap-2">
-                <div class="font-bold text-xl tracking-tighter text-gray-800">COOL<span class="text-pink-500">NOW</span></div>
+                <div class="font-bold text-xl tracking-tighter text-gray-800 uppercase">COOL<span class="text-pink-500">NOW</span></div>
             </a>
             <div class="relative hidden md:block">
                 <input type="text" id="indexSearchInput" placeholder="ค้นหากลิ่นที่ชอบ..." 
-                       class="bg-gray-100 rounded-full py-2 px-10 w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 focus:bg-white transition-all">
-                <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                       class="bg-gray-100 rounded-full py-2 px-10 w-64 lg:w-80 focus:outline-none text-sm border border-transparent focus:border-pink-200 focus:bg-white transition-all">
+                <span class="absolute left-3 top-2.5 text-xs">🔍</span>
             </div>
         </div>
         
         <div class="flex items-center gap-3 md:gap-6 text-gray-600 text-sm">
-            <button onclick="openHistoryModal()" class="hover:text-pink-500 font-medium transition flex items-center gap-1">
-                <span>📜</span> <span class="hidden sm:inline">ประวัติการสั่งซื้อ</span>
+            <button onclick="openHistoryModal()" class="hover:text-pink-500 font-semibold transition flex items-center gap-1.5 active-push">
+                <span>📜</span> <span class="hidden sm:inline">ประวัติ</span>
             </button>
-            <a href="products.html" class="hover:text-pink-500 font-medium transition">สินค้าทั้งหมด</a>
+            <a href="products.html" class="hover:text-pink-500 font-semibold transition">สินค้า</a>
             
             <div id="authSection" class="flex items-center gap-2">
                 <div class="spinner"></div>
             </div>
 
-            <div class="flex items-center gap-3 md:gap-4 border-l pl-4 md:pl-6">
-                <div class="relative cursor-pointer hover:text-pink-500 transition-transform active-push" onclick="toggleCart(true)">
-                    <span class="text-xl md:text-2xl">🛒</span>
-                    <span id="cart-count" class="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-pink-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shadow-md">0</span>
+            <div class="flex items-center border-l pl-4 ml-1">
+                <div class="relative cursor-pointer hover:scale-110 transition-transform active-push" onclick="toggleCart(true)">
+                    <span class="text-2xl">🛒</span>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md">0</span>
                 </div>
             </div>
         </div>
     </nav>
 
-    <section class="hero-bg container mx-auto mt-4 md:mt-8 px-4">
+    <section class="hero-bg container mx-auto mt-4 px-4">
         <div class="flex flex-col md:flex-row items-center bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100">
             <div class="w-full md:w-1/2 p-8 md:p-12 lg:p-16 text-center md:text-left order-2 md:order-1">
-                <span class="bg-pink-100 text-pink-500 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Natural Cooling</span>
+                <span class="bg-pink-100 text-pink-500 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Natural Cooling</span>
                 <h1 class="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 mt-4 leading-[1.1]">
                     สดชื่น เย็นสบาย... <br> <span class="text-pink-500">จากธรรมชาติ</span>
                 </h1>
@@ -69,30 +70,33 @@
                     <button onclick="location.href='products.html'" class="bg-pink-500 text-white px-10 py-4 rounded-2xl hover:bg-pink-600 transition shadow-lg shadow-pink-100 font-bold active-push">เริ่มช้อปเลย 🛍️</button>
                 </div>
             </div>
-            <div class="w-full md:w-1/2 h-[350px] md:h-[550px] order-1 md:order-2 bg-pink-50/50 flex items-center justify-center p-8">
+            <div class="w-full md:w-1/2 h-[300px] md:h-[500px] order-1 md:order-2 bg-pink-50/30 flex items-center justify-center p-8">
                  <img src="images/B2.png" alt="Banner" class="max-w-full max-h-full object-contain drop-shadow-2xl hover:scale-105 transition duration-700">
             </div>
         </div>
     </section>
 
-    <section id="product-list" class="container mx-auto mt-16 md:mt-24 px-4 mb-24">
-        <h2 class="text-2xl font-bold mb-8 px-2">สินค้าแนะนำ</h2>
+    <section id="product-list" class="container mx-auto mt-12 md:mt-20 px-4 mb-24">
+        <div class="flex justify-between items-end mb-8 px-2">
+            <h2 class="text-2xl font-bold">สินค้าแนะนำ</h2>
+            <a href="products.html" class="text-pink-500 text-sm font-bold hover:underline">ดูทั้งหมด →</a>
+        </div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Bubble Gum', 100, 'images/bubble-gum.png')">
                 <div class="relative bg-pink-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
                     <img src="images/bubble-gum.png" class="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-500">
                 </div>
-                <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1">Bubble Gum</h3>
+                <h3 class="text-sm md:text-base font-bold text-gray-800 line-clamp-1 px-1">Bubble Gum</h3>
                 <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
-                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold active-push shadow-sm">เพิ่มลงตะกร้า +</button>
+                <button class="w-full mt-4 bg-pink-500/10 text-pink-500 group-hover:bg-pink-500 group-hover:text-white py-3 rounded-xl text-xs font-bold transition-colors active-push">เพิ่มลงตะกร้า +</button>
             </div>
             <div class="group cursor-pointer bg-white p-3 md:p-5 rounded-[2.2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100" onclick="openQtyModal('Body Spray - Lemon Mint', 100, 'images/lemon-mint.png')">
                 <div class="relative bg-green-50 rounded-[1.8rem] aspect-square overflow-hidden mb-4">
                     <img src="images/lemon-mint.png" class="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-500">
                 </div>
-                <h3 class="text-sm md:text-base font-bold text-gray-800 truncate px-1">Lemon Mint</h3>
+                <h3 class="text-sm md:text-base font-bold text-gray-800 line-clamp-1 px-1">Lemon Mint</h3>
                 <p class="text-pink-500 font-bold text-lg px-1 mt-1">100 ฿</p>
-                <button class="w-full mt-4 bg-pink-500 text-white py-3 rounded-xl text-xs font-bold active-push shadow-sm">เพิ่มลงตะกร้า +</button>
+                <button class="w-full mt-4 bg-pink-500/10 text-pink-500 group-hover:bg-pink-500 group-hover:text-white py-3 rounded-xl text-xs font-bold transition-colors active-push">เพิ่มลงตะกร้า +</button>
             </div>
         </div>
     </section>
@@ -100,25 +104,23 @@
     <div id="addressModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">🏠 จัดการข้อมูลจัดส่ง</h3>
-                <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
+                <h3 class="text-xl font-bold">🏠 ข้อมูลจัดส่ง</h3>
+                <button onclick="toggleModal('addressModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl active-push">&times;</button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล ผู้รับ</label>
-                    <input id="storeName" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" placeholder="ระบุชื่อจริง-นามสกุล">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">ชื่อ-นามสกุล</label>
+                    <input id="storeName" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none" placeholder="ชื่อผู้รับสินค้า">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">เบอร์โทรศัพท์</label>
-                    <input id="storePhone" type="tel" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" placeholder="08x-xxx-xxxx">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">เบอร์โทรศัพท์</label>
+                    <input id="storePhone" type="tel" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none" placeholder="08x-xxx-xxxx">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">ที่อยู่จัดส่ง</label>
-                    <textarea id="storeAddress" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:outline-pink-500" rows="4" placeholder="บ้านเลขที่, ถนน, แขวง..."></textarea>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">ที่อยู่จัดส่ง</label>
+                    <textarea id="storeAddress" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none" rows="3" placeholder="บ้านเลขที่, ถนน, ตำบล..."></textarea>
                 </div>
-                <button onclick="saveGlobalAddress()" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg active-push">
-                    บันทึกข้อมูล 💾
-                </button>
+                <button onclick="saveGlobalAddress()" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg active-push mt-2">บันทึกข้อมูล 💾</button>
             </div>
         </div>
     </div>
@@ -127,44 +129,42 @@
         <div class="bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold">ระบุจำนวน</h3>
-                <button onclick="toggleModal('qtyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
+                <button onclick="toggleModal('qtyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl active-push">&times;</button>
             </div>
-            <div id="modalContent">
-                <div class="flex items-center gap-5 mb-8 bg-gray-50 p-4 rounded-2xl">
-                    <img id="modalImg" src="" class="w-20 h-20 object-contain bg-white rounded-xl shadow-sm">
-                    <div>
-                        <p id="modalName" class="font-bold text-gray-800 text-sm leading-tight"></p>
-                        <p id="modalPrice" class="text-pink-500 font-bold text-lg mt-1"></p>
-                    </div>
+            <div class="flex items-center gap-5 mb-8 bg-gray-50 p-4 rounded-2xl">
+                <img id="modalImg" src="" class="w-20 h-20 object-contain bg-white rounded-xl shadow-sm">
+                <div>
+                    <p id="modalName" class="font-bold text-gray-800 text-sm leading-tight"></p>
+                    <p id="modalPrice" class="text-pink-500 font-bold text-lg mt-1"></p>
                 </div>
-                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-2xl mb-8">
-                    <button onclick="changeModalQty(-1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold active-push text-xl">-</button>
-                    <span id="quantity" class="text-2xl font-bold text-gray-800">1</span>
-                    <button onclick="changeModalQty(1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold active-push text-xl">+</button>
-                </div>
-                <button onclick="addToCart()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg shadow-pink-100 hover:bg-pink-600 transition active-push">ยืนยันการเพิ่ม 🛍️</button>
             </div>
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-2xl mb-8">
+                <button onclick="changeModalQty(-1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold active-push text-xl">-</button>
+                <span id="quantity" class="text-2xl font-bold text-gray-800">1</span>
+                <button onclick="changeModalQty(1)" class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-bold active-push text-xl">+</button>
+            </div>
+            <button onclick="addToCart()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg active-push hover:bg-pink-600 transition">ยืนยันการเพิ่ม 🛍️</button>
         </div>
     </div>
 
     <div id="historyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold flex items-center gap-2">📜 ประวัติการสั่งซื้อ</h3>
-                <button onclick="toggleModal('historyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl transition active-push">&times;</button>
+                <h3 class="text-xl font-bold">📜 ประวัติการสั่งซื้อ</h3>
+                <button onclick="toggleModal('historyModal', false)" class="text-gray-300 hover:text-gray-500 text-3xl active-push">&times;</button>
             </div>
-            <div id="historyList" class="max-h-[60vh] overflow-y-auto space-y-4 pr-2"></div>
+            <div id="historyList" class="max-h-[50vh] overflow-y-auto space-y-4 pr-2"></div>
         </div>
     </div>
 
     <div id="cartDrawerOverlay" class="fixed inset-0 bg-black/40 z-[70] hidden backdrop-blur-sm transition-opacity" onclick="toggleCart(false)"></div>
     <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-[80] shadow-2xl flex flex-col drawer-closed">
-        <div class="p-6 flex justify-between items-center border-b border-gray-50">
-            <h2 class="text-xl font-bold flex items-center gap-2">🛒 ตะกร้าสินค้า</h2>
-            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 hover:text-gray-500 transition active-push">&times;</button>
+        <div class="p-6 flex justify-between items-center border-b">
+            <h2 class="text-xl font-bold">🛒 ตะกร้าสินค้า</h2>
+            <button onclick="toggleCart(false)" class="text-3xl text-gray-300 active-push">&times;</button>
         </div>
         <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30"></div>
-        <div class="p-8 border-t bg-white">
+        <div class="p-8 border-t bg-white shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
             <div id="cartSummary" class="mb-6 space-y-3"></div>
             <button onclick="proceedToCheckout()" class="w-full bg-pink-500 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-pink-600 transition active-push flex items-center justify-center gap-2">
                 ไปหน้าชำระเงิน <span>→</span>
@@ -194,52 +194,35 @@
             const authSection = document.getElementById('authSection');
             
             if(user) {
-                const isPhoneUser = !user.email && user.phoneNumber;
-                localStorage.setItem('lastLoggedInEmail', user.email || user.phoneNumber);
-                
-                // ดึงข้อมูลที่เซฟในเครื่องมาใช้ (ชื่อ)
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
-                
-                let photoHTML = '';
-                // ลำดับการแสดงชื่อ: 1.ชื่อที่บันทึกไว้ 2.ชื่อจาก Google 3.เบอร์โทร 4.สมาชิก
-                let displayName = savedData.name || user.displayName?.split(' ')[0] || (isPhoneUser ? user.phoneNumber : 'สมาชิก');
-
-                if (isPhoneUser) {
-                    photoHTML = `<span class="text-lg">📱</span>`;
-                } else {
-                    photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
-                }
+                const displayName = savedData.name || user.displayName?.split(' ')[0] || (user.phoneNumber ? 'User' : 'Member');
+                const photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '<span class="text-xs">👤</span>';
 
                 authSection.innerHTML = `
-                    <div class="flex items-center gap-2 group">
+                    <div class="flex items-center gap-2">
                         <div class="text-right hidden sm:block cursor-pointer" onclick="location.href='auth.html'">
-                            <p class="text-[10px] font-bold text-gray-800 leading-none truncate max-w-[80px]">${displayName}</p>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${isPhoneUser ? 'Verified' : 'Account'}</p>
+                            <p class="text-[10px] font-bold text-gray-800 leading-none truncate max-w-[70px]">${displayName}</p>
+                            <p class="text-[8px] text-pink-500 font-bold uppercase tracking-tighter">Verified</p>
                         </div>
-                        <button onclick="openAddressModal()" class="px-3 py-1.5 rounded-xl bg-pink-50 text-pink-500 text-[10px] font-bold border border-pink-100 hover:bg-pink-500 hover:text-white transition-all active-push">
-                            จัดการที่อยู่
-                        </button>
-                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 cursor-pointer" onclick="location.href='auth.html'">
-                            ${photoHTML}
-                        </div>
+                        <button onclick="openAddressModal()" class="w-8 h-8 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center border border-pink-100 active-push">🏠</button>
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 cursor-pointer" onclick="location.href='auth.html'">${photoHTML}</div>
                     </div>`;
             } else {
-                localStorage.removeItem('lastLoggedInEmail');
-                authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">Login</a>`;
+                authSection.innerHTML = `<a href="auth.html" class="bg-gray-800 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-black transition-all active-push">Login</a>`;
             }
         });
 
         window.proceedToCheckout = () => {
             const currentCart = JSON.parse(localStorage.getItem('coolNowCart')) || [];
-            if(currentCart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้าครับ");
+            if(currentCart.length === 0) return alert("ตะกร้าว่างเปล่าครับ");
             
             if(!window.currentUser) {
-                alert("กรุณาเข้าสู่ระบบก่อนดำเนินการชำระเงินครับ");
+                alert("กรุณาเข้าสู่ระบบก่อนชำระเงินครับ");
                 window.location.href = 'auth.html';
             } else {
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData'));
                 if(!savedData || !savedData.address || !savedData.name) {
-                    alert("กรุณาระบุชื่อและที่อยู่จัดส่งก่อนชำระเงินครับ");
+                    alert("กรุณาระบุที่อยู่จัดส่งก่อนครับ");
                     openAddressModal();
                 } else {
                     window.location.href = 'checkout.html';
@@ -258,78 +241,25 @@
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
 
-        // ปรับปรุงฟังก์ชันเปิด Modal ให้ดึงชื่อมาด้วย
         function openAddressModal() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
             document.getElementById('storeName').value = savedData.name || '';
-            document.getElementById('storePhone').value = window.currentUser?.phoneNumber || savedData.phone || '';
+            document.getElementById('storePhone').value = savedData.phone || window.currentUser?.phoneNumber || '';
             document.getElementById('storeAddress').value = savedData.address || '';
             toggleModal('addressModal', true);
         }
 
-        // ปรับปรุงฟังก์ชันบันทึกให้เก็บชื่อ
         function saveGlobalAddress() {
-            const name = document.getElementById('storeName').value;
-            const phone = document.getElementById('storePhone').value;
-            const address = document.getElementById('storeAddress').value;
+            const name = document.getElementById('storeName').value.trim();
+            const phone = document.getElementById('storePhone').value.trim();
+            const address = document.getElementById('storeAddress').value.trim();
+            if(!name || !phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
             
-            if(!name || !phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
-            
-            const customerData = { 
-                name: name, 
-                phone: phone, 
-                address: address, 
-                lastUpdated: new Date().toISOString() 
-            };
-            
-            localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
-            alert("บันทึกข้อมูลเรียบร้อย!");
+            localStorage.setItem('coolNow_CustomerData', JSON.stringify({ name, phone, address, lastUpdated: new Date() }));
+            alert("บันทึกสำเร็จ!");
             toggleModal('addressModal', false);
-            location.reload(); // รีโหลดเพื่อให้ชื่อที่ Navbar อัปเดต
+            location.reload();
         }
-
-        function openHistoryModal() {
-            const container = document.getElementById('historyList');
-            if (!window.currentUser) {
-                container.innerHTML = `<div class="text-center py-10"><p class="font-bold">กรุณาล็อคอินเพื่อดูประวัติ</p><br><a href="auth.html" class="bg-pink-500 text-white px-6 py-2 rounded-full text-xs">Login</a></div>`;
-                toggleModal('historyModal', true);
-                return;
-            }
-
-            const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
-            const userKey = window.currentUser.email || window.currentUser.phoneNumber;
-            const userOrders = allHistory[userKey] || [];
-
-            if (userOrders.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">ยังไม่มีประวัติการสั่งซื้อ</p>`;
-            } else {
-                container.innerHTML = userOrders.map(order => `
-                    <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500 mb-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-gray-800 text-sm">#${order.orderId}</p>
-                                <p class="text-[10px] text-gray-400 font-bold">${order.date}</p>
-                            </div>
-                            <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">สำเร็จ</span>
-                        </div>
-                        <div class="my-3 space-y-1 border-y border-gray-100 py-2">
-                            ${order.items ? order.items.map(item => `
-                                <div class="flex justify-between text-[11px] text-gray-600">
-                                    <span>• ${item.name}</span>
-                                    <span class="font-bold">x${item.qty}</span>
-                                </div>
-                            `).join('') : ''}
-                        </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-[10px] text-gray-400 font-bold">ยอดรวม</span>
-                            <p class="text-pink-500 font-bold text-base">${order.total} ฿</p>
-                        </div>
-                    </div>`).join('');
-            }
-            toggleModal('historyModal', true);
-        }
-
-        window.addEventListener('load', () => { updateCartUI(); });
 
         function openQtyModal(name, price, img) {
             tempItem = { name, price, img, qty: 1 };
@@ -346,78 +276,95 @@
         }
 
         function addToCart() {
-            const existing = cart.find(item => item.name === tempItem.name);
-            if (existing) { existing.qty += tempItem.qty; } else { cart.push({...tempItem}); }
-            saveAndRefresh();
-            toggleModal('qtyModal', false);
-            toggleCart(true);
-        }
-
-        function saveAndRefresh() {
+            const idx = cart.findIndex(item => item.name === tempItem.name);
+            if (idx > -1) cart[idx].qty += tempItem.qty;
+            else cart.push({...tempItem});
+            
             localStorage.setItem('coolNowCart', JSON.stringify(cart));
             updateCartUI();
+            toggleModal('qtyModal', false);
+            toggleCart(true);
         }
 
         function toggleCart(isOpen) {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartDrawerOverlay');
-            if (isOpen) { 
-                drawer.classList.replace('drawer-closed', 'drawer-open'); 
-                overlay.classList.remove('hidden'); 
-                updateCartUI(); 
-            } else { 
-                drawer.classList.replace('drawer-open', 'drawer-closed'); 
-                overlay.classList.add('hidden'); 
+            if (isOpen) {
+                drawer.classList.replace('drawer-closed', 'drawer-open');
+                overlay.classList.remove('hidden');
+                updateCartUI();
+            } else {
+                drawer.classList.replace('drawer-open', 'drawer-closed');
+                overlay.classList.add('hidden');
             }
         }
 
         function updateCartUI() {
             const list = document.getElementById('cartItemsList');
             const countBadge = document.getElementById('cart-count');
-            const summaryDisplay = document.getElementById('cartSummary');
-            let subtotal = 0, totalItems = 0;
+            const summary = document.getElementById('cartSummary');
+            let subtotal = 0, totalQty = 0;
             
             list.innerHTML = cart.length === 0 ? `<div class="text-center py-20 text-gray-300">🛒 ตะกร้าว่างเปล่า</div>` : '';
 
-            cart.forEach((item, index) => {
+            cart.forEach((item, i) => {
                 subtotal += item.price * item.qty;
-                totalItems += item.qty;
+                totalQty += item.qty;
                 list.innerHTML += `
-                    <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative">
                         <img src="${item.img}" class="w-16 h-16 object-contain bg-gray-50 rounded-xl">
                         <div class="flex-1">
-                            <p class="font-bold text-xs truncate">${item.name}</p>
+                            <p class="font-bold text-xs line-clamp-1 pr-6">${item.name}</p>
                             <p class="text-pink-500 font-bold text-sm">${item.price} ฿</p>
                             <div class="flex items-center gap-3 mt-2">
-                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 border rounded-full text-xs">-</button>
+                                <button onclick="updateQty(${i},-1)" class="w-6 h-6 border rounded-full text-xs active-push">-</button>
                                 <span class="text-xs font-bold">${item.qty}</span>
-                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 border rounded-full text-xs">+</button>
+                                <button onclick="updateQty(${i},1)" class="w-6 h-6 border rounded-full text-xs active-push">+</button>
                             </div>
                         </div>
-                        <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-red-500">🗑️</button>
+                        <button onclick="removeItem(${i})" class="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
                     </div>`;
             });
 
-            const shippingFee = (totalItems >= 2 || totalItems === 0) ? 0 : 40;
-            countBadge.innerText = totalItems;
-            summaryDisplay.innerHTML = `
-                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
-                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">${shippingFee === 0 && totalItems > 0 ? 'ฟรี' : (totalItems === 0 ? '0 ฿' : '40 ฿')}</span></div>
-                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>
-            `;
+            const shipping = (totalQty >= 2 || totalQty === 0) ? 0 : 40;
+            countBadge.innerText = totalQty;
+            summary.innerHTML = `
+                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาปกติ</span><span>${subtotal} ฿</span></div>
+                <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span class="${shipping === 0 && totalQty > 0 ? 'text-green-500' : ''}">${shipping === 0 && totalQty > 0 ? 'ฟรี' : shipping + ' ฿'}</span></div>
+                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${subtotal + shipping} ฿</span></div>`;
         }
 
-        function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
-        function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
+        function updateQty(i, a) { cart[i].qty = Math.max(1, cart[i].qty + a); syncCart(); }
+        function removeItem(i) { cart.splice(i, 1); syncCart(); }
+        function syncCart() { localStorage.setItem('coolNowCart', JSON.stringify(cart)); updateCartUI(); }
 
-        const searchInput = document.getElementById('indexSearchInput');
-        searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim()) {
-                window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+        function openHistoryModal() {
+            const container = document.getElementById('historyList');
+            if (!window.currentUser) {
+                container.innerHTML = `<div class="text-center py-10"><p class="font-bold mb-4">เข้าสู่ระบบเพื่อดูประวัติ</p><a href="auth.html" class="bg-pink-500 text-white px-8 py-2 rounded-full text-sm active-push">Login</a></div>`;
+            } else {
+                const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+                const userKey = window.currentUser.email || window.currentUser.phoneNumber;
+                const orders = allHistory[userKey] || [];
+                container.innerHTML = orders.length ? orders.map(o => `
+                    <div class="history-item bg-gray-50 p-4 rounded-2xl border-l-4 border-pink-500 mb-3">
+                        <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase"><span>#${o.orderId}</span><span>${o.date}</span></div>
+                        <div class="my-2 text-[11px]">${o.items.map(it => `<div>• ${it.name} x${it.qty}</div>`).join('')}</div>
+                        <div class="flex justify-between items-center border-t pt-2 mt-2 font-bold text-sm text-gray-800"><span>ยอดรวม</span><span class="text-pink-500">${o.total} ฿</span></div>
+                    </div>`).join('') : `<p class="text-center py-10 text-gray-400">ยังไม่มีรายการสั่งซื้อ</p>`;
+            }
+            toggleModal('historyModal', true);
+        }
+
+        // Search Redirect
+        document.getElementById('indexSearchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                window.location.href = `products.html?search=${encodeURIComponent(e.target.value.trim())}`;
             }
         });
+
+        window.addEventListener('load', updateCartUI);
     </script>
     <script src="footer.js"></script>
-
 </body>
 </html>
