@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -197,18 +197,9 @@
                 const isPhoneUser = !user.email && user.phoneNumber;
                 localStorage.setItem('lastLoggedInEmail', user.email || user.phoneNumber);
                 
-                // ดึงข้อมูลที่เซฟในเครื่องมาใช้ (ชื่อ)
                 const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
-                
-                let photoHTML = '';
-                // ลำดับการแสดงชื่อ: 1.ชื่อที่บันทึกไว้ 2.ชื่อจาก Google 3.เบอร์โทร 4.สมาชิก
                 let displayName = savedData.name || user.displayName?.split(' ')[0] || (isPhoneUser ? user.phoneNumber : 'สมาชิก');
-
-                if (isPhoneUser) {
-                    photoHTML = `<span class="text-lg">📱</span>`;
-                } else {
-                    photoHTML = user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤';
-                }
+                let photoHTML = isPhoneUser ? `<span class="text-lg">📱</span>` : (user.photoURL ? `<img src="${user.photoURL}" class="w-full h-full object-cover">` : '👤');
 
                 authSection.innerHTML = `
                     <div class="flex items-center gap-2 group">
@@ -217,7 +208,7 @@
                             <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${isPhoneUser ? 'Verified' : 'Account'}</p>
                         </div>
                         <button onclick="openAddressModal()" class="px-3 py-1.5 rounded-xl bg-pink-50 text-pink-500 text-[10px] font-bold border border-pink-100 hover:bg-pink-500 hover:text-white transition-all active-push">
-                            จัดการที่อยู่
+                            ที่อยู่
                         </button>
                         <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-pink-300 cursor-pointer" onclick="location.href='auth.html'">
                             ${photoHTML}
@@ -258,7 +249,6 @@
             else { modal.classList.add('hidden'); document.body.classList.remove('modal-active'); }
         }
 
-        // ปรับปรุงฟังก์ชันเปิด Modal ให้ดึงชื่อมาด้วย
         function openAddressModal() {
             const savedData = JSON.parse(localStorage.getItem('coolNow_CustomerData')) || {};
             document.getElementById('storeName').value = savedData.name || '';
@@ -267,69 +257,46 @@
             toggleModal('addressModal', true);
         }
 
-        // ปรับปรุงฟังก์ชันบันทึกให้เก็บชื่อ
         function saveGlobalAddress() {
             const name = document.getElementById('storeName').value;
             const phone = document.getElementById('storePhone').value;
             const address = document.getElementById('storeAddress').value;
-            
             if(!name || !phone || !address) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
             
-            const customerData = { 
-                name: name, 
-                phone: phone, 
-                address: address, 
-                lastUpdated: new Date().toISOString() 
-            };
-            
+            const customerData = { name, phone, address, lastUpdated: new Date().toISOString() };
             localStorage.setItem('coolNow_CustomerData', JSON.stringify(customerData));
             alert("บันทึกข้อมูลเรียบร้อย!");
             toggleModal('addressModal', false);
-            location.reload(); // รีโหลดเพื่อให้ชื่อที่ Navbar อัปเดต
+            location.reload();
         }
 
         function openHistoryModal() {
             const container = document.getElementById('historyList');
             if (!window.currentUser) {
                 container.innerHTML = `<div class="text-center py-10"><p class="font-bold">กรุณาล็อคอินเพื่อดูประวัติ</p><br><a href="auth.html" class="bg-pink-500 text-white px-6 py-2 rounded-full text-xs">Login</a></div>`;
-                toggleModal('historyModal', true);
-                return;
-            }
-
-            const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
-            const userKey = window.currentUser.email || window.currentUser.phoneNumber;
-            const userOrders = allHistory[userKey] || [];
-
-            if (userOrders.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">ยังไม่มีประวัติการสั่งซื้อ</p>`;
             } else {
-                container.innerHTML = userOrders.map(order => `
-                    <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500 mb-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-gray-800 text-sm">#${order.orderId}</p>
-                                <p class="text-[10px] text-gray-400 font-bold">${order.date}</p>
+                const allHistory = JSON.parse(localStorage.getItem('orderHistory')) || {};
+                const userKey = window.currentUser.email || window.currentUser.phoneNumber;
+                const userOrders = allHistory[userKey] || [];
+
+                if (userOrders.length === 0) {
+                    container.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">ยังไม่มีประวัติการสั่งซื้อ</p>`;
+                } else {
+                    container.innerHTML = userOrders.map(order => `
+                        <div class="history-item bg-gray-50 p-4 rounded-2xl shadow-sm border-l-4 border-pink-500 mb-4">
+                            <div class="flex justify-between items-start">
+                                <div><p class="font-bold text-gray-800 text-sm">#${order.orderId}</p><p class="text-[10px] text-gray-400 font-bold">${order.date}</p></div>
+                                <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">สำเร็จ</span>
                             </div>
-                            <span class="text-[9px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">สำเร็จ</span>
-                        </div>
-                        <div class="my-3 space-y-1 border-y border-gray-100 py-2">
-                            ${order.items ? order.items.map(item => `
-                                <div class="flex justify-between text-[11px] text-gray-600">
-                                    <span>• ${item.name}</span>
-                                    <span class="font-bold">x${item.qty}</span>
-                                </div>
-                            `).join('') : ''}
-                        </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-[10px] text-gray-400 font-bold">ยอดรวม</span>
-                            <p class="text-pink-500 font-bold text-base">${order.total} ฿</p>
-                        </div>
-                    </div>`).join('');
+                            <div class="my-3 space-y-1 border-y border-gray-100 py-2">
+                                ${order.items ? order.items.map(item => `<div class="flex justify-between text-[11px] text-gray-600"><span>• ${item.name}</span><span class="font-bold">x${item.qty}</span></div>`).join('') : ''}
+                            </div>
+                            <div class="flex justify-between items-center mt-2"><span class="text-[10px] text-gray-400 font-bold">ยอดรวม</span><p class="text-pink-500 font-bold text-base">${order.total} ฿</p></div>
+                        </div>`).join('');
+                }
             }
             toggleModal('historyModal', true);
         }
-
-        window.addEventListener('load', () => { updateCartUI(); });
 
         function openQtyModal(name, price, img) {
             tempItem = { name, price, img, qty: 1 };
@@ -340,10 +307,7 @@
             toggleModal('qtyModal', true);
         }
 
-        function changeModalQty(amt) { 
-            tempItem.qty = Math.max(1, tempItem.qty + amt); 
-            document.getElementById('quantity').innerText = tempItem.qty; 
-        }
+        function changeModalQty(amt) { tempItem.qty = Math.max(1, tempItem.qty + amt); document.getElementById('quantity').innerText = tempItem.qty; }
 
         function addToCart() {
             const existing = cart.find(item => item.name === tempItem.name);
@@ -376,7 +340,6 @@
             const countBadge = document.getElementById('cart-count');
             const summaryDisplay = document.getElementById('cartSummary');
             let subtotal = 0, totalItems = 0;
-            
             list.innerHTML = cart.length === 0 ? `<div class="text-center py-20 text-gray-300">🛒 ตะกร้าว่างเปล่า</div>` : '';
 
             cart.forEach((item, index) => {
@@ -403,21 +366,20 @@
             summaryDisplay.innerHTML = `
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ราคาสินค้า</span><span>${subtotal.toLocaleString()} ฿</span></div>
                 <div class="flex justify-between text-xs font-bold text-gray-400"><span>ค่าจัดส่ง</span><span class="${shippingFee === 0 && totalItems > 0 ? 'text-green-500' : ''}">${shippingFee === 0 && totalItems > 0 ? 'ฟรี' : (totalItems === 0 ? '0 ฿' : '40 ฿')}</span></div>
-                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>
-            `;
+                <div class="flex justify-between items-end pt-3 border-t mt-3"><span class="font-bold">ยอดสุทธิ</span><span class="text-2xl font-bold text-pink-500">${(subtotal + shippingFee).toLocaleString()} ฿</span></div>`;
         }
 
         function updateCartQty(index, amt) { cart[index].qty = Math.max(1, cart[index].qty + amt); saveAndRefresh(); }
         function removeFromCart(index) { cart.splice(index, 1); saveAndRefresh(); }
 
-        const searchInput = document.getElementById('indexSearchInput');
-        searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim()) {
-                window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+        document.getElementById('indexSearchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                window.location.href = `products.html?search=${encodeURIComponent(e.target.value.trim())}`;
             }
         });
+
+        window.addEventListener('load', updateCartUI);
     </script>
     <script src="footer.js"></script>
-
 </body>
 </html>
