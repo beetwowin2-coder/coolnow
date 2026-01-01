@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +18,7 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ซ่อนลูกศรใน input number */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -59,7 +60,7 @@
         <div id="loginSection" class="hidden bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/30 max-w-md w-full border border-gray-50 text-center">
             <div class="w-20 h-20 bg-pink-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl">✨</div>
             <h2 class="text-2xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ</h2>
-            <p class="text-gray-400 text-sm mb-10 leading-relaxed">เข้าสู่ระบบเพื่อรับสิทธิพิเศษ<br>และติดตามสถานะการสั่งซื้อของคุณ</p>
+            <p class="text-gray-400 text-sm mb-10 leading-relaxed">เข้าสู่ระบบเพื่อสะสมคะแนน<br>และจัดการที่อยู่จัดส่งของคุณ</p>
             
             <div class="space-y-3">
                 <button id="googleLoginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-4 rounded-2xl font-bold hover:bg-gray-50 transition shadow-sm active:scale-[0.98]">
@@ -82,7 +83,7 @@
                 <div id="step1">
                     <h3 class="text-xl font-bold mb-2">ยืนยันเบอร์โทรศัพท์</h3>
                     <p class="text-gray-400 text-sm mb-6">ระบุเบอร์โทรศัพท์เพื่อรับรหัส OTP</p>
-                    <input type="tel" id="phoneNumber" placeholder="08xxxxxxxx" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-pink-500 text-center text-lg">
+                    <input type="tel" id="phoneNumber" placeholder="08xxxxxxxx" maxlength="10" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-pink-500 text-center text-lg">
                     <div id="recaptcha-container" class="mb-4 flex justify-center"></div>
                     <button id="sendOtpBtn" class="w-full bg-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-pink-100">ส่งรหัส OTP</button>
                 </div>
@@ -90,7 +91,7 @@
                 <div id="step2" class="hidden text-center">
                     <h3 class="text-xl font-bold mb-2">กรอกรหัส OTP</h3>
                     <p class="text-gray-400 text-sm mb-6">รหัส 6 หลัก ส่งไปที่ <span id="targetPhone" class="text-pink-500 font-bold"></span></p>
-                    <input type="number" id="otpCode" placeholder="••••••" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-6 text-center text-3xl tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-pink-500 font-bold">
+                    <input type="number" id="otpCode" placeholder="••••••" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6)" class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-6 text-center text-3xl tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-pink-500 font-bold">
                     <button id="verifyOtpBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100">ยืนยันรหัส</button>
                     <button onclick="resetStep()" class="mt-4 text-xs text-gray-400 underline">เปลี่ยนเบอร์โทรศัพท์</button>
                 </div>
@@ -130,6 +131,7 @@
         
         let confirmationResult = null;
 
+        // ตรวจสอบสถานะ User
         onAuthStateChanged(auth, (user) => {
             loader.style.display = 'none';
             if (user) {
@@ -148,22 +150,36 @@
             }
         });
 
-        // Phone Login Logic
-        document.getElementById('phoneLoginBtn').onclick = () => {
-            phoneModal.classList.remove('hidden');
+        // --- ระบบ Phone Login ---
+        
+        function initRecaptcha() {
             if (!window.recaptchaVerifier) {
                 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'normal',
-                    'callback': (response) => { }
+                    'callback': (response) => { console.log("reCAPTCHA ยืนยันสำเร็จ"); }
                 });
+                window.recaptchaVerifier.render().then(id => { window.recaptchaWidgetId = id; });
             }
+        }
+
+        function resetRecaptcha() {
+            if (window.recaptchaWidgetId !== undefined) {
+                grecaptcha.reset(window.recaptchaWidgetId);
+            }
+        }
+
+        document.getElementById('phoneLoginBtn').onclick = () => {
+            phoneModal.classList.remove('hidden');
+            initRecaptcha();
         };
 
         document.getElementById('sendOtpBtn').onclick = async () => {
-            const num = document.getElementById('phoneNumber').value;
-            if (!num || num.length < 10) return alert("กรุณากรอกเบอร์โทรให้ถูกต้อง");
+            const num = document.getElementById('phoneNumber').value.trim();
+            if (!num || num.length < 10) return alert("กรุณากรอกเบอร์โทรให้ถูกต้อง (10 หลัก)");
+
             const formattedNum = "+66" + num.substring(1);
             const appVerifier = window.recaptchaVerifier;
+
             try {
                 const result = await signInWithPhoneNumber(auth, formattedNum, appVerifier);
                 confirmationResult = result;
@@ -172,26 +188,36 @@
                 document.getElementById('targetPhone').innerText = num;
             } catch (err) {
                 console.error(err);
+                resetRecaptcha();
                 alert("เกิดข้อผิดพลาด: " + err.message);
-                if (window.recaptchaVerifier) window.recaptchaVerifier.render().then(id => grecaptcha.reset(id));
             }
         };
 
         document.getElementById('verifyOtpBtn').onclick = async () => {
-            const code = document.getElementById('otpCode').value;
+            const code = document.getElementById('otpCode').value.trim();
+            if (code.length !== 6) return alert("กรุณากรอกรหัส OTP 6 หลัก");
+
             try {
                 await confirmationResult.confirm(code);
                 phoneModal.classList.add('hidden');
+                resetStep();
             } catch (err) {
                 alert("รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่");
             }
         };
 
-        window.closePhoneModal = () => phoneModal.classList.add('hidden');
+        window.closePhoneModal = () => {
+            phoneModal.classList.add('hidden');
+            resetRecaptcha();
+        };
+
         window.resetStep = () => {
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.add('hidden');
+            document.getElementById('otpCode').value = "";
         };
+
+        // --- Google & Logout Logic ---
 
         document.getElementById('googleLoginBtn').onclick = async () => {
             try { await signInWithPopup(auth, provider); } catch (err) {
