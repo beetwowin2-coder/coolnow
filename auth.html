@@ -1,105 +1,66 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cool Now Login</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-
-<style>
-body { font-family: 'Kanit', sans-serif; }
-.fade { animation: fade .35s ease; }
-@keyframes fade {
-  from { opacity:0; transform: scale(.95); }
-  to { opacity:1; transform: scale(1); }
-}
-.checkmark {
-  width:72px;height:72px;border-radius:50%;
-  background:#22c55e;
-  display:flex;align-items:center;justify-content:center;
-  color:white;font-size:40px;
-  animation:pop .4s ease;
-}
-@keyframes pop {
-  0%{transform:scale(0)}
-  80%{transform:scale(1.1)}
-  100%{transform:scale(1)}
-}
-</style>
 </head>
 
-<body class="bg-[#FBFBFD] min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen flex items-center justify-center">
 
-<div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center fade">
-  <h2 class="text-2xl font-bold mb-6">เข้าสู่ระบบ</h2>
+<div class="bg-white p-6 rounded-xl shadow-xl w-[320px] text-center">
+  <h1 class="text-xl font-bold mb-4">เข้าสู่ระบบ</h1>
 
   <button id="googleLoginBtn"
-    class="w-full border py-4 rounded-xl flex justify-center gap-2 mb-3 font-bold">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5">
-    Google
+    class="w-full bg-red-500 text-white py-2 rounded-lg mb-3 hover:bg-red-600 transition">
+    Login with Google
   </button>
 
   <button id="phoneLoginBtn"
-    class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold">
-    📱 เบอร์โทร + OTP
+    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+    Login with Phone
   </button>
 </div>
 
-<!-- PHONE MODAL -->
-<div id="phoneModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50">
-<div class="bg-white p-6 rounded-3xl w-full max-w-sm text-center fade relative">
+<!-- OTP MODAL -->
+<div id="phoneModal"
+  class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+  <div class="bg-white p-5 rounded-xl w-[300px] text-center relative">
+    <button id="closeModal" class="absolute right-3 top-2">✕</button>
 
-<button id="closeModal" class="absolute top-3 right-4 text-gray-400 text-xl">×</button>
+    <div id="step1">
+      <h2 class="font-bold mb-2">เบอร์โทร</h2>
+      <input id="phoneInput" type="tel" placeholder="0XXXXXXXXX"
+        class="border w-full p-2 rounded mb-3 text-center" />
+      <div id="recaptcha-container" class="mb-2"></div>
+      <button id="sendOtpBtn"
+        class="bg-blue-500 text-white w-full py-2 rounded">
+        ส่ง OTP
+      </button>
+    </div>
 
-<!-- STEP 1 -->
-<div id="step1">
-  <h3 class="text-xl font-bold mb-2">ยืนยันเบอร์</h3>
-  <input id="phoneInput" maxlength="10"
-    class="w-full p-4 bg-gray-50 rounded-xl mb-4 text-center text-lg"
-    placeholder="08xxxxxxxx">
-  <div class="flex justify-center mb-4">
-    <div id="recaptcha-container"></div>
+    <div id="step2" class="hidden">
+      <h2 class="font-bold mb-2">กรอก OTP</h2>
+      <input id="otpInput" maxlength="6"
+        class="border w-full p-2 rounded mb-3 text-center tracking-widest text-lg"/>
+      <button id="verifyOtpBtn"
+        class="bg-green-500 text-white w-full py-2 rounded">
+        ยืนยัน
+      </button>
+    </div>
   </div>
-  <button id="sendOtpBtn"
-    class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold">
-    ส่ง OTP
-  </button>
-</div>
-
-<!-- STEP 2 -->
-<div id="step2" class="hidden">
-  <h3 class="text-xl font-bold mb-2">กรอกรหัส OTP</h3>
-  <input id="otpInput"
-    inputmode="numeric"
-    autocomplete="one-time-code"
-    maxlength="6"
-    class="w-full p-4 bg-gray-50 rounded-xl mb-4
-    text-center text-3xl tracking-widest font-bold">
-  <button id="verifyOtpBtn"
-    class="w-full bg-green-500 text-white py-4 rounded-xl font-bold">
-    ยืนยัน
-  </button>
-  <p id="countdown" class="text-sm text-gray-400 mt-3"></p>
-</div>
-
-<!-- SUCCESS -->
-<div id="successStep" class="hidden flex flex-col items-center">
-  <div class="checkmark mb-4">✓</div>
-  <p class="font-bold">เข้าสู่ระบบสำเร็จ</p>
-</div>
-
-</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged,
-  signInWithRedirect, getRedirectResult,
-  GoogleAuthProvider, RecaptchaVerifier,
-  signInWithPhoneNumber
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -115,99 +76,81 @@ auth.languageCode = 'th';
 const provider = new GoogleAuthProvider();
 let confirmationResult;
 let recaptchaVerifier;
-let cooldown = 60;
-let timer;
 
-// handle Google redirect
-getRedirectResult(auth).then(r => {
-  if (r?.user) location.href = "index.html";
-}).catch(()=>{});
-
-// already login
+// 🔁 ถ้า login แล้ว เด้งออก
 onAuthStateChanged(auth, user => {
   if (user) location.href = "index.html";
 });
 
-// Google
-googleLoginBtn.onclick = () => signInWithRedirect(auth, provider);
+// 🔴 Google Login
+googleLoginBtn.onclick = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    location.href = "index.html";
+  } catch (e) {
+    alert("Google login error");
+    console.error(e);
+  }
+};
 
-// Phone modal
+// 📱 เปิด OTP
 phoneLoginBtn.onclick = () => {
   phoneModal.classList.remove('hidden');
+  phoneModal.classList.add('flex');
   if (!recaptchaVerifier) {
-    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size:'normal' });
+    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
     recaptchaVerifier.render();
   }
 };
 
+// ❌ ปิด modal
 closeModal.onclick = () => {
   phoneModal.classList.add('hidden');
+  phoneModal.classList.remove('flex');
   step1.classList.remove('hidden');
   step2.classList.add('hidden');
 };
 
-// Send OTP
+// 📩 ส่ง OTP
 sendOtpBtn.onclick = async () => {
-  const num = phoneInput.value;
-  if (num.length !== 10) return alert('เบอร์ไม่ถูก');
-
+  if (phoneInput.value.length !== 10) return alert("เบอร์ไม่ถูก");
   sendOtpBtn.disabled = true;
-  sendOtpBtn.innerText = 'กำลังส่ง...';
+  sendOtpBtn.innerText = "กำลังส่ง...";
 
   try {
     confirmationResult = await signInWithPhoneNumber(
-      auth, '+66'+num.slice(1), recaptchaVerifier
+      auth,
+      '+66' + phoneInput.value.slice(1),
+      recaptchaVerifier
     );
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
     otpInput.focus();
-    startCooldown();
-
-    if ('OTPCredential' in window) {
-      navigator.credentials.get({ otp:{transport:['sms']} })
-        .then(o=>{
-          otpInput.value=o.code;
-          verifyOtpBtn.click();
-        }).catch(()=>{});
-    }
-
-  } catch {
-    alert('ส่ง OTP ไม่สำเร็จ');
-    sendOtpBtn.disabled=false;
-    sendOtpBtn.innerText='ส่ง OTP';
+  } catch (e) {
+    alert("ส่ง OTP ไม่ได้");
+    sendOtpBtn.disabled = false;
+    sendOtpBtn.innerText = "ส่ง OTP";
   }
 };
 
-// auto submit
-otpInput.addEventListener('input',()=>{
-  if (otpInput.value.length===6) verifyOtpBtn.click();
+// 🔢 auto submit OTP
+otpInput.addEventListener('input', () => {
+  if (otpInput.value.length === 6) verifyOtpBtn.click();
 });
 
-// verify
+// ✅ confirm OTP
 verifyOtpBtn.onclick = async () => {
-  verifyOtpBtn.disabled=true;
-  verifyOtpBtn.innerText='กำลังตรวจสอบ...';
+  verifyOtpBtn.disabled = true;
+  verifyOtpBtn.innerText = "กำลังตรวจสอบ...";
   try {
     await confirmationResult.confirm(otpInput.value);
-    step2.classList.add('hidden');
-    successStep.classList.remove('hidden');
+    location.href = "index.html";
   } catch {
-    alert('OTP ไม่ถูก');
-    verifyOtpBtn.disabled=false;
-    verifyOtpBtn.innerText='ยืนยัน';
+    alert("OTP ผิด");
+    verifyOtpBtn.disabled = false;
+    verifyOtpBtn.innerText = "ยืนยัน";
   }
 };
-
-function startCooldown(){
-  cooldown=60;
-  countdown.innerText=`ส่งใหม่ได้ใน ${cooldown} วิ`;
-  timer=setInterval(()=>{
-    cooldown--;
-    countdown.innerText=`ส่งใหม่ได้ใน ${cooldown} วิ`;
-    if(cooldown<=0) clearInterval(timer);
-  },1000);
-}
 </script>
-
 </body>
 </html>
