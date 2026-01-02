@@ -3,61 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+<title>Cool Now Login</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 body { font-family: 'Kanit', sans-serif; }
-.fade-in { animation: fade .35s ease; }
+
+.fade {
+  animation: fade .35s ease;
+}
 @keyframes fade {
-  from { opacity: 0; transform: scale(.96); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity:0; transform: scale(.95); }
+  to { opacity:1; transform: scale(1); }
+}
+
+.checkmark {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: #22c55e;
+  display:flex; align-items:center; justify-content:center;
+  color:white; font-size:40px;
+  animation: pop .4s ease;
+}
+@keyframes pop {
+  0% { transform: scale(0); }
+  80% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 </style>
 </head>
 
-<body class="bg-[#FBFBFD] flex items-center justify-center min-h-screen">
+<body class="bg-[#FBFBFD] min-h-screen flex items-center justify-center">
 
 <!-- LOGIN -->
-<div id="loginSection" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center fade-in">
+<div id="loginSection" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center fade">
   <h2 class="text-2xl font-bold mb-6">เข้าสู่ระบบ</h2>
 
-  <button id="googleBtn" class="w-full border py-3 rounded-xl mb-3 flex justify-center gap-2">
+  <button id="googleLoginBtn"
+    class="w-full border py-4 rounded-xl flex justify-center gap-2 mb-3 font-bold">
     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5">
     Google
   </button>
 
-  <button id="phoneBtn" class="w-full bg-pink-500 text-white py-3 rounded-xl font-bold">
+  <button id="phoneLoginBtn"
+    class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold">
     📱 เบอร์โทร + OTP
   </button>
 </div>
 
 <!-- PHONE MODAL -->
-<div id="phoneModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-<div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center fade-in">
+<div id="phoneModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50">
+<div class="bg-white p-6 rounded-3xl w-full max-w-sm text-center fade relative">
 
 <!-- STEP 1 -->
 <div id="step1">
-  <h3 class="font-bold mb-2">ยืนยันเบอร์</h3>
-  <input id="phoneInput" type="tel" placeholder="08xxxxxxxx" maxlength="10"
-    class="w-full p-3 border rounded-xl mb-3 text-center">
-  <div id="recaptcha-container" class="flex justify-center scale-90 mb-3"></div>
-  <button id="sendOtpBtn" class="w-full bg-pink-500 text-white py-3 rounded-xl font-bold">
+  <h3 class="text-xl font-bold mb-2">ยืนยันเบอร์</h3>
+  <input id="phoneInput" type="tel" maxlength="10"
+    placeholder="08xxxxxxxx"
+    class="w-full p-4 bg-gray-50 rounded-xl mb-4 text-center text-lg">
+
+  <div id="recaptcha-container" class="flex justify-center mb-4 scale-90"></div>
+
+  <button id="sendOtpBtn"
+    class="w-full bg-pink-500 text-white py-4 rounded-xl font-bold">
     ส่ง OTP
   </button>
 </div>
 
 <!-- STEP 2 -->
 <div id="step2" class="hidden">
-  <h3 class="font-bold mb-2">กรอก OTP</h3>
-  <input id="otpInput" type="number" maxlength="6"
-    class="w-full p-3 border rounded-xl mb-3 text-center text-2xl tracking-widest">
-  <button id="verifyOtpBtn" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold">
+  <h3 class="text-xl font-bold mb-2">กรอกรหัส OTP</h3>
+
+  <input id="otpInput"
+    type="text"
+    inputmode="numeric"
+    autocomplete="one-time-code"
+    maxlength="6"
+    class="w-full p-4 bg-gray-50 rounded-xl mb-4
+           text-center text-3xl tracking-widest font-bold">
+
+  <button id="verifyOtpBtn"
+    class="w-full bg-green-500 text-white py-4 rounded-xl font-bold">
     ยืนยัน
   </button>
-  <p id="resendText" class="text-sm text-gray-400 mt-3"></p>
+
+  <p id="countdownText" class="text-sm text-gray-400 mt-4"></p>
+</div>
+
+<!-- SUCCESS -->
+<div id="successStep" class="hidden flex flex-col items-center">
+  <div class="checkmark mb-4">✓</div>
+  <p class="font-bold">เข้าสู่ระบบสำเร็จ</p>
 </div>
 
 </div>
@@ -67,14 +105,14 @@ body { font-family: 'Kanit', sans-serif; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth, onAuthStateChanged,
-  GoogleAuthProvider, signInWithPopup,
+  signInWithRedirect, GoogleAuthProvider,
   RecaptchaVerifier, signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: "AIzaSyCQGbSSIqRjLblQsY565li1YxXGFQrHxYc",
+  authDomain: "coolnow-1d8f4.firebaseapp.com",
+  projectId: "coolnow-1d8f4"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -83,32 +121,27 @@ auth.languageCode = 'th';
 
 const provider = new GoogleAuthProvider();
 
-const loginSection = document.getElementById('loginSection');
-const phoneModal = document.getElementById('phoneModal');
-const sendOtpBtn = document.getElementById('sendOtpBtn');
-const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-const resendText = document.getElementById('resendText');
-
-let confirmationResult;
-
 // redirect หลัง login
 onAuthStateChanged(auth, user => {
   if (user) location.href = "index.html";
 });
 
-// Google
-googleBtn.onclick = () => signInWithPopup(auth, provider);
+// Google (ไม่ popup)
+googleLoginBtn.onclick = () => signInWithRedirect(auth, provider);
 
-// Open phone
-phoneBtn.onclick = () => {
+// Phone modal
+phoneLoginBtn.onclick = () => {
   phoneModal.classList.remove('hidden');
   if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container');
+    window.recaptchaVerifier =
+      new RecaptchaVerifier(auth, 'recaptcha-container');
     recaptchaVerifier.render();
   }
 };
 
-// Send OTP + cooldown
+let confirmationResult;
+
+// SEND OTP
 sendOtpBtn.onclick = async () => {
   if (sendOtpBtn.disabled) return;
 
@@ -116,54 +149,63 @@ sendOtpBtn.onclick = async () => {
   if (num.length !== 10) return alert('เบอร์ไม่ถูก');
 
   sendOtpBtn.disabled = true;
-  sendOtpBtn.innerHTML = '⏳ กำลังส่ง...';
+  sendOtpBtn.innerText = 'กำลังส่ง...';
 
   const phone = '+66' + num.slice(1);
 
   try {
-    confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+    confirmationResult =
+      await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
 
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
     otpInput.focus();
 
+    // countdown
     let sec = 60;
-    resendText.textContent = `ส่งใหม่ได้ใน ${sec} วิ`;
+    countdownText.innerText = `ส่งใหม่ได้ใน ${sec} วิ`;
     const timer = setInterval(() => {
       sec--;
-      resendText.textContent = `ส่งใหม่ได้ใน ${sec} วิ`;
-      if (sec <= 0) {
-        clearInterval(timer);
-        resendText.innerHTML = '<button class="text-pink-500">ส่ง OTP ใหม่</button>';
-        resendText.onclick = () => location.reload();
-      }
+      countdownText.innerText = `ส่งใหม่ได้ใน ${sec} วิ`;
+      if (sec <= 0) clearInterval(timer);
     }, 1000);
+
+    // Android auto-read
+    if ('OTPCredential' in window) {
+      navigator.credentials.get({
+        otp: { transport: ['sms'] }
+      }).then(otp => {
+        otpInput.value = otp.code;
+        verifyOtpBtn.click();
+      }).catch(()=>{});
+    }
 
   } catch {
     alert('ส่ง OTP ไม่สำเร็จ');
     sendOtpBtn.disabled = false;
-    sendOtpBtn.innerHTML = 'ส่ง OTP';
+    sendOtpBtn.innerText = 'ส่ง OTP';
   }
 };
 
-// auto OTP
+// auto submit
 otpInput.addEventListener('input', () => {
   if (otpInput.value.length === 6) verifyOtpBtn.click();
 });
 
-// verify OTP (ครั้งเดียว)
+// VERIFY
 verifyOtpBtn.onclick = async () => {
   if (verifyOtpBtn.disabled) return;
-
   verifyOtpBtn.disabled = true;
-  verifyOtpBtn.innerHTML = '⏳ กำลังยืนยัน...';
+  verifyOtpBtn.innerText = 'กำลังตรวจสอบ...';
 
   try {
     await confirmationResult.confirm(otpInput.value);
+    step2.classList.add('hidden');
+    successStep.classList.remove('hidden');
   } catch {
     alert('OTP ไม่ถูกต้อง');
     verifyOtpBtn.disabled = false;
-    verifyOtpBtn.innerHTML = 'ยืนยัน';
+    verifyOtpBtn.innerText = 'ยืนยัน';
   }
 };
 </script>
